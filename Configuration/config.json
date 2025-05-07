@@ -1,0 +1,7 @@
+{
+    "token": "templateFile!",
+    "psql_host": "templteFile!",
+    "psql_database": "templteFile!",
+    "psql_username": "templteFile!",
+    "psql_password": "templteFile!"
+}

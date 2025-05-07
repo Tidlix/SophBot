@@ -13,14 +13,14 @@ namespace SophBot.Commands.ModCommands {
 
             DiscordComponent[] components = [
                 new DiscordTextDisplayComponent($"## Rollenvergabe - {role.Mention}"),
-                new DiscordTextDisplayComponent(description),
+                new DiscordTextDisplayComponent($"**{description}**"),
                 new DiscordSeparatorComponent(true),
-                new DiscordSectionComponent(new DiscordTextDisplayComponent("Rolle erhalten/enfernen -> "), new DiscordButtonComponent(DiscordButtonStyle.Primary, label: "Drück mich!", customId: "ooga"))
+                new DiscordSectionComponent(new DiscordTextDisplayComponent("Rolle erhalten/enfernen -> "), new DiscordButtonComponent(DiscordButtonStyle.Secondary, label: "Drück mich!", customId: $"rrButton_{role.Id}"))
             ];
 
             var msg = new DiscordMessageBuilder()
             .EnableV2Components()
-            .AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.Lilac));
+            .AddRawComponents(new DiscordContainerComponent(components, color: role.Color));
 
             await ctx.Channel.SendMessageAsync(msg);
 

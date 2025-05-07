@@ -9,14 +9,15 @@ using SophBot.Messages;
 namespace SophBot.Commands.ModCommands {
     public class ServerCommands {
         [Command("modifyconfig"), Description("Bearbeite die Serverconfig dieses Servers"), RequirePermissions(DiscordPermission.Administrator)] 
-        public async Task modConfig (SlashCommandContext ctx, DiscordRole? memberRole = null, DiscordChannel? welcomeChannel = null, DiscordChannel? ruleChannel = null) {
+        public async Task modConfig (SlashCommandContext ctx, DiscordRole? memberRole = null, DiscordChannel? welcomeChannel = null, DiscordChannel? ruleChannel = null, DiscordRole? mentionRole = null) {
             #pragma warning disable CS8602, CS8604, CS8625
             await ctx.DeferResponseAsync();
 
             try {
                 if (memberRole != null ) await TidlixDB.modifyServerconfig("memberrole", memberRole.Id, ctx.Guild.Id);
                 if (welcomeChannel != null ) await TidlixDB.modifyServerconfig("welcomechannel", welcomeChannel.Id, ctx.Guild.Id);
-                if (ruleChannel != null ) await TidlixDB.modifyServerconfig("rulechannel", ruleChannel.Id, ctx.Guild.Id); 
+                if (ruleChannel != null ) await TidlixDB.modifyServerconfig("rulechannel", ruleChannel.Id, ctx.Guild.Id);
+                if (mentionRole != null ) await TidlixDB.modifyServerconfig("mentionrole", mentionRole.Id, ctx.Guild.Id); 
 
                 await ctx.EditResponseAsync("Die Server-Config wurde erfolgreich bearbeitet!");                
             } catch (Exception ex) {

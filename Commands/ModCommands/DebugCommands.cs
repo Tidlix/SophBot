@@ -4,6 +4,7 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using SophBot.Database;
+using SophBot.Messages;
 
 namespace SophBot.Commands.ModCommands {
     [Command("Debug"), RequireBotOwner, RequirePermissions(DiscordPermission.Administrator)] 
@@ -13,13 +14,20 @@ namespace SophBot.Commands.ModCommands {
             await ctx.RespondAsync($"Test Complete! The Bot can respond!" );
         }
 
+        [Command("currentTest"), Description("Test Command"), RequireApplicationOwner]
+        public static async ValueTask currentTestCmd (CommandContext ctx) {
+            await ctx.DeferResponseAsync();
+            await ctx.DeleteResponseAsync();
+            
+        }
+
 
         [Command("serverconfig")] 
         public class debugConfig {
             [Command("create")]
-            public static async ValueTask createConfig (CommandContext ctx, ulong serverid, ulong welcomeChannel, ulong ruleChannel, ulong memberRole) {
+            public static async ValueTask createConfig (CommandContext ctx, ulong serverid, ulong welcomeChannel, ulong ruleChannel, ulong memberRole, ulong mentionRole) {
                 try {
-                    await TidlixDB.createServerconfig(serverid, ruleChannel, welcomeChannel, memberRole);
+                    await TidlixDB.createServerconfig(serverid, ruleChannel, welcomeChannel, memberRole, mentionRole);
                     await ctx.RespondAsync("Config created!");
                 } catch (Exception e) {
                     await ctx.RespondAsync("Couldn't create server config - " + e.Message);

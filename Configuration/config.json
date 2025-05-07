@@ -1,7 +1,9 @@
 {
     "token": "templateFile!",
-    "psql_host": "templteFile!",
-    "psql_database": "templteFile!",
-    "psql_username": "templteFile!",
-    "psql_password": "templteFile!"
+    "psql_host": "templateFile!",
+    "psql_database": "templateFile!",
+    "psql_username": "templateFile!",
+    "psql_password": "templateFile!",
+    "twitch_clientid": "templateFile!",
+    "twitch_clientsecret": "templateFile!"
 }

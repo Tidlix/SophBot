@@ -13,10 +13,11 @@ namespace SophBot.EventHandlers {
                 case "ruleAcceptButton":
                     await acceptRules(e);
                     break;
-                case "rrButton":
-                    await reactionRole(e);
+                default:
+                    if (e.Id.Contains("rrButton")) {
+                        await reactionRole(e);
+                    }
                     break;
-
             }
         }
 
@@ -39,7 +40,10 @@ namespace SophBot.EventHandlers {
         private async Task reactionRole (ComponentInteractionCreatedEventArgs e) {
             await e.Interaction.DeferAsync(true);
             DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
-            ulong.TryParse(e.Message.Embeds.First().Footer.Text, out ulong roleId);
+
+            string roleIdString = e.Id.Substring(e.Id.IndexOf('_')+1);
+
+            ulong.TryParse(roleIdString, out ulong roleId);
             DiscordRole role = await e.Guild.GetRoleAsync(roleId);
 
             if (member.Roles.Contains(role)) await member.RevokeRoleAsync(role);

@@ -15,23 +15,24 @@ namespace SophBot.Database {
             var cmd = new NpgsqlCommand($"CREATE SCHEMA IF NOT EXISTS data; " +
             "CREATE TABLE IF NOT EXISTS data.warnings (warnid BIGSERIAL PRIMARY KEY, serverid BIGINT, userid BIGINT, reason VARCHAR(2000), date VARCHAR(22));" +
             "CREATE TABLE IF NOT EXISTS data.customcommands (serverid BIGINT, cmd VARCHAR(100), output VARCHAR(2000));" +
-            "CREATE TABLE IF NOT EXISTS data.serverconfig (serverid BIGINT PRIMARY KEY, rulechannel BIGINT, welcomechannel BIGINT, memberrole BIGINT);", 
+            "CREATE TABLE IF NOT EXISTS data.serverconfig (serverid BIGINT PRIMARY KEY, rulechannel BIGINT, welcomechannel BIGINT, memberrole BIGINT, mentionrole BIGINT);" +
+            "CREATE TABLE IF NOT EXISTS data.twitchmonitorings (discordchannel BIGINT NOT NULL, twitchchannel VARCHAR NOT NULL)", 
             connection);
             await cmd.ExecuteNonQueryAsync();
         }
         private static async ValueTask createConnection() {
-            connString = $"Host={Config.Psql_host};Database={Config.Psql_database};Username={Config.Psql_username};Password={Config.Psql_password};";
+            connString = $"Host={Config.PSQL.Host};Database={Config.PSQL.Database};Username={Config.PSQL.Username};Password={Config.PSQL.Password};";
             connection = new NpgsqlConnection(connString);
             await connection.OpenAsync();
         }
 
 
         #region Serverconfig
-        public static async ValueTask createServerconfig (ulong serverid, ulong rulechannel, ulong welcomeChannel, ulong memberRole) {
+        public static async ValueTask createServerconfig (ulong serverid, ulong rulechannel, ulong welcomeChannel, ulong memberRole, ulong mentionRole) {
             if (connection.State == ConnectionState.Closed) await createConnection();
 
             using (connection) {
-                var cmd = new NpgsqlCommand($"INSERT INTO data.serverconfig (serverid, rulechannel, welcomechannel, memberrole) VALUES ({serverid}, {rulechannel}, {welcomeChannel}, {memberRole})", connection);
+                var cmd = new NpgsqlCommand($"INSERT INTO data.serverconfig (serverid, rulechannel, welcomechannel, memberrole, mentionrole) VALUES ({serverid}, {rulechannel}, {welcomeChannel}, {memberRole}, {mentionRole})", connection);
                 await cmd.ExecuteNonQueryAsync();
             }
         }
@@ -165,6 +166,65 @@ namespace SophBot.Database {
                     result += $"> {reader.GetString(2)} | {reader.GetInt64(0)} | *{reader.GetString(1)}* \n";
                 }
                 return result;
+            }
+        }
+        #endregion
+
+        #region TwitchMonitorings
+        public static async ValueTask newMonitoring (string twitchChannel, ulong discordChannelId) {
+            if (connection.State == ConnectionState.Closed) await createConnection();
+            
+            using (connection) {
+                var cmd = new NpgsqlCommand($"INSERT INTO data.twitchmonitorings (discordchannel, twitchchannel) VALUES ({discordChannelId}, '{twitchChannel}')", connection);
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+        public static async ValueTask<List<string>> getChannelMonitorings (ulong discordChannelId) {
+            if (connection.State == ConnectionState.Closed) await createConnection();
+            using (connection){
+                var cmd = new NpgsqlCommand($"SELECT twitchchannel FROM data.twitchmonitorings WHERE discordchannel = {discordChannelId}", connection);
+                var reader = await cmd.ExecuteReaderAsync();
+                var result = new List<string>();
+
+                while (await reader.ReadAsync()) {
+                    result.Add(reader.GetString(0));
+                }
+                return result;
+            }
+        }
+        public static async ValueTask<List<ulong>> getMonitoringChannels (string twitchChannel) {
+            if (connection.State == ConnectionState.Closed) await createConnection();
+            using (connection){
+                var cmd = new NpgsqlCommand($"SELECT discordchannel FROM data.twitchmonitorings WHERE twitchchannel = '{twitchChannel}'", connection);
+                var reader = await cmd.ExecuteReaderAsync();
+                var result = new List<ulong>();
+
+                while (await reader.ReadAsync()) {
+                    result.Add((ulong)reader.GetInt64(0));
+                }
+                return result;
+            }
+        }
+        public static async ValueTask<List<string>> getAllMonitorings () {
+            if (connection.State == ConnectionState.Closed) await createConnection();
+            using (connection){
+                var cmd = new NpgsqlCommand($"SELECT twitchchannel FROM data.twitchmonitorings", connection);
+                var reader = await cmd.ExecuteReaderAsync();
+                var result = new List<string>();
+
+                while (await reader.ReadAsync()) {
+                    if (!result.Contains(reader.GetString(0)))
+                        result.Add(reader.GetString(0));
+                }
+                return result;
+            }
+        }
+        public static async ValueTask removeMonitoring (ulong discordChannelId) {
+            if (connection.State == ConnectionState.Closed) await createConnection();
+
+            using (connection){
+                var cmd = new NpgsqlCommand($"DELETE FROM data.twitchmonitorings WHERE discordchannel = {discordChannelId}", connection);
+                await cmd.ExecuteNonQueryAsync();
             }
         }
         #endregion

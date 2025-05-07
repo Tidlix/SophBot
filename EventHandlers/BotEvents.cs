@@ -14,8 +14,8 @@ namespace SophBot.EventHandlers {
         #region Bot Ready
         public async Task HandleEventAsync(DiscordClient s, GuildDownloadCompletedEventArgs e)
         {
-            DiscordActivity activity = new DiscordActivity("Sophia`s Stream", DiscordActivityType.Watching);
-            await s.UpdateStatusAsync(activity);
+            DiscordActivity activity = new DiscordActivity("Beobachtet dich!", DiscordActivityType.Custom);
+            await s.UpdateStatusAsync(activity, DiscordUserStatus.Idle, new DateTimeOffset().AddYears(9));
             await MessageSystem.sendMessage("Bot started and ready!", MessageType.Message());
         }
         #endregion
@@ -31,6 +31,7 @@ namespace SophBot.EventHandlers {
             DiscordChannel ruleChannel = await g.GetRulesChannelAsync();
             DiscordChannel welcomeChannel = await g.GetRulesChannelAsync();
             DiscordRole memberRole = await getMemberRole(g);
+            DiscordRole mentionRole = await getMemberRole(g);
             
 
             ruleChannel = ruleChannel ?? g.GetDefaultChannel();
@@ -39,10 +40,11 @@ namespace SophBot.EventHandlers {
             
             await MessageSystem.sendMessage($"Bot was added to {g.Name}!", MessageType.Message());
             try {
-                await TidlixDB.createServerconfig(g.Id, ruleChannel.Id, welcomeChannel.Id, memberRole.Id);
+                await TidlixDB.createServerconfig(g.Id, ruleChannel.Id, welcomeChannel.Id, memberRole.Id, mentionRole.Id);
                 await ruleChannel.SendMessageAsync("Dieser Channel wurde automatisch als Regel-Kanal eingerichtet. Diese Einstellung kannst du mit /modifyconfig ändern!");
                 await welcomeChannel.SendMessageAsync("Dieser Channel wurde automatisch als Wilkommens-Kanal eingerichtet. Diese Einstellung kannst du mit /modifyconfig ändern!");
                 await welcomeChannel.SendMessageAsync($"{memberRole.Mention} wurde automatisch als Member-Rolle eingerichtet. Diese Einstellung kannst du mit /modifyconfig ändern");
+                await welcomeChannel.SendMessageAsync($"{mentionRole.Mention} wurde automatisch als Stream-Mention-Rolle eingerichtet. Diese Einstellung kannst du mit /modifyconfig ändern");
             } catch (Exception ex) {
                 await g.GetDefaultChannel().SendMessageAsync("Fehler - Server Konfiguration konnte nicht erstellt werden! Bitte kontaktiere den Entwickler dieses Bots!");
                 await MessageSystem.sendMessage($"Serverconfig for server {g.Name}({g.Id}) couldn't be generated! - {ex.Message}", MessageType.Error());

@@ -18,19 +18,18 @@ namespace SophBot.EventHandlers {
             DiscordChannel welcomeChannel = await e.Guild.GetChannelAsync(welcomeID);
             DiscordChannel ruleChannel = await e.Guild.GetChannelAsync(ruleID);
 
-            var embed = new DiscordEmbedBuilder() {
-                Title = "Ein neues Mitglied!",
-                Description = $"{e.Member.DisplayName} hat soeben den Server betreten!",
-                Color = DiscordColor.Blue,
-                Footer = new () {
-                    Text = $"Bitte akzeptiere die Regeln in #{ruleChannel.Name} um Zugriff auf den ganzen Server zu erhalten!"
-                },
-                Thumbnail = new () {
-                    Url = e.Member.AvatarUrl
-                }
-            };
+            DiscordComponent[] components = [
+                new DiscordSectionComponent(new DiscordTextDisplayComponent($"## Ein neues Mitglied - {e.Member.Mention}\n\n**Herzlich Willkommen auf diesem Server!**"), new DiscordThumbnailComponent(new DiscordUnfurledMediaItem(e.Member.AvatarUrl))),
+                new DiscordSeparatorComponent(true),
+                new DiscordSectionComponent(new DiscordTextDisplayComponent("Bitte akzeptiere die Regeln um den vollen Zugriff auf diesen Server zu erhalten!"), new DiscordLinkButtonComponent($"https://discord.com/channels/{e.Guild.Id}/{ruleChannel.Id}", label: "Zu den Regeln"))
+            ];
 
-            await welcomeChannel.SendMessageAsync(embed);
+            var msg = new DiscordMessageBuilder()
+            .EnableV2Components()
+            .AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.MidnightBlue))
+            .WithAllowedMention(new UserMention(e.Member));
+
+            await welcomeChannel.SendMessageAsync(msg);
         }
         #endregion
 
@@ -41,16 +40,15 @@ namespace SophBot.EventHandlers {
 
             DiscordChannel welcomeChannel = await e.Guild.GetChannelAsync(welcomeID);
 
-            var embed = new DiscordEmbedBuilder() {
-                Title = "Ein Veräter!",
-                Description = $"{e.Member.DisplayName} hat soeben den Server verlassen!",
-                Color = DiscordColor.Red,
-                Thumbnail = new () {
-                    Url = e.Member.AvatarUrl
-                }
-            };
+            DiscordComponent[] components = [
+                new DiscordSectionComponent(new DiscordTextDisplayComponent($"## Ein Verräter - {e.Member.DisplayName}\n\n**{e.Member.DisplayName} hat soeben diesen Server verlassen!**"), new DiscordThumbnailComponent(new DiscordUnfurledMediaItem(e.Member.AvatarUrl)))
+            ];
 
-            await welcomeChannel.SendMessageAsync(embed);
+            var msg = new DiscordMessageBuilder()
+            .EnableV2Components()
+            .AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.Red));
+
+            await welcomeChannel.SendMessageAsync(msg);
         }
 
         #endregion

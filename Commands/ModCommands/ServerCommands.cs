@@ -53,7 +53,7 @@ namespace SophBot.Commands.ModCommands {
                         customId: "variables", 
                         required: false, 
                         style: DiscordTextInputStyle.Paragraph,
-                        value: "[rand100] - Zufallszahl 1-100\n[user] - Ausführender Nutzer\n[text] - Gesamter Text hinter dem Command\n[first] - Erstes Wort nach dem Command"));
+                        value: "[rand(max)] - Zufallszahl (max -> höchster Wert)\n[rand(min, max)] - Zufallszahl (min -> kleinster Wert; max -> höchster Wert) \n[user] - Ausführender Nutzer\n[text] - Gesamter Text hinter dem Command\n[word(index)] - Bestimmtest Wort des Textes nach dem Command (z.B. [word(2)] -> zweites Wort nach Command)"));
 
                     await ctx.RespondWithModalAsync(modal);
 
@@ -103,7 +103,7 @@ namespace SophBot.Commands.ModCommands {
                         customId: "variables", 
                         required: false, 
                         style: DiscordTextInputStyle.Paragraph,
-                        value: "[rand100] - Zufallszahl 1-100\n[user] - Ausführender Nutzer\n[text] - Gesamter Text hinter dem Command\n[first] - Erstes Wort nach dem Command"));
+                        value: "[rand(max)] - Zufallszahl (max -> höchster Wert)\n[rand(min, max)] - Zufallszahl (min -> kleinster Wert; max -> höchster Wert) \n[user] - Ausführender Nutzer\n[text] - Gesamter Text hinter dem Command\n[word(index)] - Bestimmtest Wort des Textes nach dem Command (z.B. [word(2)] -> zweites Wort nach Command)"));
                     await ctx.RespondWithModalAsync(modal);
 
                 } catch (Exception ex) {

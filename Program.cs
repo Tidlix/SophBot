@@ -20,8 +20,6 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        
-        //#region Basic Config
         await Config.ReadAsnyc();
 
         try {

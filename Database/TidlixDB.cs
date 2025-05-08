@@ -77,7 +77,8 @@ namespace SophBot.Database {
                 var reader = await cmd.ExecuteReaderAsync();
 
                 while (await reader.ReadAsync()) {
-                    if (reader.GetString(0) == null) return false;
+                    if (reader.GetString(0) == null) 
+                        return false;
                     else return true;
                 }
                 return false;

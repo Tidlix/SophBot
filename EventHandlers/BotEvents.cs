@@ -16,7 +16,7 @@ namespace SophBot.EventHandlers {
         {
             DiscordActivity activity = new DiscordActivity("Beobachtet dich!", DiscordActivityType.Custom);
             await s.UpdateStatusAsync(activity, DiscordUserStatus.Idle, new DateTimeOffset().AddYears(9));
-            await MessageSystem.sendMessage("Bot started and ready!", MessageType.Message());
+            await Log.sendMessage("Bot started and ready!", MessageType.Message());
         }
         #endregion
 
@@ -38,7 +38,7 @@ namespace SophBot.EventHandlers {
             welcomeChannel = welcomeChannel ?? g.GetDefaultChannel();
 
             
-            await MessageSystem.sendMessage($"Bot was added to {g.Name}!", MessageType.Message());
+            await Log.sendMessage($"Bot was added to {g.Name}!", MessageType.Message());
             try {
                 await TidlixDB.createServerconfig(g.Id, ruleChannel.Id, welcomeChannel.Id, memberRole.Id, mentionRole.Id);
                 await ruleChannel.SendMessageAsync("Dieser Channel wurde automatisch als Regel-Kanal eingerichtet. Diese Einstellung kannst du mit /modifyconfig ändern!");
@@ -47,7 +47,7 @@ namespace SophBot.EventHandlers {
                 await welcomeChannel.SendMessageAsync($"{mentionRole.Mention} wurde automatisch als Stream-Mention-Rolle eingerichtet. Diese Einstellung kannst du mit /modifyconfig ändern");
             } catch (Exception ex) {
                 await g.GetDefaultChannel().SendMessageAsync("Fehler - Server Konfiguration konnte nicht erstellt werden! Bitte kontaktiere den Entwickler dieses Bots!");
-                await MessageSystem.sendMessage($"Serverconfig for server {g.Name}({g.Id}) couldn't be generated! - {ex.Message}", MessageType.Error());
+                await Log.sendMessage($"Serverconfig for server {g.Name}({g.Id}) couldn't be generated! - {ex.Message}", MessageType.Error());
             }
         }
         private static async Task<DiscordRole> getMemberRole(DiscordGuild g) {
@@ -63,11 +63,11 @@ namespace SophBot.EventHandlers {
         #region Bot Removed
         public async Task HandleEventAsync(DiscordClient s, GuildDeletedEventArgs e)
         {
-            await MessageSystem.sendMessage($"Bot was added to {e.Guild.Name}!", MessageType.Message());
+            await Log.sendMessage($"Bot was added to {e.Guild.Name}!", MessageType.Message());
             try {
                 await TidlixDB.deleteServerconfig(e.Guild.Id);
             } catch (Exception ex) {
-                await MessageSystem.sendMessage($"Serverconfig for server {e.Guild.Name}({e.Guild.Id}) couldn't be deleted! - {ex.Message}", MessageType.Error());
+                await Log.sendMessage($"Serverconfig for server {e.Guild.Name}({e.Guild.Id}) couldn't be deleted! - {ex.Message}", MessageType.Error());
             }
         }
         #endregion

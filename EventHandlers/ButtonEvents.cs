@@ -34,7 +34,7 @@ namespace SophBot.EventHandlers {
                 await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Regeln erfolgreich akzeptiert!"));
             } catch (Exception ex){
                 await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Fehler - Regeln konnten nicht akzeptiert werden! Bitte kontaktiere den Entwickler dieses Bots!"));
-                await MessageSystem.sendMessage($"Rule role from {e.Interaction.Guild.Name}({e.Interaction.Guild.Id}) couldn't be readed! - {ex.Message}", MessageType.Error());
+                await Log.sendMessage($"Rule role from {e.Interaction.Guild.Name}({e.Interaction.Guild.Id}) couldn't be readed! - {ex.Message}", MessageType.Error());
             }
         }
         private async Task reactionRole (ComponentInteractionCreatedEventArgs e) {

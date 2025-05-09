@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using SophBot.Configuration;
 using SophBot.Database;
 using SophBot.Messages;
 using System.Text.RegularExpressions;
@@ -10,6 +11,9 @@ namespace SophBot.EventHandlers {
     {
         public async Task HandleEventAsync(DiscordClient s, MessageCreatedEventArgs e)
         {
+            if (e.Message.Content.Contains(s.CurrentUser.Mention)) {
+                await aiRequest(s, e);
+            }
             if (e.Message.Content.StartsWith("!"))
             {
                 await customCommand(e);
@@ -67,7 +71,22 @@ namespace SophBot.EventHandlers {
                 await e.Message.RespondAsync(response);
 
             } catch (Exception ex) {
-                await MessageSystem.sendMessage($"Failed to try customcommand - {ex.Message}", MessageType.Warning());
+                await Log.sendMessage($"Failed to try customcommand - {ex.Message}", MessageType.Warning());
+            }
+        }
+    
+        public async ValueTask aiRequest(DiscordClient s, MessageCreatedEventArgs e)
+        {
+            try
+            {
+                string promt = e.Message.Content.Substring(e.Message.Content.IndexOf(s.CurrentUser.Mention) + s.CurrentUser.Mention.Length + 1);
+                string response = await Services.AI.Generate(promt);
+
+                await e.Message.RespondAsync(response);
+            }
+            catch (Exception ex)
+            {
+                await Log.sendMessage(ex.Message, MessageType.Error());
             }
         }
     }

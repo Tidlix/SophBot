@@ -25,10 +25,10 @@ class Program
         try {
             await TidlixDB.createDB();
         } catch (Exception e) {
-            await MessageSystem.sendMessage($"Couldn't connect to Database. Database will not be reachable! - {e.Message}", MessageType.Error());
+            await Log.sendMessage($"Couldn't connect to Database. Database will not be reachable! - {e.Message}", MessageType.Error());
         }
-        await Clients.CreateDiscordClient(); 
-        await Clients.CreateTwitchMonitoring();  
+        await Services.Discord.CreateDiscordClient(); 
+        await Services.Twitch.CreateTwitchMonitoring();  
 
         while (true);
     }

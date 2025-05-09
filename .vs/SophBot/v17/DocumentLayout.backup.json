@@ -3,12 +3,24 @@
   "WorkspaceRootPath": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|d:\\coding\\git\\repos\\tidlix\\sophbot\\eventhandlers\\messageevents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|solutionrelative:eventhandlers\\messageevents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|d:\\coding\\git\\repos\\tidlix\\sophbot\\commands\\usercommands\\customcommands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|solutionrelative:commands\\usercommands\\customcommands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|d:\\coding\\git\\repos\\tidlix\\sophbot\\commands\\modcommands\\servercommands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|solutionrelative:commands\\modcommands\\servercommands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|d:\\coding\\git\\repos\\tidlix\\sophbot\\commands\\modcommands\\twitchcommands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|solutionrelative:commands\\modcommands\\twitchcommands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|d:\\coding\\git\\repos\\tidlix\\sophbot\\commands\\modcommands\\rrcomands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|solutionrelative:commands\\modcommands\\rrcomands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|d:\\coding\\git\\repos\\tidlix\\sophbot\\configuration\\services.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|solutionrelative:configuration\\services.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|d:\\coding\\git\\repos\\tidlix\\sophbot\\configuration\\config.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|solutionrelative:configuration\\config.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{052614E7-6889-49DB-8C99-C34B8771C52E}|SophBot.csproj|d:\\coding\\git\\repos\\tidlix\\sophbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -22,44 +34,85 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ServerCommands.cs",
-              "DocumentMoniker": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Commands\\ModCommands\\ServerCommands.cs",
-              "RelativeDocumentMoniker": "Commands\\ModCommands\\ServerCommands.cs",
-              "ToolTip": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Commands\\ModCommands\\ServerCommands.cs",
-              "RelativeToolTip": "Commands\\ModCommands\\ServerCommands.cs",
-              "ViewState": "AgIAAE0AAAAAAAAAAAAIwGoAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T13:03:15.136Z"
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "MessageEvents.cs",
-              "DocumentMoniker": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\EventHandlers\\MessageEvents.cs",
-              "RelativeDocumentMoniker": "EventHandlers\\MessageEvents.cs",
-              "ToolTip": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\EventHandlers\\MessageEvents.cs",
-              "RelativeToolTip": "EventHandlers\\MessageEvents.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAABRAAAAAAAAAA==",
+              "Title": "CustomCommands.cs",
+              "DocumentMoniker": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Commands\\UserCommands\\CustomCommands.cs",
+              "RelativeDocumentMoniker": "Commands\\UserCommands\\CustomCommands.cs",
+              "ToolTip": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Commands\\UserCommands\\CustomCommands.cs",
+              "RelativeToolTip": "Commands\\UserCommands\\CustomCommands.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAA3AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T12:02:38.595Z",
+              "WhenOpened": "2025-05-09T09:40:46.662Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
+              "Title": "RRComands.cs",
+              "DocumentMoniker": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Commands\\ModCommands\\RRComands.cs",
+              "RelativeDocumentMoniker": "Commands\\ModCommands\\RRComands.cs",
+              "ToolTip": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Commands\\ModCommands\\RRComands.cs",
+              "RelativeToolTip": "Commands\\ModCommands\\RRComands.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-09T09:40:24.69Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "TwitchCommands.cs",
+              "DocumentMoniker": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Commands\\ModCommands\\TwitchCommands.cs",
+              "RelativeDocumentMoniker": "Commands\\ModCommands\\TwitchCommands.cs",
+              "ToolTip": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Commands\\ModCommands\\TwitchCommands.cs",
+              "RelativeToolTip": "Commands\\ModCommands\\TwitchCommands.cs",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAswBkAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-09T09:15:13.086Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Services.cs",
+              "DocumentMoniker": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Configuration\\Services.cs",
+              "RelativeDocumentMoniker": "Configuration\\Services.cs",
+              "ToolTip": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Configuration\\Services.cs",
+              "RelativeToolTip": "Configuration\\Services.cs",
+              "ViewState": "AgIAALwAAAAAAAAAAAAowL0AAAB4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-09T09:13:37.209Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Config.cs",
+              "DocumentMoniker": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Configuration\\Config.cs",
+              "RelativeDocumentMoniker": "Configuration\\Config.cs",
+              "ToolTip": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Configuration\\Config.cs",
+              "RelativeToolTip": "Configuration\\Config.cs",
+              "ViewState": "AgIAADkAAAAAAAAAAAAmwC8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-09T09:10:37.913Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "D:\\Coding\\Git\\Repos\\Tidlix\\SophBot\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAAACAAAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAAAsAAAAAAAAAAADwvx4AAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T08:25:06.864Z"
+              "WhenOpened": "2025-05-08T08:25:06.864Z",
+              "EditorCaption": ""
             }
           ]
         }

@@ -121,15 +121,15 @@ namespace SophBot.Database {
                 return result;
             }
         }
-        public static async ValueTask<string> getAllCommands(ulong serverid) {
+        public static async ValueTask<List<string>> getAllCommands(ulong serverid) {
             if (connection.State == ConnectionState.Closed) await createConnection();
             using (connection){
                 var cmd = new NpgsqlCommand($"SELECT cmd FROM data.customcommands WHERE serverid = {serverid}", connection);
                 var reader = await cmd.ExecuteReaderAsync();
-                string result = "Hier sind alle Custom Commands von diesem Server: ";
+                List<string> result = new List<string>();
 
                 while (await reader.ReadAsync()) {
-                    result += "\n- !" + reader.GetString(0);
+                    result.Add(reader.GetString(0));
                 }
                 return result;
             }

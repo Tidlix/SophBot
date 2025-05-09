@@ -15,7 +15,7 @@ namespace SophBot.Commands.ModCommands {
 
             var list = await TidlixDB.getAllMonitorings();
             list.Add(ChannelName.ToLower());
-            Clients.TwitchMonitoring.SetChannelsByName(list);
+            Services.Twitch.Monitoring.SetChannelsByName(list);
         }
         [Command("Remove"), Description("Lösche alle Kanal-Überwachung von diesem Channel")] 
         public async Task removeMonitoring (CommandContext ctx) {
@@ -23,7 +23,7 @@ namespace SophBot.Commands.ModCommands {
             await TidlixDB.removeMonitoring(ctx.Channel.Id);
 
             var list = await TidlixDB.getAllMonitorings();
-            Clients.TwitchMonitoring.SetChannelsByName(list);
+            Services.Twitch.Monitoring.SetChannelsByName(list);
         }
     }
 }

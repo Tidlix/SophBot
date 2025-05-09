@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using SophBot.Messages;
 
 namespace SophBot.Configuration {
     public class Config {
@@ -17,6 +18,10 @@ namespace SophBot.Configuration {
             public static string ClientId = "errorTwitch";
             public static string ClientSecret = "errorTwitch";
             public static string AccessToken = "errorTwitch";
+        }
+        public static class AI
+        {
+            public static string Key = "errorAI";
         }
         
 
@@ -39,6 +44,7 @@ namespace SophBot.Configuration {
                     Twitch.ClientId = data.twitch_clientid;
                     Twitch.ClientSecret = data.twitch_clientsecret;
                     Twitch.AccessToken = await getTwitchAccessTokenAsync();
+                    AI.Key = data.ai_api_key;
                 }
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
@@ -83,6 +89,7 @@ namespace SophBot.Configuration {
             public string psql_password = "errorSQL";
             public string twitch_clientid = "errorTwitch";
             public string twitch_clientsecret = "errorTwitch";
+            public string ai_api_key = "errorAI";
         }
         internal class tokenResponse 
         {

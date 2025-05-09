@@ -9,8 +9,7 @@ namespace SophBot.EventHandlers {
     {
         public async Task HandleEventAsync(DiscordClient s, ModalSubmittedEventArgs e)
         {
-            if (e.Id.Contains("createCommand")) await createCommand(e);
-            else if (e.Id.Contains("modifyCommand")) await modifyCommand(e);
+            if (e.Id.Contains("commandModal_")) await customCommand(e);
             else {
                 switch (e.Id) {
                     case "ruleModal":
@@ -40,33 +39,38 @@ namespace SophBot.EventHandlers {
 
             } catch (Exception ex) {
                 await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Fehler - Regel konnte nicht gesendet werden! Bitte kontaktiere den Entwickler dieses Bots!"));
-                await MessageSystem.sendMessage($"Rule channel from {e.Interaction.Guild.Name}({e.Interaction.Guild.Id}) couldn't be readed! - {ex.Message}", MessageType.Error());
-            }
-        }
-    
-        private async ValueTask createCommand(ModalSubmittedEventArgs e) {
-            await e.Interaction.DeferAsync(true);
-            string command = e.Id.Replace("createCommand", "");
-
-            try {
-                await TidlixDB.createCommand(command, e.Values.Values.First(), e.Interaction.Guild.Id);
-                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Command !{command} wurde erfolgreich erstellt!"));
-            } catch (Exception ex) {
-                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Fehler - Der Command konnte nicht erstellt werden! Bitte kontaktiere den Entwickler dieses Bots!"));
-                await MessageSystem.sendMessage($"Command for {e.Interaction.Guild.Name}({e.Interaction.Guild.Id}) couldn't be created! - {ex.Message}", MessageType.Error());
+                await Log.sendMessage($"Rule channel from {e.Interaction.Guild.Name}({e.Interaction.Guild.Id}) couldn't be readed! - {ex.Message}", MessageType.Error());
             }
         }
 
-        private async ValueTask modifyCommand(ModalSubmittedEventArgs e) {
+        private async ValueTask customCommand(ModalSubmittedEventArgs e)
+        {
             await e.Interaction.DeferAsync(true);
-            string command = e.Id.Replace("modifyCommand", "");
+            string command = e.Id.Substring(e.Id.IndexOf('_') + 1);
+            string value = e.Values.Values.First();
+            ulong guildId = e.Interaction.Guild.Id;
 
-            try {
-                await TidlixDB.modifyCommand(command, e.Values.Values.First(), e.Interaction.Guild.Id);
-                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Command !{command} wurde erfolgreich bearbeitet!"));
-            } catch (Exception ex) {
-                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Fehler - Command konnte nicht bearbeitet werden! Bitte kontaktiere den Entwickler dieses Bots!"));
-                await MessageSystem.sendMessage($"Command for {e.Interaction.Guild.Name}({e.Interaction.Guild.Id}) couldn't be created! - {ex.Message}", MessageType.Error());
+            if (await TidlixDB.checkCommandExists(command, guildId))
+            {
+                if (value == "")
+                {
+                    await TidlixDB.deleteCommand(command, guildId);
+                    await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Command !{command} wurde gelöscht!"));
+                }
+                else
+                {
+                    await TidlixDB.modifyCommand(command, value, guildId);
+                    await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Command !{command} wurde bearbeitet!"));
+                }
+            }
+            else
+            {
+                if (value != "")
+                {
+                    await TidlixDB.createCommand(command, value, guildId);
+                    await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Command !{command} wurde erstellt!"));
+                }
+                else await e.Interaction.DeleteOriginalResponseAsync();
             }
         }
     }

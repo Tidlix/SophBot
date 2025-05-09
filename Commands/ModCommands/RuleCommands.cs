@@ -45,7 +45,7 @@ namespace SophBot.Commands.ModCommands {
                 await ctx.EditResponseAsync($"Nachricht gesendet! {msg.JumpLink}");
             } catch (Exception ex) {
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Fehler - Regel konnte nicht gesendet werden! Bitte kontaktiere den Entwickler dieses Bots!"));
-                await MessageSystem.sendMessage($"Rule channel from {ctx.Guild.Name}({ctx.Guild.Id}) couldn't be readed! - {ex.Message}", MessageType.Error());
+                await Log.sendMessage($"Rule channel from {ctx.Guild.Name}({ctx.Guild.Id}) couldn't be readed! - {ex.Message}", MessageType.Error());
             }
         }
     }

@@ -14,8 +14,6 @@ namespace SophBot.EventHandlers {
         #region Bot Ready
         public async Task HandleEventAsync(DiscordClient s, GuildDownloadCompletedEventArgs e)
         {
-            DiscordActivity activity = new DiscordActivity("Beobachtet dich!", DiscordActivityType.Custom);
-            await s.UpdateStatusAsync(activity, DiscordUserStatus.Idle, new DateTimeOffset().AddYears(9));
             await Log.sendMessage("Bot started and ready!", MessageType.Message());
         }
         #endregion

@@ -33,21 +33,8 @@ namespace SophBot.EventHandlers {
                 }
                 string response = await TidlixDB.getCommand(command, e.Guild.Id);
 
-                string randPattern = @"\[rand\((?:(\d+),)?(\d+)\)\]";
-                response = Regex.Replace(response, randPattern, match =>
-                {
-                    int min = (match.Groups[1].Success) ? int.Parse(match.Groups[1].Value) : 0;
-                    int max = int.Parse(match.Groups[2].Value);
-
-                    if (min > max)
-                    {
-                        return match.Value; 
-                    }
-
-                    int zufallswert = random.Next(min, max + 1);
-
-                    return zufallswert.ToString();
-                });
+                if (response.Contains("[user]")) response = response.Replace("[user]", e.Author.Mention);
+                if (response.Contains("[text]")) response = response.Replace("[text]", text);
 
                 string wordPattern = @"\[word\((\d+)\)\]";
                 response = Regex.Replace(response, wordPattern, match =>
@@ -64,9 +51,24 @@ namespace SophBot.EventHandlers {
                     
                 });
 
+                string randPattern = @"\[rand\((?:(\d+),)?(\d+)\)\]";
+                response = Regex.Replace(response, randPattern, match =>
+                {
+                    int min = (match.Groups[1].Success) ? int.Parse(match.Groups[1].Value) : 0;
+                    int max = int.Parse(match.Groups[2].Value);
 
-                if (response.Contains("[user]")) response = response.Replace("[user]", e.Author.Mention);
-                if (response.Contains("[text]")) response = response.Replace("[text]", text);
+                    if (min > max)
+                    {
+                        return match.Value; 
+                    }
+
+                    int zufallswert = random.Next(min, max + 1);
+
+                    return zufallswert.ToString();
+                });
+
+
+                
 
                 await e.Message.RespondAsync(response);
 

@@ -9,18 +9,20 @@ namespace SophBot.Commands.UserCommands
     public class ProfileCommands
     {
         [Command("Profile"), Description("Gib dein Profil aus")]
-        public async ValueTask profile(CommandContext ctx)
+        public async ValueTask profile(CommandContext ctx, DiscordMember? member = null)
         {
-#pragma warning disable CS8602
+#pragma warning disable CS8602, CS8604, CS8625
             await ctx.DeferResponseAsync();
 
+            if (member == null) member = ctx.Member;
+
             var components = new DiscordComponent[] {
-                new DiscordSectionComponent(new DiscordTextDisplayComponent($"# ---------- {ctx.User.Mention}`s Profil ----------"), new DiscordThumbnailComponent(ctx.User.AvatarUrl)),
+                new DiscordSectionComponent(new DiscordTextDisplayComponent($"# ---------- {member.Mention}`s Profil ----------"), new DiscordThumbnailComponent(member.AvatarUrl)),
                 new DiscordSeparatorComponent(true),
-                new DiscordTextDisplayComponent($"**Name**: \n{ctx.User.GlobalName}"),
-                new DiscordTextDisplayComponent($"**Mitglied seit**: \n{ctx.Member.JoinedAt.ToString("dd.MM.yyyy - HH:mm")}"),
-                new DiscordTextDisplayComponent($"**Punkte**: \n{await TidlixDB.UserProfiles.getPointsAsync(ctx.Guild.Id, ctx.User.Id)}"),
-                new DiscordTextDisplayComponent($"**Leaderboard Platzierung**: \n{await TidlixDB.UserProfiles.getLeaderBoardScoreAsync(ctx.Guild.Id, ctx.User.Id)} von {await TidlixDB.UserProfiles.getLeaderBoardCountAsync(ctx.Guild.Id)}")
+                new DiscordTextDisplayComponent($"**Name**: \n{member.DisplayName}"),
+                new DiscordTextDisplayComponent($"**Mitglied seit**: \n{member.JoinedAt.ToString("dd.MM.yyyy - HH:mm")}"),
+                new DiscordTextDisplayComponent($"**Punkte**: \n{await TidlixDB.UserProfiles.getPointsAsync(ctx.Guild.Id, member.Id)}"),
+                new DiscordTextDisplayComponent($"**Leaderboard Platzierung**: \n{await TidlixDB.UserProfiles.getLeaderBoardScoreAsync(ctx.Guild.Id, member.Id)} von {await TidlixDB.UserProfiles.getLeaderBoardCountAsync(ctx.Guild.Id)}")
             };
 
             await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.VeryDarkGray)));
@@ -39,6 +41,11 @@ namespace SophBot.Commands.UserCommands
                 if (points > availablePoints)
                 {
                     await ctx.EditResponseAsync("Du hast nicht genug Punkte, um diese Aktion auszuführen!");
+                    return;
+                }
+                else if (points <= 0)
+                {
+                    await ctx.EditResponseAsync("Du musst mindestens 1 Punkt Wetten, um diese Aktion auszuführen!");
                     return;
                 }
 
@@ -90,6 +97,12 @@ namespace SophBot.Commands.UserCommands
                     await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.Red)));
                     return;
                 }
+                else if (points <= 0)
+                {
+                    components.Add(new DiscordTextDisplayComponent("Du musst mindestens 1 Punkt wetten, um diese Aktion auszuführen!"));
+                    await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.Red)));
+                    return;
+                }
 
                 if (new Random().Next(10) < 5)
                 {
@@ -111,12 +124,12 @@ namespace SophBot.Commands.UserCommands
                 }
             }
             [Command("Roulette"), Description("Wähle eine Zahl 1-100 (Gewinnchance 1% Auszahlung x100)")]
-            public static async ValueTask coinflip(CommandContext ctx, [Description("Auf welche Zahl willst du Wetten?")] int bet, [Description("Wie viele Punkte willst du Wetten?")] int points)
+            public static async ValueTask roulette(CommandContext ctx, [Description("Auf welche Zahl willst du Wetten?")] int bet, [Description("Wie viele Punkte willst du Wetten?")] int points)
             {
                 await ctx.DeferResponseAsync();
 
                 List<DiscordComponent> components = new();
-                components.Add(new DiscordTextDisplayComponent("## Coinflip"));
+                components.Add(new DiscordTextDisplayComponent("## Roulette"));
                 components.Add(new DiscordSeparatorComponent(true));
 
                 if (bet < 1 ||  bet > 100)
@@ -130,6 +143,12 @@ namespace SophBot.Commands.UserCommands
                 if (points > availablePoints)
                 {
                     components.Add(new DiscordTextDisplayComponent("Du hast nicht genug Punkte, um diese Aktion auszuführen!"));
+                    await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.Red)));
+                    return;
+                }
+                else if (points <= 0)
+                {
+                    components.Add(new DiscordTextDisplayComponent("Du musst mindestens 1 Punkt wetten, um diese Aktion auszuführen!"));
                     await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.Red)));
                     return;
                 }

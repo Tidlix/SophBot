@@ -21,16 +21,18 @@ namespace SophBot.Commands.UserCommands
 
             DiscordComponent[] components =
             {
+                new DiscordTextDisplayComponent($"**\"{promt}\"**"),
+                new DiscordSeparatorComponent(true),
                 new DiscordTextDisplayComponent(response)
             };
             DiscordContainerComponent container = new DiscordContainerComponent(components);
             
             var message = new DiscordMessageBuilder();
             message.EnableV2Components();
-            message.AddComponents(container);
+            message.AddRawComponents(container);
 
 
-            await ctx.EditResponseAsync(response);
+            await ctx.EditResponseAsync(message);
         }
     }
 }

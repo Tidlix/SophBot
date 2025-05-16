@@ -56,7 +56,7 @@ namespace SophBot.Commands.ModCommands {
             }
         }
 
-        [Command("SetPoints"), Description("Setzte die Punkte eines bestimmten Nutzers")]
+        [Command("SetPoints"), Description("Setzte die Punkte eines bestimmten Nutzers"), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async ValueTask setPoints(CommandContext ctx, DiscordMember member, ulong points)
         {
             await ctx.DeferResponseAsync();

@@ -14,7 +14,6 @@ using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using SophBot.Commands.ContextChecks;
 using SophBot.Commands.ModCommands;
-using SophBot.Commands.UsercCommands;
 using SophBot.Commands.UserCommands;
 using SophBot.Configuration;
 using SophBot.Database;
@@ -69,15 +68,17 @@ namespace SophBot.Configuration {
 
                     extension.AddCommands([
                         typeof(DebugCommands),
-                    typeof(ModerationCommands),
-                    typeof(ModerationCommands.warnCommands),
-                    typeof(RuleCommands),
-                    typeof(ServerCommands),
-                    //typeof(ServerCommands.customCommands),
-                    typeof(CustomCommands),
-                    typeof(RRCommands),
-                    typeof(TwitchCommands),
-                    typeof(AICommands)
+                        typeof(ModerationCommands),
+                        typeof(ModerationCommands.WarnCommands),
+                        typeof(RuleCommands),
+                        typeof(ServerCommands),
+                        typeof(ProfileCommands),
+                        typeof(ProfileCommands.PointCommands),
+                        typeof(ProfileCommands.Gamble),
+                        typeof(CustomCommands),
+                        typeof(RRCommands),
+                        typeof(TwitchCommands),
+                        typeof(AICommands)
                     ]);
 
                     TextCommandProcessor textCommandProcessor = new(new()
@@ -110,58 +111,65 @@ namespace SophBot.Configuration {
 
             public static async ValueTask CreateTwitchMonitoring()
             {
+                try
+                {
 #pragma warning disable CS8629
-                TwitchAPI api = new TwitchAPI();
-                api.Settings.ClientId = Config.Twitch.ClientId;
-                api.Settings.Secret = Config.Twitch.ClientSecret;
-                api.Settings.AccessToken = Config.Twitch.AccessToken;
+                    TwitchAPI api = new TwitchAPI();
+                    api.Settings.ClientId = Config.Twitch.ClientId;
+                    api.Settings.Secret = Config.Twitch.ClientSecret;
+                    api.Settings.AccessToken = Config.Twitch.AccessToken;
 
-                Monitoring = new LiveStreamMonitorService(api, 60);
-                Monitoring.OnStreamOnline += async (s, e) =>
-                {
-                    string twitchChannel = e.Channel;
-                    var time = e.Stream.StartedAt;
-
-                    List<ulong> discordChannels = await TidlixDB.getMonitoringChannels(twitchChannel.ToLower());
-
-                    foreach (ulong discordChannelId in discordChannels)
+                    Monitoring = new LiveStreamMonitorService(api, 60);
+                    Monitoring.OnStreamOnline += async (s, e) =>
                     {
-                        DiscordChannel discordChannel = await Discord.Client.GetChannelAsync(discordChannelId);
-                        DiscordGuild guild = await Discord.Client.GetGuildAsync((ulong)discordChannel.GuildId);
+                        string twitchChannel = e.Channel;
+                        var time = e.Stream.StartedAt;
 
-                        ulong mentionRoleId = await TidlixDB.readServerconfig("mentionrole", guild.Id);
-                        DiscordRole mentionRole = await guild.GetRoleAsync(mentionRoleId);
+                        List<ulong> discordChannels = await TidlixDB.TwitchMonitorings.getMonitoringChannelsAsync(twitchChannel.ToLower());
 
-                        string url = e.Stream.ThumbnailUrl.Replace("{width}", "1920").Replace("{height}", "1080");
+                        foreach (ulong discordChannelId in discordChannels)
+                        {
+                            DiscordChannel discordChannel = await Discord.Client.GetChannelAsync(discordChannelId);
+                            DiscordGuild guild = await Discord.Client.GetGuildAsync((ulong)discordChannel.GuildId);
 
-                        
-                        DiscordComponent[] components = [
-                            new DiscordTextDisplayComponent($"# {e.Stream.UserName} ist nun Live!"),
-                            new DiscordSeparatorComponent(true),
-                            new DiscordTextDisplayComponent($"## {e.Stream.Title}"),
-                            new DiscordMediaGalleryComponent(new DiscordMediaGalleryItem(url, "test", false)),
-                            new DiscordSeparatorComponent(true),
-                            new DiscordSectionComponent(new DiscordTextDisplayComponent($"**{mentionRole.Mention}** \n*{time.ToString("dd.MM.yyyy - HH:mm")}*"), new DiscordLinkButtonComponent($"https://twitch.tv/{twitchChannel}", label: "Jetzt auf Twitch.tv ansehen!"))
-                        ];
+                            ulong mentionRoleId = await TidlixDB.ServerConfig.readValueAsync("mentionrole", guild.Id);
+                            DiscordRole mentionRole = await guild.GetRoleAsync(mentionRoleId);
 
-                        var msg = new DiscordMessageBuilder()
-                        .EnableV2Components()
-                        .AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.Purple))
-                        .WithAllowedMention(new RoleMention(mentionRole));
+                            string url = e.Stream.ThumbnailUrl.Replace("{width}", "1920").Replace("{height}", "1080");
 
-                        await discordChannel.SendMessageAsync(msg);
+
+                            DiscordComponent[] components = [
+                                new DiscordTextDisplayComponent($"# {e.Stream.UserName} ist nun Live!"),
+                                new DiscordSeparatorComponent(true),
+                                new DiscordTextDisplayComponent($"## {e.Stream.Title}"),
+                                new DiscordMediaGalleryComponent(new DiscordMediaGalleryItem(url, "test", false)),
+                                new DiscordSeparatorComponent(true),
+                                new DiscordSectionComponent(new DiscordTextDisplayComponent($"**{mentionRole.Mention}** \n*{time.ToString("dd.MM.yyyy - HH:mm")}*"), new DiscordLinkButtonComponent($"https://twitch.tv/{twitchChannel}", label: "Jetzt auf Twitch.tv ansehen!"))
+                            ];
+
+                            var msg = new DiscordMessageBuilder()
+                            .EnableV2Components()
+                            .AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.Purple))
+                            .WithAllowedMention(new RoleMention(mentionRole));
+
+                            await discordChannel.SendMessageAsync(msg);
+                        }
+                    };
+
+                    var list = new List<string>();
+                    var channelList = await TidlixDB.TwitchMonitorings.getAllMonitoringsAsync();
+                    foreach (var channel in channelList)
+                    {
+                        list.Add(channel);
                     }
-                };
 
-                var list = new List<string>();
-                var channelList = await TidlixDB.getAllMonitorings();
-                foreach (var channel in channelList)
-                {
-                    list.Add(channel);
+                    Monitoring.SetChannelsByName(list);
+                    Monitoring.Start();
                 }
-
-                Monitoring.SetChannelsByName(list);
-                Monitoring.Start();
+                catch (Exception e)
+                {
+                    await Log.sendMessage(e.Message, MessageType.Warning());
+                }
             }
         }
         #endregion

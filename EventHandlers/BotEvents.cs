@@ -38,7 +38,7 @@ namespace SophBot.EventHandlers {
             
             await Log.sendMessage($"Bot was added to {g.Name}!", MessageType.Message());
             try {
-                await TidlixDB.createServerconfig(g.Id, ruleChannel.Id, welcomeChannel.Id, memberRole.Id, mentionRole.Id);
+                await TidlixDB.ServerConfig.createAsnyc(g.Id, ruleChannel.Id, welcomeChannel.Id, memberRole.Id, mentionRole.Id);
                 await ruleChannel.SendMessageAsync("Dieser Channel wurde automatisch als Regel-Kanal eingerichtet. Diese Einstellung kannst du mit /modifyconfig ändern!");
                 await welcomeChannel.SendMessageAsync("Dieser Channel wurde automatisch als Wilkommens-Kanal eingerichtet. Diese Einstellung kannst du mit /modifyconfig ändern!");
                 await welcomeChannel.SendMessageAsync($"{memberRole.Mention} wurde automatisch als Member-Rolle eingerichtet. Diese Einstellung kannst du mit /modifyconfig ändern");
@@ -63,7 +63,7 @@ namespace SophBot.EventHandlers {
         {
             await Log.sendMessage($"Bot was added to {e.Guild.Name}!", MessageType.Message());
             try {
-                await TidlixDB.deleteServerconfig(e.Guild.Id);
+                await TidlixDB.ServerConfig.deleteAsync(e.Guild.Id);
             } catch (Exception ex) {
                 await Log.sendMessage($"Serverconfig for server {e.Guild.Name}({e.Guild.Id}) couldn't be deleted! - {ex.Message}", MessageType.Error());
             }

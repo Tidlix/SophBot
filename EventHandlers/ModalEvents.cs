@@ -29,7 +29,7 @@ namespace SophBot.EventHandlers {
             string title = values[0];
             string description = values[1];
             try {
-                var channel = await e.Interaction.Guild.GetChannelAsync(await TidlixDB.readServerconfig("rulechannel", e.Interaction.Guild.Id));
+                var channel = await e.Interaction.Guild.GetChannelAsync(await TidlixDB.ServerConfig.readValueAsync("rulechannel", e.Interaction.Guild.Id));
                 var msg = await channel.SendMessageAsync(new DiscordEmbedBuilder() {
                     Title = title,
                     Description = description,
@@ -50,16 +50,16 @@ namespace SophBot.EventHandlers {
             string value = e.Values.Values.First();
             ulong guildId = e.Interaction.Guild.Id;
 
-            if (await TidlixDB.checkCommandExists(command, guildId))
+            if (await TidlixDB.CustomCommands.checkExistanceAsync(command, guildId))
             {
                 if (value == "")
                 {
-                    await TidlixDB.deleteCommand(command, guildId);
-                    await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Command !{command} wurde gelöscht!"));
+                    await TidlixDB.CustomCommands.deleteAsnyc(command, guildId);
+                    await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Command !{command} wurde gelï¿½scht!"));
                 }
                 else
                 {
-                    await TidlixDB.modifyCommand(command, value, guildId);
+                    await TidlixDB.CustomCommands.modifyAsync(command, value, guildId);
                     await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Command !{command} wurde bearbeitet!"));
                 }
             }
@@ -67,7 +67,7 @@ namespace SophBot.EventHandlers {
             {
                 if (value != "")
                 {
-                    await TidlixDB.createCommand(command, value, guildId);
+                    await TidlixDB.CustomCommands.createAsnyc(command, value, guildId);
                     await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Command !{command} wurde erstellt!"));
                 }
                 else await e.Interaction.DeleteOriginalResponseAsync();

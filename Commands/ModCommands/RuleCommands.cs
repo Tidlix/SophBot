@@ -40,7 +40,7 @@ namespace SophBot.Commands.ModCommands {
             ));
 
             try {
-                var channel = await ctx.Guild.GetChannelAsync(await TidlixDB.readServerconfig("rulechannel", ctx.Guild.Id));
+                var channel = await ctx.Guild.GetChannelAsync(await TidlixDB.ServerConfig.readValueAsync("rulechannel", ctx.Guild.Id));
                 var msg = await channel.SendMessageAsync(message);
                 await ctx.EditResponseAsync($"Nachricht gesendet! {msg.JumpLink}");
             } catch (Exception ex) {

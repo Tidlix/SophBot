@@ -9,7 +9,7 @@ namespace SophBot.Commands.ChoiceProviders {
         public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
         {
             #pragma warning disable CS8602
-            var commands = await TidlixDB.getAllCommands(ctx.Guild.Id);
+            var commands = await TidlixDB.CustomCommands.getAllCommandsAsnyc(ctx.Guild.Id);
 
             var list = new List<DiscordAutoCompleteChoice>();
 

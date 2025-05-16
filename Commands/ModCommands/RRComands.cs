@@ -23,27 +23,6 @@ namespace SophBot.Commands.ModCommands {
             .AddRawComponents(new DiscordContainerComponent(components, color: role.Color));
 
             await ctx.Channel.SendMessageAsync(msg);
-
-            /*
-            var msgBuilder = new DiscordMessageBuilder();
-
-            var embed = new DiscordEmbedBuilder()
-            {
-                Title = "Reactionrole",
-                Description = "Drücke den Knopf um folgende Rolle zu erhalten:" +
-                $"\n\n{role.Mention}" +
-                $"\n{description}" +
-                "\n\n*Drücke den Knopf erneut um die Rolle zu entfernen!*",
-                Color = DiscordColor.Lilac,
-                Footer = new DiscordEmbedBuilder.EmbedFooter() { Text = role.Id.ToString() }
-            };
-            var button = new DiscordButtonComponent(customId: "rrButton", label: "Drück mich!", style: DiscordButtonStyle.Primary);
-
-            msgBuilder.AddEmbed(embed);
-            msgBuilder.AddComponents(button);
-
-            await ctx.Channel.SendMessageAsync(msgBuilder);
-            */
         }
     }
 }

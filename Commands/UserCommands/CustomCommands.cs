@@ -4,7 +4,7 @@ using DSharpPlus.Entities;
 using SophBot.Database;
 using SophBot.Messages;
 
-namespace SophBot.Commands.UsercCommands {
+namespace SophBot.Commands.UserCommands {
     public class CustomCommands {
         [Command("ListCommands"), Description("Erhalte eine Liste aller Custom Commands")]
         public async ValueTask listCommands(CommandContext ctx) {
@@ -13,7 +13,7 @@ namespace SophBot.Commands.UsercCommands {
 
             try {
                 string commandList = "";
-                foreach(var command in await TidlixDB.getAllCommands(ctx.Guild.Id))
+                foreach(var command in await TidlixDB.CustomCommands.getAllCommandsAsnyc(ctx.Guild.Id))
                 {
                     commandList+= $"- {command} \n";
                 }

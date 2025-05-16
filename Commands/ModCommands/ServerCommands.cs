@@ -16,10 +16,10 @@ namespace SophBot.Commands.ModCommands {
             await ctx.DeferResponseAsync();
 
             try {
-                if (memberRole != null ) await TidlixDB.modifyServerconfig("memberrole", memberRole.Id, ctx.Guild.Id);
-                if (welcomeChannel != null ) await TidlixDB.modifyServerconfig("welcomechannel", welcomeChannel.Id, ctx.Guild.Id);
-                if (ruleChannel != null ) await TidlixDB.modifyServerconfig("rulechannel", ruleChannel.Id, ctx.Guild.Id);
-                if (mentionRole != null ) await TidlixDB.modifyServerconfig("mentionrole", mentionRole.Id, ctx.Guild.Id); 
+                if (memberRole != null ) await TidlixDB.ServerConfig.modifyValueAsnyc("memberrole", memberRole.Id.ToString(), ctx.Guild.Id);
+                if (welcomeChannel != null ) await TidlixDB.ServerConfig.modifyValueAsnyc("welcomechannel", welcomeChannel.Id.ToString(), ctx.Guild.Id);
+                if (ruleChannel != null ) await TidlixDB.ServerConfig.modifyValueAsnyc("rulechannel", ruleChannel.Id.ToString(), ctx.Guild.Id);
+                if (mentionRole != null ) await TidlixDB.ServerConfig.modifyValueAsnyc("mentionrole", mentionRole.Id.ToString(), ctx.Guild.Id); 
 
                 await ctx.EditResponseAsync("Die Server-Config wurde erfolgreich bearbeitet!");                
             } catch (Exception ex) {
@@ -37,7 +37,7 @@ namespace SophBot.Commands.ModCommands {
             modal.AddComponents(new DiscordTextInputComponent(
                     style: DiscordTextInputStyle.Paragraph,
                     label: "Command-Ausgabe: ",
-                    value: await TidlixDB.getCommand(command, ctx.Guild.Id),
+                    value: await TidlixDB.CustomCommands.getCommandAsnyc(command, ctx.Guild.Id),
                     customId: $"commandInput_{command}",
                     required: false,
                     max_length: 2000

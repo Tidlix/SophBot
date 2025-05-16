@@ -4,16 +4,16 @@ using DSharpPlus.EventArgs;
 using SophBot.Database;
 
 namespace SophBot.EventHandlers {
-    public class MemberEvents : 
-    IEventHandler<GuildMemberAddedEventArgs>, 
-    IEventHandler<GuildMemberRemovedEventArgs>, 
+    public class MemberEvents :
+    IEventHandler<GuildMemberAddedEventArgs>,
+    IEventHandler<GuildMemberRemovedEventArgs>,
     IEventHandler<GuildBanAddedEventArgs>
-    {
+        {
         #region Member Joined
         public async Task HandleEventAsync(DiscordClient s, GuildMemberAddedEventArgs e)
         {
-            ulong welcomeID = await TidlixDB.readServerconfig("welcomechannel", e.Guild.Id);
-            ulong ruleID = await TidlixDB.readServerconfig("rulechannel", e.Guild.Id);
+            ulong welcomeID = await TidlixDB.ServerConfig.readValueAsync("welcomechannel", e.Guild.Id);
+            ulong ruleID = await TidlixDB.ServerConfig.readValueAsync("rulechannel", e.Guild.Id);
 
             DiscordChannel welcomeChannel = await e.Guild.GetChannelAsync(welcomeID);
             DiscordChannel ruleChannel = await e.Guild.GetChannelAsync(ruleID);
@@ -30,13 +30,15 @@ namespace SophBot.EventHandlers {
             .WithAllowedMention(new UserMention(e.Member));
 
             await welcomeChannel.SendMessageAsync(msg);
+
+            await TidlixDB.UserProfiles.createAsync(e.Guild.Id, e.Member.Id, 100);
         }
         #endregion
 
         #region Member Left
         public async Task HandleEventAsync(DiscordClient s, GuildMemberRemovedEventArgs e)
         {
-            ulong welcomeID = await TidlixDB.readServerconfig("welcomechannel", e.Guild.Id);
+            ulong welcomeID = await TidlixDB.ServerConfig.readValueAsync("welcomechannel", e.Guild.Id);
 
             DiscordChannel welcomeChannel = await e.Guild.GetChannelAsync(welcomeID);
 
@@ -57,7 +59,7 @@ namespace SophBot.EventHandlers {
         public async Task HandleEventAsync(DiscordClient s, GuildBanAddedEventArgs e)
         {
             var ban = await e.Guild.GetBanAsync(e.Member);
-            await TidlixDB.createWarning(e.Guild.Id, e.Member.Id, ban.Reason + " (Ausgeführter Ban)");
+            await TidlixDB.Warnings.createAsnyc(e.Guild.Id, e.Member.Id, ban.Reason + " (Ausgeführter Ban)");
         }
         #endregion
     }

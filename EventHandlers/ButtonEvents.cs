@@ -29,7 +29,7 @@ namespace SophBot.EventHandlers {
             DiscordMember member = (DiscordMember) e.Interaction.User;
 
             try {
-                DiscordRole memberRole = await e.Interaction.Guild.GetRoleAsync(await TidlixDB.readServerconfig("memberrole", e.Interaction.Guild.Id));
+                DiscordRole memberRole = await e.Interaction.Guild.GetRoleAsync(await TidlixDB.ServerConfig.readValueAsync("memberrole", e.Interaction.Guild.Id));
                 await member.GrantRoleAsync(memberRole);
                 await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Regeln erfolgreich akzeptiert!"));
             } catch (Exception ex){

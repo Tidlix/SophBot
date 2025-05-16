@@ -1,35 +1,25 @@
-﻿using CommunityToolkit.HighPerformance.Helpers;
-using DSharpPlus;
-using DSharpPlus.Commands;
-using DSharpPlus.Commands.Processors.SlashCommands;
-using DSharpPlus.Commands.Processors.SlashCommands.InteractionNamingPolicies;
-using DSharpPlus.Commands.Processors.TextCommands;
-using DSharpPlus.Commands.Processors.TextCommands.Parsing;
-using DSharpPlus.Interactivity.Extensions;
-using Microsoft.Extensions.Logging;
-using SophBot.Commands.ContextChecks;
-using SophBot.Commands.ModCommands;
-using SophBot.Commands.UsercCommands;
-using SophBot.Configuration;
+﻿using SophBot.Configuration;
 using SophBot.Database;
-using SophBot.EventHandlers;
 using SophBot.Messages;
 namespace SophBot;
 
-class Program
+public class Program
 {
     static async Task Main(string[] args)
     {
         await Config.ReadAsnyc();
 
-        try {
+        try
+        {
             await TidlixDB.createDB();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             await Log.sendMessage($"Couldn't connect to Database. Database will not be reachable! - {e.Message}", MessageType.Error());
         }
-        await Services.Discord.CreateDiscordClient(); 
-        await Services.Twitch.CreateTwitchMonitoring();  
+        await Services.Discord.CreateDiscordClient();
+        await Services.Twitch.CreateTwitchMonitoring();
 
-        while (true);
+        while (true) ;
     }
 }

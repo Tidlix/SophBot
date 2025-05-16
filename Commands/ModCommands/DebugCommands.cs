@@ -21,13 +21,12 @@ namespace SophBot.Commands.ModCommands {
             
         }
 
-
         [Command("serverconfig")] 
         public class debugConfig {
             [Command("create")]
             public static async ValueTask createConfig (CommandContext ctx, ulong serverid, ulong welcomeChannel, ulong ruleChannel, ulong memberRole, ulong mentionRole) {
                 try {
-                    await TidlixDB.createServerconfig(serverid, ruleChannel, welcomeChannel, memberRole, mentionRole);
+                    await TidlixDB.ServerConfig.createAsnyc(serverid, ruleChannel, welcomeChannel, memberRole, mentionRole);
                     await ctx.RespondAsync("Config created!");
                 } catch (Exception e) {
                     await ctx.RespondAsync("Couldn't create server config - " + e.Message);
@@ -36,10 +35,43 @@ namespace SophBot.Commands.ModCommands {
             [Command("delete")]
             public static async ValueTask deleteConfig (CommandContext ctx, ulong serverid) {
                 try {
-                    await TidlixDB.deleteServerconfig(serverid);
+                    await TidlixDB.ServerConfig.deleteAsync(serverid);
                     await ctx.RespondAsync("Config deleted!");
                 } catch (Exception e) {
                     await ctx.RespondAsync("Couldn't delete server config - " + e.Message);
+                }
+            }
+        }
+
+        [Command("Userprofiles")]
+        public class userProfiles {
+            [Command("create")]
+            public static async ValueTask createConfig (CommandContext ctx, DiscordUser user, int points) {
+                #pragma warning disable CS8602
+                try {
+                    await TidlixDB.UserProfiles.createAsync(ctx.Guild.Id, user.Id, points);
+                    await ctx.RespondAsync("Profile created!");
+                } catch (Exception e) {
+                    await ctx.RespondAsync("Couldn't create user profile - " + e.Message);
+                }
+            }
+            [Command("guildCreate")]
+            public static async ValueTask deleteConfig (CommandContext ctx, int points) {
+                try {
+                    var users = ctx.Guild.GetAllMembersAsync();
+
+                    await foreach(var user in users) {
+                        try {
+                            if (user.IsBot) continue;
+                            
+                            await TidlixDB.UserProfiles.createAsync(ctx.Guild.Id, user.Id, points);
+                        } catch (Exception e) { await Log.sendMessage(e.Message, MessageType.Warning()); }
+                        
+                    }
+
+                    await ctx.RespondAsync("Profiles created!");
+                } catch (Exception e) {
+                    await ctx.RespondAsync("Couldn't create user profiles - " + e.Message);
                 }
             }
         }

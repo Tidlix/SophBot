@@ -11,9 +11,13 @@ namespace SophBot.EventHandlers {
         {
             if (e.Id.Contains("commandModal_")) await customCommand(e);
             else {
-                switch (e.Id) {
+                switch (e.Id)
+                {
                     case "ruleModal":
                         await sendRules(e);
+                        break;
+                    case "suggestionModal":
+                        await sendSuggestion(s, e);
                         break;
                 }
             }         
@@ -43,6 +47,21 @@ namespace SophBot.EventHandlers {
             }
         }
 
+        private async ValueTask sendSuggestion(DiscordClient s, ModalSubmittedEventArgs e)
+        {
+#pragma warning disable CS8604
+            await e.Interaction.DeferAsync(true);
+
+            var owner = s.CurrentApplication.Owners.First();
+            var components = new DiscordComponent[] {
+                new DiscordTextDisplayComponent($"### {e.Interaction.User.Mention} has sent an Suggestion:"),
+                new DiscordSeparatorComponent(true),
+                new DiscordTextDisplayComponent($"{e.Values.Values.First()}")
+            };
+            await owner.SendMessageAsync(new DiscordMessageBuilder().EnableV2Components().AddRawComponents(new DiscordContainerComponent(components, false, DiscordColor.Azure)));
+
+            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Deine Idee wurde weitergegeben! \nBitte beachte dass es ein wenig dauern kann, bis deine Idee angeschaut wird. *Ggf. könnten in den nächsten Tagen weitere Nachfragen auf dich zu kommen, sollte etwas nicht ganz klar sein.*"));
+        }
         private async ValueTask customCommand(ModalSubmittedEventArgs e)
         {
             await e.Interaction.DeferAsync(true);

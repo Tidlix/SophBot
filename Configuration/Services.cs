@@ -76,6 +76,7 @@ namespace SophBot.Configuration {
                         typeof(ProfileCommands),
                         typeof(ProfileCommands.PointCommands),
                         typeof(ProfileCommands.Gamble),
+                        typeof(SuggestionCommands),
                         typeof(CustomCommands),
                         typeof(RRCommands),
                         typeof(TwitchCommands),

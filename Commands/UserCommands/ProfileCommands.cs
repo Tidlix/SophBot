@@ -109,7 +109,7 @@ namespace SophBot.Commands.UserCommands
                     await TidlixDB.UserProfiles.modifyValueAsnyc("points", (availablePoints + points).ToString(), ctx.Guild.Id, ctx.User.Id);
                     components.Add(new DiscordTextDisplayComponent($"**{ctx.User.Mention} hat {points} gewettet und Gewonnen!**"));
                     components.Add(new DiscordSeparatorComponent(true));
-                    components.Add(new DiscordTextDisplayComponent($"Deine Punkte: {availablePoints + points}**"));
+                    components.Add(new DiscordTextDisplayComponent($"Deine Punkte: {availablePoints + points}"));
 
                     await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.Gold)));
                 }
@@ -118,7 +118,7 @@ namespace SophBot.Commands.UserCommands
                     await TidlixDB.UserProfiles.modifyValueAsnyc("points", (availablePoints - points).ToString(), ctx.Guild.Id, ctx.User.Id);
                     components.Add(new DiscordTextDisplayComponent($"**{ctx.User.Mention} hat {points} gewettet und Verloren!**"));
                     components.Add(new DiscordSeparatorComponent(true));
-                    components.Add(new DiscordTextDisplayComponent($"Deine Punkte: {availablePoints - points}**"));
+                    components.Add(new DiscordTextDisplayComponent($"Deine Punkte: {availablePoints - points}"));
 
                     await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.Goldenrod)));
                 }
@@ -159,7 +159,7 @@ namespace SophBot.Commands.UserCommands
                     await TidlixDB.UserProfiles.modifyValueAsnyc("points", (availablePoints + (points * 100)).ToString(), ctx.Guild.Id, ctx.User.Id);
                     components.Add(new DiscordTextDisplayComponent($"**{ctx.User.Mention} hat {points} auf {bet} gewettet und Gewonnen!**"));
                     components.Add(new DiscordSeparatorComponent(true));
-                    components.Add(new DiscordTextDisplayComponent($"Deine Punkte: {availablePoints + (points * 100)}**"));
+                    components.Add(new DiscordTextDisplayComponent($"Deine Punkte: {availablePoints + (points * 100)}"));
 
                     await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.Gold)));
                 }

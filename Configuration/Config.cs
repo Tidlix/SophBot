@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using SophBot.Messages;
 
 namespace SophBot.Configuration {
     public class Config {

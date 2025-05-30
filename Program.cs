@@ -1,7 +1,6 @@
 ﻿using SophBot.Configuration;
-using SophBot.Database;
-using SophBot.Messages;
-namespace SophBot;
+using SophBot.Objects;
+
 
 public class Program
 {
@@ -11,14 +10,16 @@ public class Program
 
         try
         {
-            await TidlixDB.createDB();
+            await TDatabase.createDB();
         }
         catch (Exception e)
         {
-            await Log.sendMessage($"Couldn't connect to Database. Database will not be reachable! - {e.Message}", MessageType.Error());
+            TLog.sendLog($"Couldn't create Database. Database will not be reachable! > {e.Message} < ", TLog.MessageType.Warning);
         }
-        await Services.Discord.CreateDiscordClient();
-        await Services.Twitch.CreateTwitchMonitoring();
+
+        await TBotClient.CreateDiscordClient(Microsoft.Extensions.Logging.LogLevel.Debug);
+        await TTwitchClient.CreateTwitchMonitoring();
+        
 
         while (true) ;
     }

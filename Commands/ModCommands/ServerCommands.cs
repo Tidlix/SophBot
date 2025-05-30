@@ -5,8 +5,7 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using SophBot.Commands.ChoiceProviders;
-using SophBot.Database;
-using SophBot.Messages;
+using SophBot.Objects;
 
 namespace SophBot.Commands.ModCommands {
     public class ServerCommands {
@@ -14,35 +13,40 @@ namespace SophBot.Commands.ModCommands {
         public async ValueTask modConfig (SlashCommandContext ctx, DiscordRole? memberRole = null, DiscordChannel? welcomeChannel = null, DiscordChannel? ruleChannel = null, DiscordRole? mentionRole = null) {
             #pragma warning disable CS8602, CS8604, CS8625
             await ctx.DeferResponseAsync();
+            
+            try
+            {
+                TDiscordGuild guild = new(ctx.Guild);
+                if (welcomeChannel != null) await guild.setChannelAsnyc(TDiscordGuild.Channel.Welcome, welcomeChannel);
+                if (ruleChannel != null) await guild.setChannelAsnyc(TDiscordGuild.Channel.Rules, ruleChannel);
+                if (memberRole != null) await guild.setRoleAsync(TDiscordGuild.Role.Member, memberRole);
+                if (mentionRole != null) await guild.setRoleAsync(TDiscordGuild.Role.Member, mentionRole);
 
-            try {
-                if (memberRole != null ) await TidlixDB.ServerConfig.modifyValueAsnyc("memberrole", memberRole.Id.ToString(), ctx.Guild.Id);
-                if (welcomeChannel != null ) await TidlixDB.ServerConfig.modifyValueAsnyc("welcomechannel", welcomeChannel.Id.ToString(), ctx.Guild.Id);
-                if (ruleChannel != null ) await TidlixDB.ServerConfig.modifyValueAsnyc("rulechannel", ruleChannel.Id.ToString(), ctx.Guild.Id);
-                if (mentionRole != null ) await TidlixDB.ServerConfig.modifyValueAsnyc("mentionrole", mentionRole.Id.ToString(), ctx.Guild.Id); 
-
-                await ctx.EditResponseAsync("Die Server-Config wurde erfolgreich bearbeitet!");                
-            } catch (Exception ex) {
-                await ctx.EditResponseAsync("Fehler - Server Konfiguration konnte nicht bearbeitet werden! Bitte kontaktiere den Entwickler dieses Bots!");
-                await Log.sendMessage($"Serverconfig for server {ctx.Guild.Name}({ctx.Guild.Id}) couldn't be updated! - {ex.Message}", MessageType.Error());
+                await ctx.EditResponseAsync("Die Server-Config wurde erfolgreich bearbeitet!");
+            }
+            catch (Exception ex)
+            {
+                await ctx.EditResponseAsync(ex.Message);
             }
         }
 
         [Command("customcommand")]
         public async ValueTask customCommand(SlashCommandContext ctx, [SlashAutoCompleteProvider<CommandChoiceProvider>] string command)
         {
+            TDiscordGuild guild = new(ctx.Guild);
+
             var modal = new DiscordInteractionResponseBuilder();
             modal.WithTitle(command);
             modal.WithCustomId($"commandModal_{command}");
-            modal.AddComponents(new DiscordTextInputComponent(
+            modal.AddTextInputComponent(new DiscordTextInputComponent(
                     style: DiscordTextInputStyle.Paragraph,
                     label: "Command-Ausgabe: ",
-                    value: await TidlixDB.CustomCommands.getCommandAsnyc(command, ctx.Guild.Id),
+                    value: await guild.getCommandAsnyc(command),
                     customId: $"commandInput_{command}",
                     required: false,
                     max_length: 2000
                 ));
-            modal.AddComponents(new DiscordTextInputComponent(
+            modal.AddTextInputComponent(new DiscordTextInputComponent(
                         label: "Verfügbare Variablen: ",
                         customId: "variables",
                         required: false,

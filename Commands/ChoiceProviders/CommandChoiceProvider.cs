@@ -1,7 +1,7 @@
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using SophBot.Database;
+using SophBot.Objects;
 
 namespace SophBot.Commands.ChoiceProviders {
     public class CommandChoiceProvider : IAutoCompleteProvider
@@ -9,7 +9,7 @@ namespace SophBot.Commands.ChoiceProviders {
         public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
         {
             #pragma warning disable CS8602
-            var commands = await TidlixDB.CustomCommands.getAllCommandsAsnyc(ctx.Guild.Id);
+            var commands = await TDatabase.CustomCommands.getAllCommandsAsnyc(ctx.Guild.Id);
 
             var list = new List<DiscordAutoCompleteChoice>();
 

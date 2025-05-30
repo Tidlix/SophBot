@@ -20,7 +20,7 @@ namespace SophBot.Commands.ModCommands {
 
             var msg = new DiscordMessageBuilder()
             .EnableV2Components()
-            .AddRawComponents(new DiscordContainerComponent(components, color: role.Color));
+            .AddContainerComponent(new DiscordContainerComponent(components, color: role.Color));
 
             await ctx.Channel.SendMessageAsync(msg);
         }

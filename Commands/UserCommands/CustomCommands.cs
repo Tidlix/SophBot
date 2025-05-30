@@ -1,8 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Entities;
-using SophBot.Database;
-using SophBot.Messages;
+using SophBot.Objects;
 
 namespace SophBot.Commands.UserCommands {
     public class CustomCommands {
@@ -13,7 +12,7 @@ namespace SophBot.Commands.UserCommands {
 
             try {
                 string commandList = "";
-                foreach(var command in await TidlixDB.CustomCommands.getAllCommandsAsnyc(ctx.Guild.Id))
+                foreach(var command in await TDatabase.CustomCommands.getAllCommandsAsnyc(ctx.Guild.Id))
                 {
                     commandList+= $"- {command} \n";
                 }
@@ -25,10 +24,10 @@ namespace SophBot.Commands.UserCommands {
                 };
                 DiscordContainerComponent container = new DiscordContainerComponent(components, color: DiscordColor.Gray);
 
-                await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddRawComponents(container));
+                await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(container));
             } catch (Exception ex) {
                 await ctx.EditResponseAsync("Fehler - Commands konnten nicht gelesen werden! Bitte kontaktiere den Entwickler dieses Bots!");
-                await Log.sendMessage($"Custom command list couldn't be readed! - {ex.Message}", MessageType.Error());
+                TLog.sendLog($"Custom command list couldn't be readed! - {ex.Message}", TLog.MessageType.Error);
             }
         }
     }

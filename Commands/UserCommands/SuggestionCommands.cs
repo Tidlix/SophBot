@@ -13,7 +13,7 @@ namespace SophBot.Commands.UserCommands
             var modal = new DiscordInteractionResponseBuilder()
             .WithCustomId("suggestionModal")
             .WithTitle("Suggestion")
-            .AddComponents(new DiscordTextInputComponent("Deine Idee:", "suggestionModalInput", placeholder: "Bitte beschreibe deine Idee so genau wie möglich", style: DiscordTextInputStyle.Paragraph));
+            .AddTextInputComponent(new DiscordTextInputComponent("Deine Idee:", "suggestionModalInput", placeholder: "Bitte beschreibe deine Idee so genau wie möglich", style: DiscordTextInputStyle.Paragraph));
 
             await ctx.RespondWithModalAsync(modal);
         }

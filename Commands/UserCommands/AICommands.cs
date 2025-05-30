@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using SophBot.Configuration;
+using SophBot.Objects;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,7 +18,7 @@ namespace SophBot.Commands.UserCommands
         {
             await ctx.DeferResponseAsync();
 
-            var response = await Services.AI.Generate(promt);
+            var response = await TSophBotAI.generateResponse(promt);
 
             DiscordComponent[] components =
             {
@@ -29,7 +30,7 @@ namespace SophBot.Commands.UserCommands
             
             var message = new DiscordMessageBuilder();
             message.EnableV2Components();
-            message.AddRawComponents(container);
+            message.AddContainerComponent(container);
 
 
             await ctx.EditResponseAsync(message);

@@ -3,9 +3,8 @@ using System.Diagnostics;
 using DSharpPlus.Entities;
 using Npgsql;
 using SophBot.Configuration;
-using SophBot.Messages;
-namespace SophBot.Database {
-    public class TidlixDB {
+namespace SophBot.Objects {
+    public class TDatabase {
         public static string connString = "errorConnString";
         public static NpgsqlConnection connection = new NpgsqlConnection();
 
@@ -80,15 +79,18 @@ namespace SophBot.Database {
 
         #region Customcommands
         public static class CustomCommands {
-            public static async ValueTask<bool> checkExistanceAsync(string command, ulong serverid) {
+            public static async ValueTask<bool> checkExistanceAsync(string command, ulong serverid)
+            {
                 if (connection.State == ConnectionState.Closed) await createConnection();
 
-                using(connection) {
+                using (connection)
+                {
                     var cmd = new NpgsqlCommand($"SELECT output FROM data.customcommands WHERE serverid = {serverid} AND cmd = '{command}'", connection);
                     var reader = await cmd.ExecuteReaderAsync();
 
-                    while (await reader.ReadAsync()) {
-                        if (reader.GetString(0) == null) 
+                    while (await reader.ReadAsync())
+                    {
+                        if (reader.GetString(0) == null)
                             return false;
                         else return true;
                     }
@@ -121,15 +123,16 @@ namespace SophBot.Database {
             }
             public static async ValueTask<string> getCommandAsnyc(string command, ulong serverid) {
                 if (connection.State == ConnectionState.Closed) await createConnection();
-                using (connection){
+                using (connection)
+                {
                     var cmd = new NpgsqlCommand($"SELECT output FROM data.customcommands WHERE serverid = {serverid} AND cmd = '{command}'", connection);
                     var reader = await cmd.ExecuteReaderAsync();
-                    string result = "ERROR - Daten konnten nicht von Datenbank gelesen werden!";
 
-                    while (await reader.ReadAsync()) {
-                        result = reader.GetString(0);
+                    while (await reader.ReadAsync())
+                    {
+                        return reader.GetString(0);
                     }
-                    return result;
+                    throw new Exception("404 - Custom Command couldn't be found");
                 }
             }
             public static async ValueTask<List<string>> getAllCommandsAsnyc(ulong serverid) {
@@ -151,34 +154,33 @@ namespace SophBot.Database {
 
         #region Warnings
         public static class Warnings {
-            public static async ValueTask createAsnyc (ulong serverid, ulong userid, string reason) {
+            public static async ValueTask createAsnyc (TUserWarning warning) {
                 if (connection.State == ConnectionState.Closed) await createConnection();
                 
                 using (connection) {
                     DateTime dt = DateTime.Now;
-                    string dateFormat = "[dd.MM.yyyy - HH:mm] ";
 
-                    var cmd = new NpgsqlCommand($"INSERT INTO data.warnings (serverid, userid, reason, date) VALUES ({serverid}, {userid}, '{reason}', '{dt.ToString(dateFormat)}')", connection);
+                    var cmd = new NpgsqlCommand($"INSERT INTO data.warnings (serverid, userid, reason, date) VALUES ({warning.Guild.Id}, {warning.User.Id}, '{warning.Reason}', '{warning.Date}')", connection);
                     await cmd.ExecuteNonQueryAsync();
                 }
             }
-            public static async ValueTask deleteAsnyc (ulong warnid, ulong serverid) {
+            public static async ValueTask deleteAsnyc (ulong warnId) {
                 if (connection.State == ConnectionState.Closed) await createConnection();
 
                 using (connection){
-                    var cmd = new NpgsqlCommand($"DELETE FROM data.warnings WHERE warnid = {warnid} AND guildid = {serverid}", connection);
+                    var cmd = new NpgsqlCommand($"DELETE FROM data.warnings WHERE warnid = {warnId}", connection);
                     await cmd.ExecuteNonQueryAsync();
                 }
-            }
-            public static async ValueTask<string> getAllByUserAsnyc (ulong userid, ulong serverid) {
+            } 
+            public static async ValueTask<List<TUserWarning>> getAllByMemberAsnyc (DiscordMember member) {
                 if (connection.State == ConnectionState.Closed) await createConnection();
                 using (connection){
-                    var cmd = new NpgsqlCommand($"SELECT warnid, reason, date FROM data.warnings WHERE serverid = {serverid} AND userid = {userid}", connection);
+                    var cmd = new NpgsqlCommand($"SELECT warnid, reason, date FROM data.warnings WHERE serverid = {member.Guild.Id} AND userid = {member.Id} LIMIT 10", connection);
                     var reader = await cmd.ExecuteReaderAsync();
-                    string result = "**Datum/Zeit | Warn-ID | Grund** \n";
+                    List<TUserWarning> result = new();
 
                     while (await reader.ReadAsync()) {
-                        result += $"> {reader.GetString(2)} | {reader.GetInt64(0)} | *{reader.GetString(1)}* \n";
+                        result.Add(new((ulong) reader.GetInt64(0), member.Guild.Id, member.Id, reader.GetString(2), reader.GetString(1)));
                     }
                     return result;
                 }
@@ -275,7 +277,7 @@ namespace SophBot.Database {
                     await cmd.ExecuteNonQueryAsync();
                 }
             }
-            public static async ValueTask<long> getPointsAsync(ulong serverid, ulong userid)
+            public static async ValueTask<ulong> getPointsAsync(ulong serverid, ulong userid)
             {
                 if (connection.State == ConnectionState.Closed) await createConnection();
 
@@ -284,11 +286,11 @@ namespace SophBot.Database {
                     var cmd = new NpgsqlCommand($"SELECT points FROM data.userprofiles WHERE serverid = {serverid} AND userid = '{userid}'", connection);
                     var reader = await cmd.ExecuteReaderAsync();
 
-                    long result = -404;
+                    ulong result = 0;
 
                     while (await reader.ReadAsync())
                     {
-                        result = reader.GetInt64(0);
+                        result = (ulong) reader.GetInt64(0);
                     }
 
                     return result;

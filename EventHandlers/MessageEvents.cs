@@ -2,12 +2,12 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using SophBot.Configuration;
-using SophBot.Database;
-using SophBot.Messages;
+using SophBot.Objects;
 using System.Text.RegularExpressions;
 using TwitchLib.Api.Core.Extensions.System;
 
-namespace SophBot.EventHandlers {
+namespace SophBot.EventHandlers
+{
     class MessageEvents : IEventHandler<MessageCreatedEventArgs>
     {
         private static readonly Dictionary<ulong, int> messageCount = new();
@@ -46,82 +46,75 @@ namespace SophBot.EventHandlers {
             string text = (msg.Contains(' ')) ? msg.Substring(msg.IndexOf(' ')) : "";
             Random random = new Random();
 
-            try
+            TDiscordGuild guild = new(e.Guild);
+            string? output = await guild.getCommandAsnyc(command);
+
+            if (output == null)
             {
-                if (!await TidlixDB.CustomCommands.checkExistanceAsync(command, e.Guild.Id))
+                return;
+            }
+
+            if (output.Contains("[user]")) output = output.Replace("[user]", e.Author.Mention);
+            if (output.Contains("[text]")) output = output.Replace("[text]", text);
+
+            string wordPattern = @"\[word\((\d+)\)\]";
+            output = Regex.Replace(output, wordPattern, match =>
+            {
+                int word = int.Parse(match.Groups[1].Value);
+                string[] words = text.Split(' ');
+                try
                 {
-                    return;
+                    return words[word];
                 }
-                string response = await TidlixDB.CustomCommands.getCommandAsnyc(command, e.Guild.Id);
-
-                if (response.Contains("[user]")) response = response.Replace("[user]", e.Author.Mention);
-                if (response.Contains("[text]")) response = response.Replace("[text]", text);
-
-                string wordPattern = @"\[word\((\d+)\)\]";
-                response = Regex.Replace(response, wordPattern, match =>
+                catch 
                 {
-                    int word = int.Parse(match.Groups[1].Value);
-                    string[] words = text.Split(' ');
-                    try
-                    {
-                        return words[word];
-                    }
-                    catch
-                    {
-                        return "";
-                    }
+                    return "";
+                }
 
-                });
+            });
 
-                string randPattern = @"\[rand\((?:(\d+),)?(\d+)\)\]";
-                response = Regex.Replace(response, randPattern, match =>
-                {
-                    int min = (match.Groups[1].Success) ? int.Parse(match.Groups[1].Value) : 0;
-                    int max = int.Parse(match.Groups[2].Value);
-
-                    if (min > max)
-                    {
-                        return match.Value;
-                    }
-
-                    int zufallswert = random.Next(min, max + 1);
-
-                    return zufallswert.ToString();
-                });
-
-
-
-
-                await e.Message.RespondAsync(response);
-
-            }
-            catch (Exception ex)
+            string randPattern = @"\[rand\((?:(\d+),)?(\d+)\)\]";
+            output = Regex.Replace(output, randPattern, match =>
             {
-                await Log.sendMessage($"Failed to try customcommand - {ex.Message}", MessageType.Warning());
-            }
+                int min = (match.Groups[1].Success) ? int.Parse(match.Groups[1].Value) : 0;
+                int max = int.Parse(match.Groups[2].Value);
+
+                if (min > max)
+                {
+                    return match.Value;
+                }
+
+                int zufallswert = random.Next(min, max + 1);
+
+                return zufallswert.ToString();
+            });
+
+            await e.Message.RespondAsync(output);
         }
 
         private async ValueTask aiRequestAsync(DiscordClient s, MessageCreatedEventArgs e)
-        {
-            try
-            {
-                string promt = e.Message.Content.Substring(e.Message.Content.IndexOf(s.CurrentUser.Mention) + s.CurrentUser.Mention.Length + 1);
-                string response = await Services.AI.Generate(promt);
+                {
+                    try
+                    {
+                        string promt = e.Message.Content.Substring(e.Message.Content.IndexOf(s.CurrentUser.Mention) + s.CurrentUser.Mention.Length + 1);
+                        string response = await TSophBotAI.generateResponse(promt);
 
-                await e.Message.RespondAsync(response);
-            }
-            catch (Exception ex)
-            {
-                await Log.sendMessage(ex.Message, MessageType.Error());
-            }
-        }
+                        await e.Message.RespondAsync(response);
+                    }
+                    catch (Exception ex)
+                    {
+                        TLog.sendLog(ex.Message, TLog.MessageType.Error);
+                    }
+                }
 
         private async ValueTask addPointsAsnyc(MessageCreatedEventArgs e)
         {
-            DiscordMember member = await e.Guild.GetMemberAsync(e.Author.Id);
-            
-            var points = await TidlixDB.UserProfiles.getPointsAsync(e.Guild.Id, e.Author.Id);
-            await TidlixDB.UserProfiles.modifyValueAsnyc("points", (points + ((member.PremiumType.HasValue) ? 5 : 10)).ToString(), e.Guild.Id, e.Author.Id);
+            DiscordMember m = await e.Guild.GetMemberAsync(e.Author.Id);
+            TDiscordMember member = new(m);
+
+            ulong points = (ulong)((m.PremiumType.HasValue) ? 10 : 5);
+
+            await member.addGuildPointsAsnyc((points));
         }
     }
 }

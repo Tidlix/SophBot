@@ -2,8 +2,8 @@ using DSharpPlus.Entities;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using System.ComponentModel;
-using SophBot.Database;
-using SophBot.Messages;
+using SophBot.Objects;
+using DSharpPlus.Commands.Processors.SlashCommands;
 
 namespace SophBot.Commands.ModCommands {
     public class ModerationCommands
@@ -12,58 +12,62 @@ namespace SophBot.Commands.ModCommands {
         public class WarnCommands
         {
             [Command("add"), Description("Verwarne einen Nutzer")]
-            public async ValueTask warnUser(CommandContext ctx, DiscordMember member, string reason)
-            {
-#pragma warning disable CS8602
-                try
-                {
-                    await TidlixDB.Warnings.createAsnyc(ctx.Guild.Id, member.Id, reason);
-                    await ctx.RespondAsync($"Die Verwarnung für {member.Mention} wurde erstellt! Sieh dir alle Verwanungen mit /warnig get an");
-                }
-                catch (Exception e)
-                {
-                    await ctx.RespondAsync("Die Verwarnung konnte nicht ausgeführt werden! Bitte kontaktiere den Entwickler dieses Bots!");
-                    await Log.sendMessage($"Couldn't warn user {member.DisplayName}({member.Id}) - {e.Message}", MessageType.Error());
-                }
-            }
-            [Command("remove"), Description("Entferne eine Verwarnung eines Nutzers")]
-            public async ValueTask deleteWarning(CommandContext ctx, [Description("Warn-ID der Verwarnung die du löschen willst")] ulong warnid)
+            public async ValueTask warnUser(CommandContext ctx, DiscordMember target, string reason)
             {
                 try
                 {
-                    await TidlixDB.Warnings.deleteAsnyc(warnid, ctx.Guild.Id);
-                    await ctx.RespondAsync($"Die Verwarnung #{warnid} wurde gelöscht!");
+                    TDiscordMember member = new(target);
+                    await member.addWarningAsnyc(reason);
+                    await ctx.RespondAsync($"Die Verwarnung für {target.Mention} wurde erstellt! Sieh dir alle Verwanungen mit /warnig get an");
                 }
                 catch (Exception e)
                 {
-                    await ctx.RespondAsync("Die Löschung konnte nicht ausgeführt werden! Bitte kontaktiere den Entwickler dieses Bots!");
-                    await Log.sendMessage($"Couldn't delete warning {warnid} - {e.Message}", MessageType.Error());
+                    await ctx.RespondAsync(e.Message);
                 }
             }
+
             [Command("get"), Description("Erhalte jede Verwarnung eines Nutzers")]
-            public async ValueTask getWarning(CommandContext ctx, DiscordMember member)
+            public async ValueTask getWarning(SlashCommandContext ctx, [Description("Wähle den Nutzer, wessen Verwarnungen du erhalten möchtest")] DiscordMember target)
             {
+                await ctx.DeferResponseAsync(true);
                 try
                 {
-                    string warnings = await TidlixDB.Warnings.getAllByUserAsnyc(member.Id, ctx.Guild.Id);
-                    await ctx.RespondAsync($"**Hier sind alle Verwarnungen von {member.Mention}:**\n\n" + warnings);
+                    TDiscordMember member = new(target);
+                    var warnings = await member.getWarningsAsnyc();
+
+                    List<DiscordComponent> components = new();
+                    components.Add(new DiscordTextDisplayComponent($"# Verwarnungen von {target.Mention}"));
+
+                    int current = 0;
+                    foreach (var warning in warnings)
+                    {
+                        if (current >= 10) break;
+                        current++;
+                        components.Add(new DiscordSectionComponent(
+                            new DiscordTextDisplayComponent($"{warning.Date} - {warning.Reason}"),
+                            new DiscordButtonComponent(DiscordButtonStyle.Danger, $"deleteUserWarningButton_{warning.WarnId}", "Verwarnung Aufheben")
+                        ));
+                    }
+
+                    await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new DiscordContainerComponent(components)));
                 }
                 catch (Exception e)
                 {
-                    await ctx.RespondAsync("Die Verwarnungen konnten nich gesammelt werden! Bitte kontaktiere den Entwickler dieses Bots!");
-                    await Log.sendMessage($"select warnings from {member.DisplayName}({member.Id}) > Guild {ctx.Guild.Name}({ctx.Guild.Id}) - {e.Message}", MessageType.Error());
+                    TLog.sendLog(e.Message, TLog.MessageType.Error);
+                    await ctx.EditResponseAsync("Etwas ist schiefgelaufen! - Bitte Kontaktiere den Entwickler dieses Bots");
                 }
             }
         }
 
         [Command("SetPoints"), Description("Setzte die Punkte eines bestimmten Nutzers"), RequirePermissions(DiscordPermission.ModerateMembers)]
-        public async ValueTask setPoints(CommandContext ctx, DiscordMember member, ulong points)
+        public async ValueTask setPoints(CommandContext ctx, DiscordMember target, ulong points)
         {
+            TDiscordMember member = new(target);
             await ctx.DeferResponseAsync();
 
-            await TidlixDB.UserProfiles.modifyValueAsnyc("points", points.ToString(), ctx.Guild.Id, member.Id);
+            await member.setGuildPointsAsnyc(points);
 
-            await ctx.EditResponseAsync($"Du hast die Punkte von {member.Mention} auf {points} gesetzt!");
+            await ctx.EditResponseAsync($"Du hast die Punkte von {target.Mention} auf {points} gesetzt!");
         }
     }
 }

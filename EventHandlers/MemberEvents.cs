@@ -1,7 +1,7 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using SophBot.Database;
+using SophBot.Objects;
 
 namespace SophBot.EventHandlers {
     public class MemberEvents :
@@ -12,11 +12,11 @@ namespace SophBot.EventHandlers {
         #region Member Joined
         public async Task HandleEventAsync(DiscordClient s, GuildMemberAddedEventArgs e)
         {
-            ulong welcomeID = await TidlixDB.ServerConfig.readValueAsync("welcomechannel", e.Guild.Id);
-            ulong ruleID = await TidlixDB.ServerConfig.readValueAsync("rulechannel", e.Guild.Id);
+            TDiscordGuild guild = new(e.Guild);
+            TDiscordMember member = new(e.Member);
 
-            DiscordChannel welcomeChannel = await e.Guild.GetChannelAsync(welcomeID);
-            DiscordChannel ruleChannel = await e.Guild.GetChannelAsync(ruleID);
+            DiscordChannel welcomeChannel = await guild.getChannelAsnyc(TDiscordGuild.Channel.Welcome);
+            DiscordChannel ruleChannel = await guild.getChannelAsnyc(TDiscordGuild.Channel.Rules);
 
             DiscordComponent[] components = [
                 new DiscordSectionComponent(new DiscordTextDisplayComponent($"## Ein neues Mitglied - {e.Member.Mention}\n\n**Herzlich Willkommen auf diesem Server!**"), new DiscordThumbnailComponent(new DiscordUnfurledMediaItem(e.Member.AvatarUrl))),
@@ -26,21 +26,20 @@ namespace SophBot.EventHandlers {
 
             var msg = new DiscordMessageBuilder()
             .EnableV2Components()
-            .AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.MidnightBlue))
+            .AddContainerComponent(new DiscordContainerComponent(components, color: DiscordColor.MidnightBlue))
             .WithAllowedMention(new UserMention(e.Member));
 
             await welcomeChannel.SendMessageAsync(msg);
 
-            await TidlixDB.UserProfiles.createAsync(e.Guild.Id, e.Member.Id, 100);
+            await member.createProfileAsync();
         }
         #endregion
 
         #region Member Left
         public async Task HandleEventAsync(DiscordClient s, GuildMemberRemovedEventArgs e)
         {
-            ulong welcomeID = await TidlixDB.ServerConfig.readValueAsync("welcomechannel", e.Guild.Id);
-
-            DiscordChannel welcomeChannel = await e.Guild.GetChannelAsync(welcomeID);
+            TDiscordGuild guild = new(e.Guild);
+            DiscordChannel welcomeChannel = await guild.getChannelAsnyc(TDiscordGuild.Channel.Welcome);
 
             DiscordComponent[] components = [
                 new DiscordSectionComponent(new DiscordTextDisplayComponent($"## Ein Verräter - {e.Member.DisplayName}\n\n**{e.Member.DisplayName} hat soeben diesen Server verlassen!**"), new DiscordThumbnailComponent(new DiscordUnfurledMediaItem(e.Member.AvatarUrl)))
@@ -48,7 +47,7 @@ namespace SophBot.EventHandlers {
 
             var msg = new DiscordMessageBuilder()
             .EnableV2Components()
-            .AddRawComponents(new DiscordContainerComponent(components, color: DiscordColor.Red));
+            .AddContainerComponent(new DiscordContainerComponent(components, color: DiscordColor.Red));
 
             await welcomeChannel.SendMessageAsync(msg);
         }
@@ -58,8 +57,9 @@ namespace SophBot.EventHandlers {
         #region Member Banned
         public async Task HandleEventAsync(DiscordClient s, GuildBanAddedEventArgs e)
         {
+            TDiscordMember member = new(e.Member);
             var ban = await e.Guild.GetBanAsync(e.Member);
-            await TidlixDB.Warnings.createAsnyc(e.Guild.Id, e.Member.Id, ban.Reason + " (Ausgeführter Ban)");
+            await member.addWarningAsnyc(ban.Reason);
         }
         #endregion
     }

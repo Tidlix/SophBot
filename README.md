@@ -1,1 +1,2 @@
-Bot für https://discord.gg/HrXDx5my3A
+Ein Discord-Bot für xSophe
+https://discord.gg/HrXDx5my3A

@@ -22,7 +22,7 @@ namespace SophBot.Objects
                     api.Settings.AccessToken = Config.Twitch.AccessToken;
 
                     Monitoring = new LiveStreamMonitorService(api, 60);
-                    //Monitoring.OnStreamOnline += async (s, e) => await StreamOnline(s, e);
+                    Monitoring.OnStreamOnline += async (s, e) => await StreamOnline(s, e);
 
                     var list = new List<string>();
                     var channelList = await TDatabase.TwitchMonitorings.getAllMonitoringsAsync();

@@ -63,11 +63,19 @@ namespace SophBot.Commands.UserCommands
                 int i = 1;
                 foreach (var current in await TDatabase.UserProfiles.getLeaderBoardTopAsync(ctx.Guild.Id, 10))
                 {
-                    string output = $"**Platz {i}: {(await ctx.Guild.GetMemberAsync(current.Key)).DisplayName}**\n{current.Value} Punkte";
+                    string displayName = "404 - User not Found";
+                    try
+                    {
+                        displayName = (await ctx.Guild.GetMemberAsync(current.Key)).DisplayName;
+                    } catch {}
+
+                    string output = $"**Platz {i++}: {displayName}**\n{current.Value} Punkte";
                     components.Add(new DiscordTextDisplayComponent(output));
                 }
                 components.Add(new DiscordSeparatorComponent(true));
-                components.Add(new DiscordTextDisplayComponent($"Deine Platzierung: {await member.getGuildPointsAsnyc()} / Gesamte Einträge: {await TDatabase.UserProfiles.getLeaderBoardCountAsync(ctx.Guild.Id)}"));
+                components.Add(new DiscordTextDisplayComponent($"Deine Platzierung: " +
+                    $"{ await member.getGuildPointsAsnyc()} " +
+                    $"/ Gesamte Einträge: {await TDatabase.UserProfiles.getLeaderBoardCountAsync(ctx.Guild.Id)}"));
 
                 await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new DiscordContainerComponent(components, color: DiscordColor.Gold)));
             }

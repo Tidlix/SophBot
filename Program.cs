@@ -1,26 +1,23 @@
-﻿using SophBot.Configuration;
-using SophBot.Objects;
+﻿using SophBot.bot.conf;
+using SophBot.bot.logs;
+using SophBotv2.bot.discord;
 
-
-public class Program
+namespace SophBot
 {
-    static async Task Main(string[] args)
+    public class Program
     {
-        await Config.ReadAsnyc();
-
-        try
+        public static async Task Main(string[] args)
         {
-            await TDatabase.createDB();
-        }
-        catch (Exception e)
-        {
-            TLog.sendLog($"Couldn't create Database. Database will not be reachable! > {e.Message} < ", TLog.MessageType.Warning);
-        }
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                SLogger.Log($"Unhandled Exception => {e.ExceptionObject.ToString()}", type: LogType.Error);
+            };
 
-        await TBotClient.CreateDiscordClient(Microsoft.Extensions.Logging.LogLevel.Debug);
-        await TTwitchClient.CreateTwitchMonitoring();
-        
+            await SConfig.ReadConfigAsync();
+            await SBotClient.CreateClientAsync();
 
-        while (true) ;
+
+            while (true);
+        }   
     }
 }

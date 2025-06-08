@@ -1,6 +1,6 @@
 bin/Debug/net9.0/CommunityToolkit.HighPerformance.dll
 bin/Debug/net9.0/ConcurrentCollections.dll
-bin/Debug/net9.0/config.json
+bin/Debug/net9.0/config/
 bin/Debug/net9.0/DSharpPlus.Commands.dll
 bin/Debug/net9.0/DSharpPlus.dll
 bin/Debug/net9.0/DSharpPlus.Interactivity.dll

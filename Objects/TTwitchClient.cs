@@ -43,7 +43,7 @@ namespace SophBot.Objects
             private static async Task StreamOnline(object? sender, OnStreamOnlineArgs e)
             {
                 string twitchChannel = e.Channel;
-                var time = e.Stream.StartedAt;
+                var time = e.Stream.StartedAt.AddHours(2); // For German time
 
                 List<ulong> discordChannels = await TDatabase.TwitchMonitorings.getMonitoringChannelsAsync(twitchChannel.ToLower());
 

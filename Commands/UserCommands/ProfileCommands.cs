@@ -74,7 +74,7 @@ namespace SophBot.Commands.UserCommands
                 }
                 components.Add(new DiscordSeparatorComponent(true));
                 components.Add(new DiscordTextDisplayComponent($"Deine Platzierung: " +
-                    $"{ await member.getGuildPointsAsnyc()} " +
+                    $"{ await TDatabase.UserProfiles.getLeaderBoardScoreAsync(ctx.Guild.Id, ctx.Member.Id)} " +
                     $"/ Gesamte Einträge: {await TDatabase.UserProfiles.getLeaderBoardCountAsync(ctx.Guild.Id)}"));
 
                 await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new DiscordContainerComponent(components, color: DiscordColor.Gold)));

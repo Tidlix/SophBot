@@ -10,7 +10,8 @@ namespace SophBot.bot.database
         UserProfiles,
         CustomCommands,
         TwitchMonitorings,
-        Warnings
+        Warnings,
+        Wiki
     }
 
     public class SDBEngine
@@ -26,7 +27,7 @@ namespace SophBot.bot.database
             switch (column)
             {
                 case SDBColumn.UserID:
-                    return "user";
+                    return "userid";
                 case SDBColumn.Points:
                     return "points";
                 case SDBColumn.ServerID:
@@ -43,8 +44,10 @@ namespace SophBot.bot.database
                     return "memberrole";
                 case SDBColumn.MentionRoleID:
                     return "mentionrole";
-                case SDBColumn.Command:
-                    return "command";
+                case SDBColumn.Name:
+                    return "name";
+                case SDBColumn.Number:
+                    return "number";
                 case SDBColumn.Description:
                     return "description";
                 case SDBColumn.DateTime:
@@ -68,6 +71,8 @@ namespace SophBot.bot.database
                     return "customcommands";
                 case SDBTable.Warnings:
                     return "warnings";
+                case SDBTable.Wiki:
+                    return "wiki";
 
                 default:
                     throw new Exception("Table-Switch-Case not defined!");
@@ -94,7 +99,7 @@ namespace SophBot.bot.database
             public static SDBColumn[] CustomCommands =
             {
                 SDBColumn.ServerID,
-                SDBColumn.Command,
+                SDBColumn.Name,
                 SDBColumn.Description
             };
             public static SDBColumn[] TwitchMonitorings =
@@ -110,6 +115,11 @@ namespace SophBot.bot.database
                 SDBColumn.UserID,
                 SDBColumn.Description,
                 SDBColumn.DateTime
+            };
+            public static SDBColumn[] Wiki = {
+                SDBColumn.Name,
+                SDBColumn.Number,
+                SDBColumn.Description,
             };
         }
         private static void checkColumns(SDBTable table, List<SDBValue> values)
@@ -151,18 +161,79 @@ namespace SophBot.bot.database
                         if (!ColumnList.Warnings.Contains(column)) throw new Exception($"Table 'Warnings' does not contain column '{getColumnString(column)}'");
                     }
                     break;
+                case SDBTable.Wiki:
+                    foreach (SDBValue value in values)
+                    {
+                        SDBColumn column = value.Column;
+                        if (!ColumnList.Wiki.Contains(column)) throw new Exception($"Table 'Wiki' does not contain column '{getColumnString(column)}'");
+                    }
+                    break;
             }
         }
         #endregion
 
 
+        #region Initialization
         public static async ValueTask Initialize()
         {
             connString = $"Host={SConfig.Database.Host}:{SConfig.Database.Port};Database ={SConfig.Database.DB_Name};Username={SConfig.Database.Username};Password={SConfig.Database.Password};";
             _Connection = new NpgsqlConnection(connString);
             await _Connection.OpenAsync();
+            await createTables();
         }
+        private static async ValueTask createTables()
+        {
+            try
+            {
+                List<string> columnList = new();
+                NpgsqlCommand cmd = new();
+                cmd.Connection = _Connection;
 
+                foreach (SDBColumn column in ColumnList.ServerConfig) columnList.Add($"{getColumnString(column)} VARCHAR");
+                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {SConfig.Database.Schema}.{getTableString(SDBTable.ServerConfig)} ({string.Join(", ", columnList)})";
+                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                columnList.Clear();
+                await cmd.ExecuteNonQueryAsync();
+
+                foreach (SDBColumn column in ColumnList.UserProfiles) columnList.Add($"{getColumnString(column)} VARCHAR");
+                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {SConfig.Database.Schema}.{getTableString(SDBTable.UserProfiles)} ({string.Join(", ", columnList)})";
+                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                columnList.Clear();
+                await cmd.ExecuteNonQueryAsync();
+
+                foreach (SDBColumn column in ColumnList.Warnings) columnList.Add($"{getColumnString(column)} VARCHAR");
+                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {SConfig.Database.Schema}.{getTableString(SDBTable.Warnings)} ({string.Join(", ", columnList)})";
+                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                columnList.Clear();
+                await cmd.ExecuteNonQueryAsync();
+
+                foreach (SDBColumn column in ColumnList.CustomCommands) columnList.Add($"{getColumnString(column)} VARCHAR");
+                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {SConfig.Database.Schema}.{getTableString(SDBTable.CustomCommands)} ({string.Join(", ", columnList)})";
+                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                columnList.Clear();
+                await cmd.ExecuteNonQueryAsync();
+
+                foreach (SDBColumn column in ColumnList.TwitchMonitorings) columnList.Add($"{getColumnString(column)} VARCHAR");
+                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {SConfig.Database.Schema}.{getTableString(SDBTable.TwitchMonitorings)} ({string.Join(", ", columnList)})";
+                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                columnList.Clear();
+                await cmd.ExecuteNonQueryAsync();
+
+                foreach (SDBColumn column in ColumnList.Wiki) columnList.Add($"{getColumnString(column)} VARCHAR");
+                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {SConfig.Database.Schema}.{getTableString(SDBTable.Wiki)} ({string.Join(", ", columnList)})";
+                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                columnList.Clear();
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex)
+            {
+                SLogger.Log("Couldn't create DB_Tables!", "SDBEngine.cs -> createTables()", ex, LogType.Critical);
+            }
+
+        }
+        #endregion
+
+        #region DB Functions
         public static async ValueTask InsertAsync(List<SDBValue> values, SDBTable table)
         {
             try
@@ -184,9 +255,10 @@ namespace SophBot.bot.database
                     cmd.Parameters.AddWithValue(paramName, value.Value);
                 }
 
-                cmd.CommandText = $"INSERT INTO data.{getTableString(table)} ({string.Join(", ", columnList)}) VALUES ({string.Join(", ", valueList)})";
+                cmd.CommandText = $"INSERT INTO {SConfig.Database.Schema}.{getTableString(table)} ({string.Join(", ", columnList)}) VALUES ({string.Join(", ", valueList)})";
                 cmd.Connection = _Connection;
 
+                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
                 await cmd.ExecuteNonQueryAsync();
             }
             catch (Exception ex)
@@ -226,9 +298,10 @@ namespace SophBot.bot.database
                     cmd.Parameters.AddWithValue(paramName, condition.Value);
                 }
 
-                cmd.CommandText = $"UPDATE data.{getTableString(table)} SET {string.Join(", ", valuesList)} WHERE {string.Join(" AND ", conditionsList)}";
+                cmd.CommandText = $"UPDATE {SConfig.Database.Schema}.{getTableString(table)} SET {string.Join(", ", valuesList)} WHERE {string.Join(" AND ", conditionsList)}";
                 cmd.Connection = _Connection;
 
+                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
                 await cmd.ExecuteNonQueryAsync();
             }
             catch (Exception ex)
@@ -243,7 +316,7 @@ namespace SophBot.bot.database
             {
                 checkColumns(table, conditions);
 
-                NpgsqlCommand cmd = new ();
+                NpgsqlCommand cmd = new();
 
                 List<string> conditionsList = new();
                 for (int i = 0; i < conditions.Count; i++)
@@ -256,9 +329,10 @@ namespace SophBot.bot.database
                     cmd.Parameters.AddWithValue(paramName, condition.Value);
                 }
 
-                cmd.CommandText = $"DELETE FROM data.{getTableString(table)} WHERE {string.Join(" AND ", conditionsList)}";
+                cmd.CommandText = $"DELETE FROM {SConfig.Database.Schema}.{getTableString(table)} WHERE {string.Join(" AND ", conditionsList)}";
                 cmd.Connection = _Connection;
-                
+
+                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
                 await cmd.ExecuteNonQueryAsync();
             }
             catch (Exception ex)
@@ -276,20 +350,20 @@ namespace SophBot.bot.database
                 NpgsqlCommand cmd = new();
                 List<string> result = new();
 
-                string command = $"SELECT {getColumnString(column)} FROM data.{getTableString(table)} ";
+                string command = $"SELECT {getColumnString(column)} FROM {SConfig.Database.Schema}.{getTableString(table)} ";
 
                 if (conditions != null)
                 {
                     List<string> conditionsList = new();
                     for (int i = 0; i < conditions.Count; i++)
-                {
-                    var condition = conditions[i];
-                    string columnName = getColumnString(condition.Column);
-                    string paramName = $"@c{i}";
+                    {
+                        var condition = conditions[i];
+                        string columnName = getColumnString(condition.Column);
+                        string paramName = $"@c{i}";
 
-                    conditionsList.Add($"{columnName} = {paramName}");
-                    cmd.Parameters.AddWithValue(paramName, condition.Value);
-                }
+                        conditionsList.Add($"{columnName} = {paramName}");
+                        cmd.Parameters.AddWithValue(paramName, condition.Value);
+                    }
                     command += $"WHERE {string.Join(" AND ", conditionsList)} ";
                 }
 
@@ -297,9 +371,19 @@ namespace SophBot.bot.database
 
                 cmd.CommandText = command;
                 cmd.Connection = _Connection;
+
+
+                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
                 var reader = await cmd.ExecuteReaderAsync();
 
-                while (await reader.ReadAsync()) result.Add(reader.GetString(0));
+                while (await reader.ReadAsync())
+                {
+                    result.Add(reader.GetString(0));
+                    SLogger.Log($"Selected result {reader.GetString(0)}", type: LogType.Debug); 
+                }
+                SLogger.Log("Reading Complete", type: LogType.Debug);
+                await _Connection.CloseAsync();
+                await _Connection.OpenAsync();
                 return result;
             }
             catch (Exception ex)
@@ -308,5 +392,6 @@ namespace SophBot.bot.database
                 throw new Exception("Database Error - Check Console for more information!");
             }
         }
+        #endregion
     }
 }

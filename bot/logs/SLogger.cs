@@ -1,3 +1,5 @@
+using SophBot.bot.conf;
+
 namespace SophBot.bot.logs
 {
     public enum LogType
@@ -13,6 +15,8 @@ namespace SophBot.bot.logs
     {
         public static void Log(string message, string location = "", Exception? exception = null, LogType type = LogType.Debug)
         {
+            if (type < SConfig.LogLevel) return;
+
             string dateTime = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
             switch (type)
             {

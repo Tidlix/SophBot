@@ -11,8 +11,9 @@ namespace SophBot.bot.database
         TwitchChannel,
         MemberRoleID,
         MentionRoleID,
-        Command,
+        Name,
         Description,
+        Number,
         DateTime
     }
 

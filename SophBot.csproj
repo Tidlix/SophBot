@@ -8,9 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02515" />
-    <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02515" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02515" />
+    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02517" />
+    <PackageReference Include="DSharpPlus.Analyzers" Version="5.0.0-nightly-02517" />
+    <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02517" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02517" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
     <PackageReference Include="TwitchLib.Api" Version="3.10.0-preview-e47ba7f" />
   </ItemGroup>

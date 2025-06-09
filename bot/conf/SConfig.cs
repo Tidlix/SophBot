@@ -5,6 +5,7 @@ namespace SophBot.bot.conf
 {
     public class SConfig
     {
+        public static LogType LogLevel;
         public static class Discord
         {
 #pragma warning disable CS8618
@@ -16,6 +17,7 @@ namespace SophBot.bot.conf
             public static string Host;
             public static string Port;
             public static string DB_Name;
+            public static string Schema;
             public static string Username;
             public static string Password;
         }
@@ -36,25 +38,43 @@ namespace SophBot.bot.conf
             try
             {
                 StreamReader sr = new StreamReader($"{AppDomain.CurrentDomain.BaseDirectory}/config/discord.conf");
+                SLogger.Log($"Reading file: discord.conf", type: LogType.Debug);
                 string confFile = await sr.ReadToEndAsync();
+                SLogger.Log(confFile, type: LogType.Debug);
+
                 Discord.Token = getValue(confFile, "Token");
 
+
                 sr = new StreamReader($"{AppDomain.CurrentDomain.BaseDirectory}/config/database.conf");
+                SLogger.Log($"Reading file: database.conf", type: LogType.Debug);
                 confFile = await sr.ReadToEndAsync();
+                SLogger.Log(confFile, type: LogType.Debug);
+
                 Database.Host = getValue(confFile, "Host");
                 Database.Port = getValue(confFile, "Port");
                 Database.DB_Name = getValue(confFile, "Database");
+                Database.Schema = getValue(confFile, "Schema");
                 Database.Username = getValue(confFile, "Username");
                 Database.Password = getValue(confFile, "Password");
 
+
                 sr = new StreamReader($"{AppDomain.CurrentDomain.BaseDirectory}/config/twitch.conf");
+                SLogger.Log($"Reading file: twitch.conf", type: LogType.Debug);
                 confFile = await sr.ReadToEndAsync();
+                SLogger.Log(confFile, type: LogType.Debug);
+
                 Twitch.ClientId = getValue(confFile, "ID");
                 Twitch.ClientSecret = getValue(confFile, "Secret");
 
+
                 sr = new StreamReader($"{AppDomain.CurrentDomain.BaseDirectory}/config/ai.conf");
+                SLogger.Log($"Reading file: ai.conf", type: LogType.Debug);
                 confFile = await sr.ReadToEndAsync();
+                SLogger.Log(confFile, type: LogType.Debug);
+
                 AI.ApiKey = getValue(confFile, "API_Key");
+
+
             }
             catch (Exception ex)
             {

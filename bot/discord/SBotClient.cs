@@ -27,6 +27,7 @@ namespace SophBot.bot.discord
 
                 builder.ConfigureEventHandlers(events =>
                 {
+                    events.AddEventHandlers<WelcomeEvents>();
                     events.AddEventHandlers<ErrorEvents>();
                     events.AddEventHandlers<ClientEvents>();
                     events.AddEventHandlers<WikiEvents>();

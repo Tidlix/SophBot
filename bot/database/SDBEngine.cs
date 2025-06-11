@@ -234,7 +234,7 @@ namespace SophBot.bot.database
         #endregion
 
         #region DB Functions
-        public static async ValueTask InsertAsync(List<SDBValue> values, SDBTable table)
+        public static async ValueTask InsertAsync(List<SDBValue> values, SDBTable table, bool unique = true)
         {
             try
             {
@@ -243,6 +243,7 @@ namespace SophBot.bot.database
                 NpgsqlCommand cmd = new();
                 List<string> columnList = new();
                 List<string> valueList = new();
+                List<string> conditionsList = new();
 
                 for (int i = 0; i < values.Count; i++)
                 {
@@ -253,13 +254,24 @@ namespace SophBot.bot.database
                     columnList.Add(columnName);
                     valueList.Add(paramName);
                     cmd.Parameters.AddWithValue(paramName, value.Value);
+
+                    if (unique) conditionsList.Add($"{columnName} = {paramName}");
                 }
 
-                cmd.CommandText = $"INSERT INTO {SConfig.Database.Schema}.{getTableString(table)} ({string.Join(", ", columnList)}) VALUES ({string.Join(", ", valueList)})";
+                cmd.CommandText = $"INSERT INTO {SConfig.Database.Schema}.{getTableString(table)} ({string.Join(", ", columnList)}) SELECT {string.Join(", ", valueList)}";
                 cmd.Connection = _Connection;
 
+                if (unique) cmd.CommandText += $" WHERE NOT EXISTS (SELECT 1 FROM {SConfig.Database.Schema}.{getTableString(table)} WHERE {string.Join(" AND ", conditionsList)})";
+
+
                 SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
-                await cmd.ExecuteNonQueryAsync();
+                var result = await cmd.ExecuteNonQueryAsync(); //Given Exeption: 42601: INSERT has more target columns than expressions
+
+                
+                if (result == 0)
+                {
+                    SLogger.Log("Couldn't insert data - Data already exists like that in db", type: LogType.Warning);
+                }
             }
             catch (Exception ex)
             {

@@ -7,7 +7,8 @@ using SophBot.bot.logs;
 
 namespace SophBot.bot.discord.events
 {
-    public class WikiEvents : IEventHandler<ComponentInteractionCreatedEventArgs>
+    public class WikiEvents :
+        IEventHandler<ComponentInteractionCreatedEventArgs>
     {
         public async Task HandleEventAsync(DiscordClient s, ComponentInteractionCreatedEventArgs e)
         {

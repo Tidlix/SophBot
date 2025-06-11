@@ -11,11 +11,6 @@ namespace SophBot
         public static async Task Main(string[] args)
         {
             SConfig.LogLevel = LogType.Message;
-            
-            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
-            {
-                SLogger.Log($"Unhandled Exception => {e.ExceptionObject.ToString()}", type: LogType.Error);
-            };
 
             
             await SConfig.ReadConfigAsync();

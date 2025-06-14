@@ -1,6 +1,7 @@
 using DSharpPlus.Entities;
 using SophBot.bot.database;
 using SophBot.bot.logs;
+using Microsoft.Extensions.Logging; 
 
 namespace SophBot.bot.discord.features.wiki
 {
@@ -16,14 +17,14 @@ namespace SophBot.bot.discord.features.wiki
             List<DiscordSelectComponentOption> options = new();
             foreach (var article in articleList)
             {
-                SLogger.Log("Got Wiki Article " + article, type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, "Got Wiki Article " + article, "WikiEngine.cs");
 
                 options.Add(new DiscordSelectComponentOption(article, article));
             }
 
             return options;
         }
-        private static async ValueTask<string> getSite(string article, int site)
+        public static async ValueTask<string> getSite(string article, int site)
         {
             List<SDBValue> conditions = new();
             conditions.Add(new SDBValue(SDBColumn.Name, article));
@@ -31,9 +32,25 @@ namespace SophBot.bot.discord.features.wiki
 
             var result = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Description, conditions, 1);
 
-            SLogger.Log("Got Wiki Site " + result.First(), type: LogType.Debug);
+            SLogger.Log(LogLevel.Debug, "Got Wiki Site " + result.First(), "WikiEngine.cs");
 
             return result.First();
+        }
+        public static async ValueTask setSite(string article, int site, string input)
+        {
+            List<SDBValue> values = new();
+            values.Add(new SDBValue(SDBColumn.Name, article));
+            values.Add(new SDBValue(SDBColumn.Number, site.ToString()));
+
+            try
+            {
+                await SDBEngine.DeleteAsync(SDBTable.Wiki, values);    
+            } catch {}
+            
+
+            values.Add(new SDBValue(SDBColumn.Description, input));
+
+            await SDBEngine.InsertAsync(values, SDBTable.Wiki);
         }
         private static async ValueTask<int> countSites(string article)
         {
@@ -41,7 +58,7 @@ namespace SophBot.bot.discord.features.wiki
             conditions.Add(new SDBValue(SDBColumn.Name, article));
 
             var sites = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Number, conditions);
-            SLogger.Log($"Found {sites.Count} sites for wiki article {article}", type: LogType.Debug);
+            SLogger.Log(LogLevel.Debug, $"Found {sites.Count} sites for wiki article {article}", "WikiEngine.cs");
             return sites.Count;
         }
 

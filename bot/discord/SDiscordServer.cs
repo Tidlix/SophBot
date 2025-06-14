@@ -1,4 +1,5 @@
 using DSharpPlus.Entities;
+using Microsoft.Extensions.Logging;
 using SophBot.bot.database;
 using SophBot.bot.logs;
 
@@ -41,7 +42,7 @@ namespace SophBot.bot.discord
             }
             catch (Exception ex)
             {
-                SLogger.Log("Couldn't get Server Channel", "SDiscordServer.cs -> getChannelAsync()", ex, LogType.Error);
+                SLogger.Log(LogLevel.Error, "Couldn't get Server Channel", "SDiscordServer.cs", ex);
                 throw new Exception(ex.Message);
             }
         }

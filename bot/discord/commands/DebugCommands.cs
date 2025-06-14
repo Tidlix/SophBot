@@ -5,12 +5,13 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Commands.Trees.Metadata;
 using DSharpPlus.Entities;
+using Microsoft.Extensions.Logging;
 using SophBot.bot.conf;
 using SophBot.bot.logs;
 
 namespace SophBot.bot.discord.commands
 {
-    [Command("debug"), RequireApplicationOwner,  RequireGuild]
+    [Command("debug"), RequireApplicationOwner, AllowedProcessors<TextCommandProcessor>, RequireGuild]
     public class DebugCommands
     {
         [Command("serverconfig")]
@@ -36,15 +37,46 @@ namespace SophBot.bot.discord.commands
                 {
                     await ctx.RespondAsync("Failed to modify Config: " + ex.Message);
                 }
-                
-            }    
+
+            }
         }
 
         [Command("loglevel"), Description("Change the current LogLevel")]
-        public async ValueTask changeLogLevel(CommandContext ctx, LogType LogLevel)
+        public async ValueTask changeLogLevel(CommandContext ctx, LogLevel? logLevel = null)
         {
-            SConfig.LogLevel = LogLevel;
-            await ctx.RespondAsync($"LogLevel changed to `{LogLevel}`");
+            if (logLevel.Equals(null))
+            {
+                string response = "following loglevels are available: \n```";
+
+                foreach (var value in Enum.GetValues(typeof(LogLevel)))
+                {
+                    response += $"\n{(int)value} - {value}";
+                }
+                response += "\n```";
+
+                await ctx.RespondAsync(response);
+                return;
+            }
+
+            SConfig.LogLevel = (LogLevel)logLevel!;
+            await ctx.RespondAsync($"LogLevel changed to `{logLevel}`");
+        }
+
+        [Command("insert_wiki")]
+        public async ValueTask insertWiki(CommandContext ctx, string article, int site)
+        {
+            await ctx.DeferResponseAsync();
+
+            List<DiscordComponent> actionRow = new();
+            actionRow.Add(new DiscordButtonComponent(DiscordButtonStyle.Secondary, $"modify-wiki_article={article};site={site};", "Press me!"));
+
+            var msg = new DiscordMessageBuilder()
+                .WithContent("`DEBUG` Press the button to insert to wiki")
+                .AddActionRowComponent(new DiscordActionRowComponent(actionRow));
+
+            await ctx.EditResponseAsync(msg);
+
+            string customId = $"modify-wiki_article={article};site={site};";
         }
     }
 }

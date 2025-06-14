@@ -5,8 +5,8 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.InteractionNamingPolicies;
 using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
+using Microsoft.Extensions.Logging;
 using SophBot.bot.conf;
-using SophBot.bot.discord.commands;
 using SophBot.bot.discord.events;
 using SophBot.bot.logs;
 
@@ -24,13 +24,20 @@ namespace SophBot.bot.discord
             {
                 DiscordClientBuilder builder = DiscordClientBuilder.CreateDefault(SConfig.Discord.Token, DiscordIntents.All);
                 builder.DisableDefaultLogging();
+                builder.ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddProvider(new SLogger.LoggerProvider());
+                    logging.SetMinimumLevel(LogLevel.Warning);
+                });
 
                 builder.ConfigureEventHandlers(events =>
                 {
-                    events.AddEventHandlers<WelcomeEvents>();
                     events.AddEventHandlers<ErrorEvents>();
                     events.AddEventHandlers<ClientEvents>();
+                    events.AddEventHandlers<WelcomeEvents>();
                     events.AddEventHandlers<WikiEvents>();
+                    events.AddEventHandlers<RREvents>();
                 });
 
                 builder.ConfigureExtraFeatures(features =>
@@ -66,7 +73,7 @@ namespace SophBot.bot.discord
             }
             catch (Exception ex)
             {
-                SLogger.Log("Couldn't create discord client", "SBotClient.cs -> CreateClientAsync()", ex, LogType.Critical);
+                SLogger.Log(LogLevel.Critical, "Couldn't create discord client", "SBotClient.cs", exception: ex);
             }
             
         }

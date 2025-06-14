@@ -1,54 +1,65 @@
+using DSharpPlus;
+using Microsoft.Extensions.Logging;
 using SophBot.bot.conf;
-
+using System;
 namespace SophBot.bot.logs
 {
-    public enum LogType
+    public static class SLogger
     {
-        Debug,
-        Message,
-        Warning,
-        Error,
-        Critical
-    }
-
-    public class SLogger
-    {
-        public static void Log(string message, string location = "", Exception? exception = null, LogType type = LogType.Debug)
+        public static void Log(LogLevel level, string message, string source, Exception exception = null!)
         {
-            if (type < SConfig.LogLevel) return;
+            if (level < SConfig.LogLevel) return;
 
-            string dateTime = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
-            switch (type)
-            {
-                case LogType.Debug:
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.Write($"[ Debug    - {dateTime} ] ");
-                    break;
-                case LogType.Message:
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                    Console.Write($"[ Message  - {dateTime} ] ");
-                    break;
-                case LogType.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.Write($"[ Warning  - {dateTime} ] ");
-                    break;
-                case LogType.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write($"[ Error    - {dateTime} ] ");
-                    break;
-                case LogType.Critical:
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                    Console.Write($"[ Critical - {dateTime} ] ");
-                    break;
-            }
-            if (location != "") Console.Write($"at {location}: ");
+            var time = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
+
+            Console.ForegroundColor = GetColor(level);
+            Console.Write($"[{time} - {level}] ");
             Console.ResetColor();
-
-            Console.WriteLine(message);
+            Console.WriteLine($"{source} -> {message}");
 
             if (exception != null)
+                Console.WriteLine(exception);
+        }
+
+        private static ConsoleColor GetColor(LogLevel level) => level switch
+        {
+            LogLevel.Critical => ConsoleColor.DarkRed,
+            LogLevel.Error => ConsoleColor.Red,
+            LogLevel.Warning => ConsoleColor.Yellow,
+            LogLevel.Information => ConsoleColor.Blue,
+            LogLevel.Debug => ConsoleColor.Gray,
+            LogLevel.Trace => ConsoleColor.DarkGray,
+            _ => ConsoleColor.White,
+        };
+
+
+        public class LoggerProvider : ILoggerProvider
+        {
+            #pragma warning disable CS8603, CS8633, CS8767
+            public ILogger CreateLogger(string categoryName)
             {
-                Console.WriteLine($"Given Exeption: {exception.Message}");
+                return new StaticLogger(categoryName);
+            }
+
+            public void Dispose() { }
+
+            private class StaticLogger : ILogger
+            {
+                private readonly string _name;
+
+                public StaticLogger(string name)
+                {
+                    _name = name;
+                }
+
+                public IDisposable BeginScope<TState>(TState state) => null;
+
+                public bool IsEnabled(LogLevel logLevel) => true;
+
+                public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+                {
+                    SLogger.Log(logLevel, formatter(state, exception), _name, exception);
+                }
             }
         }
     }

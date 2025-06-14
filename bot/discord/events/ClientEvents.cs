@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using Microsoft.Extensions.Logging;
 using SophBot.bot.logs;
 
 namespace SophBot.bot.discord.events
@@ -9,7 +10,7 @@ namespace SophBot.bot.discord.events
     {
         public Task HandleEventAsync(DiscordClient s, ClientStartedEventArgs e)
         {
-            SLogger.Log("Bot Started and Ready!", type: LogType.Message);
+            SLogger.Log(LogLevel.Information, "Bot Started and Ready!", "ClientEvents.cs");
             return Task.CompletedTask;
         }
     }

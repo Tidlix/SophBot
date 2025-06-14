@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using SophBot.bot.conf;
 using SophBot.bot.logs;
@@ -191,43 +192,43 @@ namespace SophBot.bot.database
 
                 foreach (SDBColumn column in ColumnList.ServerConfig) columnList.Add($"{getColumnString(column)} VARCHAR");
                 cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {SConfig.Database.Schema}.{getTableString(SDBTable.ServerConfig)} ({string.Join(", ", columnList)})";
-                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Sending db_cmd {cmd.CommandText}", "SDBEngine.cs");
                 columnList.Clear();
                 await cmd.ExecuteNonQueryAsync();
 
                 foreach (SDBColumn column in ColumnList.UserProfiles) columnList.Add($"{getColumnString(column)} VARCHAR");
                 cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {SConfig.Database.Schema}.{getTableString(SDBTable.UserProfiles)} ({string.Join(", ", columnList)})";
-                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Sending db_cmd {cmd.CommandText}", "SBDEngine.cs");
                 columnList.Clear();
                 await cmd.ExecuteNonQueryAsync();
 
                 foreach (SDBColumn column in ColumnList.Warnings) columnList.Add($"{getColumnString(column)} VARCHAR");
                 cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {SConfig.Database.Schema}.{getTableString(SDBTable.Warnings)} ({string.Join(", ", columnList)})";
-                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Sending db_cmd {cmd.CommandText}", "SDBEngine.cs");
                 columnList.Clear();
                 await cmd.ExecuteNonQueryAsync();
 
                 foreach (SDBColumn column in ColumnList.CustomCommands) columnList.Add($"{getColumnString(column)} VARCHAR");
                 cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {SConfig.Database.Schema}.{getTableString(SDBTable.CustomCommands)} ({string.Join(", ", columnList)})";
-                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Sending db_cmd {cmd.CommandText}", "SDBEngine.cs");
                 columnList.Clear();
                 await cmd.ExecuteNonQueryAsync();
 
                 foreach (SDBColumn column in ColumnList.TwitchMonitorings) columnList.Add($"{getColumnString(column)} VARCHAR");
                 cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {SConfig.Database.Schema}.{getTableString(SDBTable.TwitchMonitorings)} ({string.Join(", ", columnList)})";
-                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Sending db_cmd {cmd.CommandText}", "SDBEngine.cs");
                 columnList.Clear();
                 await cmd.ExecuteNonQueryAsync();
 
                 foreach (SDBColumn column in ColumnList.Wiki) columnList.Add($"{getColumnString(column)} VARCHAR");
                 cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {SConfig.Database.Schema}.{getTableString(SDBTable.Wiki)} ({string.Join(", ", columnList)})";
-                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Sending db_cmd {cmd.CommandText}", "SDBEngine.cs");
                 columnList.Clear();
                 await cmd.ExecuteNonQueryAsync();
             }
             catch (Exception ex)
             {
-                SLogger.Log("Couldn't create DB_Tables!", "SDBEngine.cs -> createTables()", ex, LogType.Critical);
+                SLogger.Log(LogLevel.Critical, "Couldn't create DB_Tables!", "SDBEngine.cs", ex);
             }
 
         }
@@ -264,18 +265,18 @@ namespace SophBot.bot.database
                 if (unique) cmd.CommandText += $" WHERE NOT EXISTS (SELECT 1 FROM {SConfig.Database.Schema}.{getTableString(table)} WHERE {string.Join(" AND ", conditionsList)})";
 
 
-                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Sending db_cmd {cmd.CommandText}", "SDBEngine.cs");
                 var result = await cmd.ExecuteNonQueryAsync(); //Given Exeption: 42601: INSERT has more target columns than expressions
 
                 
                 if (result == 0)
                 {
-                    SLogger.Log("Couldn't insert data - Data already exists like that in db", type: LogType.Warning);
+                    SLogger.Log(LogLevel.Warning, "Couldn't insert data - Data already exists like that in db", "SDBEngine.cs");
                 }
             }
             catch (Exception ex)
             {
-                SLogger.Log("Couldn't insert value in database", "SDBEngine.cs -> InsertAsync()", ex, LogType.Error);
+                SLogger.Log(LogLevel.Error, "Couldn't insert value in database", "SDBEngine.cs", ex);
                 throw new Exception("Database Error - Check Console for more information!");
             }
         }
@@ -313,12 +314,12 @@ namespace SophBot.bot.database
                 cmd.CommandText = $"UPDATE {SConfig.Database.Schema}.{getTableString(table)} SET {string.Join(", ", valuesList)} WHERE {string.Join(" AND ", conditionsList)}";
                 cmd.Connection = _Connection;
 
-                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Sending db_cmd {cmd.CommandText}", "SDBEngine.cs");
                 await cmd.ExecuteNonQueryAsync();
             }
             catch (Exception ex)
             {
-                SLogger.Log("Couldn't modify value in database", "SDBEngine.cs -> ModifyAsync()", ex, LogType.Error);
+                SLogger.Log(LogLevel.Error, "Couldn't modify value in database", "SDBEngine.cs", ex);
                 throw new Exception("Database Error - Check Console for more information!");
             }
         }
@@ -344,12 +345,12 @@ namespace SophBot.bot.database
                 cmd.CommandText = $"DELETE FROM {SConfig.Database.Schema}.{getTableString(table)} WHERE {string.Join(" AND ", conditionsList)}";
                 cmd.Connection = _Connection;
 
-                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Sending db_cmd {cmd.CommandText}", "SDBEngine.cs");
                 await cmd.ExecuteNonQueryAsync();
             }
             catch (Exception ex)
             {
-                SLogger.Log("Couldn't delete value in database", "SDBEngine.cs -> DeleteAsync()", ex, LogType.Error);
+                SLogger.Log(LogLevel.Error, "Couldn't delete value in database", "SDBEngine.cs", ex);
                 throw new Exception("Database Error - Check Console for more information!");
             }
         }
@@ -385,22 +386,22 @@ namespace SophBot.bot.database
                 cmd.Connection = _Connection;
 
 
-                SLogger.Log($"Sending db_cmd {cmd.CommandText}", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Sending db_cmd {cmd.CommandText}", "SDBEngine.cs");
                 var reader = await cmd.ExecuteReaderAsync();
 
                 while (await reader.ReadAsync())
                 {
                     result.Add(reader.GetString(0));
-                    SLogger.Log($"Selected result {reader.GetString(0)}", type: LogType.Debug); 
+                    SLogger.Log(LogLevel.Debug, $"Selected result {reader.GetString(0)}", "SDBEngine.cs"); 
                 }
-                SLogger.Log("Reading Complete", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, "Reading Complete", "SDBEngine.cs");
                 await _Connection.CloseAsync();
                 await _Connection.OpenAsync();
                 return result;
             }
             catch (Exception ex)
             {
-                SLogger.Log("Couldn't select value in database", "SDBEngine.cs -> SelectAsync()", ex, LogType.Error);
+                SLogger.Log(LogLevel.Error, "Couldn't select value in database", "SDBEngine.cs", ex);
                 throw new Exception("Database Error - Check Console for more information!");
             }
         }

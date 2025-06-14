@@ -1,11 +1,12 @@
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 using SophBot.bot.logs;
 
 namespace SophBot.bot.conf
 {
     public class SConfig
     {
-        public static LogType LogLevel;
+        public static LogLevel LogLevel;
         public static class Discord
         {
 #pragma warning disable CS8618
@@ -38,17 +39,17 @@ namespace SophBot.bot.conf
             try
             {
                 StreamReader sr = new StreamReader($"{AppDomain.CurrentDomain.BaseDirectory}/config/discord.conf");
-                SLogger.Log($"Reading file: discord.conf", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Reading file: discord.conf", "SConfig.cs");
                 string confFile = await sr.ReadToEndAsync();
-                SLogger.Log(confFile, type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, confFile, "discord.conf");
 
                 Discord.Token = getValue(confFile, "Token");
 
 
                 sr = new StreamReader($"{AppDomain.CurrentDomain.BaseDirectory}/config/database.conf");
-                SLogger.Log($"Reading file: database.conf", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Reading file: database.conf", "SConfig.cs");
                 confFile = await sr.ReadToEndAsync();
-                SLogger.Log(confFile, type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, confFile, "database.conf");
 
                 Database.Host = getValue(confFile, "Host");
                 Database.Port = getValue(confFile, "Port");
@@ -59,18 +60,18 @@ namespace SophBot.bot.conf
 
 
                 sr = new StreamReader($"{AppDomain.CurrentDomain.BaseDirectory}/config/twitch.conf");
-                SLogger.Log($"Reading file: twitch.conf", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Reading file: twitch.conf", "SConfig.cs");
                 confFile = await sr.ReadToEndAsync();
-                SLogger.Log(confFile, type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, confFile, "twitch.conf");
 
                 Twitch.ClientId = getValue(confFile, "ID");
                 Twitch.ClientSecret = getValue(confFile, "Secret");
 
 
                 sr = new StreamReader($"{AppDomain.CurrentDomain.BaseDirectory}/config/ai.conf");
-                SLogger.Log($"Reading file: ai.conf", type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, $"Reading file: ai.conf", "SConfig.cs");
                 confFile = await sr.ReadToEndAsync();
-                SLogger.Log(confFile, type: LogType.Debug);
+                SLogger.Log(LogLevel.Debug, confFile, "ai.conf");
 
                 AI.ApiKey = getValue(confFile, "API_Key");
 
@@ -78,7 +79,7 @@ namespace SophBot.bot.conf
             }
             catch (Exception ex)
             {
-                SLogger.Log("Failed to read config files", "SConfig.cs -> ReadConfigAsnyc()", ex, LogType.Critical);
+                SLogger.Log(LogLevel.Critical, "Failed to read config files", "SConfig.cs", ex);
             }
         }
 

@@ -2,23 +2,23 @@
 using SophBot.bot.logs;
 using SophBot.bot.discord;
 using SophBot.bot.database;
+using Microsoft.Extensions.Logging;
 
 namespace SophBot
 {
     public class Program
     {
-        
         public static async Task Main(string[] args)
         {
-            SConfig.LogLevel = LogType.Message;
 
-            
+            SConfig.LogLevel = LogLevel.Information;
+
             await SConfig.ReadConfigAsync();
             await SDBEngine.Initialize();
             await SBotClient.CreateClientAsync();
 
 
-            while (true);
+            while (true) ;
         }   
     }
 }

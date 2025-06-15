@@ -252,6 +252,10 @@ namespace SophBot.bot.database
                     string columnName = getColumnString(value.Column);
                     string paramName = $"@v{i}";
 
+
+                    SLogger.Log(LogLevel.Debug, $"Added Parameter @v{i} = '{value.Value}'", "SDBEngine.cs");
+
+
                     columnList.Add(columnName);
                     valueList.Add(paramName);
                     cmd.Parameters.AddWithValue(paramName, value.Value);
@@ -266,7 +270,7 @@ namespace SophBot.bot.database
 
 
                 SLogger.Log(LogLevel.Debug, $"Sending db_cmd {cmd.CommandText}", "SDBEngine.cs");
-                var result = await cmd.ExecuteNonQueryAsync(); //Given Exeption: 42601: INSERT has more target columns than expressions
+                var result = await cmd.ExecuteNonQueryAsync();
 
                 
                 if (result == 0)
@@ -296,6 +300,10 @@ namespace SophBot.bot.database
                     string columnName = getColumnString(value.Column);
                     string paramName = $"@v{i}";
 
+
+                    SLogger.Log(LogLevel.Debug, $"Added Parameter @v{i} = '{value.Value}'", "SDBEngine.cs");
+
+
                     valuesList.Add($"{columnName} = {paramName}");
                     cmd.Parameters.AddWithValue(paramName, value.Value);
                 }
@@ -306,6 +314,10 @@ namespace SophBot.bot.database
                     var condition = conditions[i];
                     string columnName = getColumnString(condition.Column);
                     string paramName = $"@c{i}";
+
+
+                    SLogger.Log(LogLevel.Debug, $"Added Parameter @c{i} = '{condition.Value}'", "SDBEngine.cs");
+
 
                     conditionsList.Add($"{columnName} = {paramName}");
                     cmd.Parameters.AddWithValue(paramName, condition.Value);
@@ -338,6 +350,10 @@ namespace SophBot.bot.database
                     string columnName = getColumnString(condition.Column);
                     string paramName = $"@c{i}";
 
+
+                    SLogger.Log(LogLevel.Debug, $"Added Parameter @c{i} = '{condition.Value}'", "SDBEngine.cs");
+
+
                     conditionsList.Add($"{columnName} = {paramName}");
                     cmd.Parameters.AddWithValue(paramName, condition.Value);
                 }
@@ -354,7 +370,7 @@ namespace SophBot.bot.database
                 throw new Exception("Database Error - Check Console for more information!");
             }
         }
-        public static async ValueTask<List<string>> SelectAsync(SDBTable table, SDBColumn column, List<SDBValue>? conditions = null, int? limit = null)
+        public static async ValueTask<List<string>?> SelectAsync(SDBTable table, SDBColumn column, List<SDBValue>? conditions = null, int? limit = null)
         {
             try
             {
@@ -374,6 +390,8 @@ namespace SophBot.bot.database
                         string columnName = getColumnString(condition.Column);
                         string paramName = $"@c{i}";
 
+                        SLogger.Log(LogLevel.Debug, $"Added Parameter @c{i} = '{condition.Value}'", "SDBEngine.cs");
+
                         conditionsList.Add($"{columnName} = {paramName}");
                         cmd.Parameters.AddWithValue(paramName, condition.Value);
                     }
@@ -392,17 +410,19 @@ namespace SophBot.bot.database
                 while (await reader.ReadAsync())
                 {
                     result.Add(reader.GetString(0));
-                    SLogger.Log(LogLevel.Debug, $"Selected result {reader.GetString(0)}", "SDBEngine.cs"); 
+                    SLogger.Log(LogLevel.Debug, $"Selected result {reader.GetString(0)}", "SDBEngine.cs");
                 }
                 SLogger.Log(LogLevel.Debug, "Reading Complete", "SDBEngine.cs");
                 await _Connection.CloseAsync();
                 await _Connection.OpenAsync();
+
+                if (result.Count == 0) return null;
                 return result;
             }
             catch (Exception ex)
             {
                 SLogger.Log(LogLevel.Error, "Couldn't select value in database", "SDBEngine.cs", ex);
-                throw new Exception("Database Error - Check Console for more information!");
+                return null;
             }
         }
         #endregion

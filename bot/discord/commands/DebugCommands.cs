@@ -53,12 +53,15 @@ namespace SophBot.bot.discord.commands
                     response += $"\n{(int)value} - {value}";
                 }
                 response += "\n```";
+                response += $"\nCurrent Level: {SConfig.LogLevel}";
 
                 await ctx.RespondAsync(response);
                 return;
             }
 
-            SConfig.LogLevel = (LogLevel)logLevel!;
+            SConfig.LogLevel = (LogLevel)logLevel;
+
+            SLogger.Log(LogLevel.None, $"Loglevel changed to {logLevel}", "DebugCommands.cs");
             await ctx.RespondAsync($"LogLevel changed to `{logLevel}`");
         }
 

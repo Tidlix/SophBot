@@ -13,8 +13,8 @@ namespace SophBot.bot.discord.events
         {
             SDiscordServer server = new(e.Guild);
 
-            DiscordChannel welcomeChannel = await server.getChannelAsync(SDiscordChannelType.WelcomeChannel);
-            DiscordChannel ruleChannel = await server.getChannelAsync(SDiscordChannelType.RuleChannel);
+            DiscordChannel welcomeChannel = await server.getChannelAsync(SDiscordChannel.WelcomeChannel);
+            DiscordChannel ruleChannel = await server.getChannelAsync(SDiscordChannel.RuleChannel);
 
             DiscordComponent[] components = [
                 new DiscordSectionComponent(new DiscordTextDisplayComponent($"## Ein neues Mitglied - {e.Member.Mention}\n\n**Herzlich Willkommen auf diesem Server!**"), new DiscordThumbnailComponent(new DiscordUnfurledMediaItem(e.Member.AvatarUrl))),
@@ -33,7 +33,7 @@ namespace SophBot.bot.discord.events
         public async Task HandleEventAsync(DiscordClient s, GuildMemberRemovedEventArgs e)
         {
             SDiscordServer server = new(e.Guild);
-            DiscordChannel welcomeChannel = await server.getChannelAsync(SDiscordChannelType.WelcomeChannel);
+            DiscordChannel welcomeChannel = await server.getChannelAsync(SDiscordChannel.WelcomeChannel);
 
             DiscordComponent[] components = [
                 new DiscordSectionComponent(
@@ -51,7 +51,7 @@ namespace SophBot.bot.discord.events
         public async Task HandleEventAsync(DiscordClient s, GuildBanAddedEventArgs e)
         {
             SDiscordServer server = new(e.Guild);
-            DiscordChannel welcomeChannel = await server.getChannelAsync(SDiscordChannelType.WelcomeChannel);
+            DiscordChannel welcomeChannel = await server.getChannelAsync(SDiscordChannel.WelcomeChannel);
             DiscordBan ban = await e.Guild.GetBanAsync(e.Member);
 
             DiscordComponent[] components = [

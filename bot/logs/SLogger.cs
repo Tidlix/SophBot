@@ -1,5 +1,6 @@
 using DSharpPlus;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 using SophBot.bot.conf;
 using System;
 namespace SophBot.bot.logs
@@ -27,8 +28,9 @@ namespace SophBot.bot.logs
             LogLevel.Error => ConsoleColor.Red,
             LogLevel.Warning => ConsoleColor.Yellow,
             LogLevel.Information => ConsoleColor.Blue,
-            LogLevel.Debug => ConsoleColor.Gray,
-            LogLevel.Trace => ConsoleColor.DarkGray,
+            LogLevel.Debug => ConsoleColor.DarkGray,
+            LogLevel.Trace => ConsoleColor.Black,
+            LogLevel.None => ConsoleColor.Green,
             _ => ConsoleColor.White,
         };
 
@@ -58,6 +60,7 @@ namespace SophBot.bot.logs
 
                 public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
                 {
+                    if (SConfig.LogLevel >= LogLevel.Information && logLevel <= LogLevel.Information) return;
                     SLogger.Log(logLevel, formatter(state, exception), _name, exception);
                 }
             }

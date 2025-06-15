@@ -11,6 +11,8 @@ namespace SophBot.bot.discord.features.wiki
         {
             var articles = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Name);
 
+            if (articles == null) return new List<DiscordSelectComponentOption>() { new DiscordSelectComponentOption("404 Not Found", "") };
+
             List<string> articleList = new();
             foreach (var article in articles) if (!articleList.Contains(article)) articleList.Add(article);
 
@@ -32,9 +34,9 @@ namespace SophBot.bot.discord.features.wiki
 
             var result = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Description, conditions, 1);
 
-            SLogger.Log(LogLevel.Debug, "Got Wiki Site " + result.First(), "WikiEngine.cs");
+            SLogger.Log(LogLevel.Debug, "Got Wiki Site " + result!.First(), "WikiEngine.cs");
 
-            return result.First();
+            return result!.First();
         }
         public static async ValueTask setSite(string article, int site, string input)
         {
@@ -58,7 +60,7 @@ namespace SophBot.bot.discord.features.wiki
             conditions.Add(new SDBValue(SDBColumn.Name, article));
 
             var sites = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Number, conditions);
-            SLogger.Log(LogLevel.Debug, $"Found {sites.Count} sites for wiki article {article}", "WikiEngine.cs");
+            SLogger.Log(LogLevel.Debug, $"Found {sites!.Count} sites for wiki article {article}", "WikiEngine.cs");
             return sites.Count;
         }
 

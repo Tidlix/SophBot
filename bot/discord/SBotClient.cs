@@ -28,7 +28,7 @@ namespace SophBot.bot.discord
                 {
                     logging.ClearProviders();
                     logging.AddProvider(new SLogger.LoggerProvider());
-                    logging.SetMinimumLevel(LogLevel.Warning);
+                    logging.SetMinimumLevel(LogLevel.Trace);
                 });
 
                 builder.ConfigureEventHandlers(events =>
@@ -36,8 +36,10 @@ namespace SophBot.bot.discord
                     events.AddEventHandlers<ErrorEvents>();
                     events.AddEventHandlers<ClientEvents>();
                     events.AddEventHandlers<WelcomeEvents>();
+                    events.AddEventHandlers<CCEvents>();
                     events.AddEventHandlers<WikiEvents>();
                     events.AddEventHandlers<RREvents>();
+                    events.AddEventHandlers<RuleEvents>();
                 });
 
                 builder.ConfigureExtraFeatures(features =>

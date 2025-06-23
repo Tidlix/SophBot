@@ -81,5 +81,36 @@ namespace SophBot.bot.discord.commands
 
             string customId = $"modify-wiki_article={article};site={site};";
         }
+
+        [Command("createProfiles")]
+        public async ValueTask createProfiles(CommandContext ctx)
+        {
+            await ctx.DeferResponseAsync();
+            var members = ctx.Guild!.Members;
+
+            foreach (var member in members)
+            {
+                if (member.Value.IsBot) continue;
+                SDiscordUser user = new(member.Value);
+                await user.CreateProfileAsnyc();
+            }
+            await ctx.EditResponseAsync("Profile erstellt!");
+        }
+
+        [Command("currentTest")]
+        public async ValueTask currentTest(CommandContext ctx)
+        {
+            SDiscordServer server = new(ctx.Guild!);
+            var leaderboard = await server.getPointsLeaderboardAsync();
+
+            string output = "\n";
+            foreach (var current in leaderboard)
+            {
+                output += $"{current.Key} - {current.Value} \n";
+            }
+
+
+            await ctx.RespondAsync("Done!" + output);
+        }
     }
 }

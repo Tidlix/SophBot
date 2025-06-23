@@ -23,7 +23,7 @@ namespace SophBot.bot.discord.commands
             modal.AddTextInputComponent(new DiscordTextInputComponent(
                     style: DiscordTextInputStyle.Paragraph,
                     label: "Command-Ausgabe: ",
-                    value: await server.getCCOutputAsync(command),
+                    value: await server.Commands.getOutputAsync(command),
                     customId: $"ccSytem-Input_cmd={command};",
                     required: false,
                     max_length: 2000

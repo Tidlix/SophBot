@@ -3,7 +3,7 @@ using SophBot.bot.database;
 using SophBot.bot.logs;
 using Microsoft.Extensions.Logging; 
 
-namespace SophBot.bot.discord.features.wiki
+namespace SophBot.bot.discord.features
 {
     public class WikiEngine
     {
@@ -32,7 +32,7 @@ namespace SophBot.bot.discord.features.wiki
             conditions.Add(new SDBValue(SDBColumn.Name, article));
             conditions.Add(new SDBValue(SDBColumn.Number, site.ToString()));
 
-            var result = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Description, conditions, 1);
+            var result = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Description, conditions, limit: 1);
 
             SLogger.Log(LogLevel.Debug, "Got Wiki Site " + result!.First(), "WikiEngine.cs");
 

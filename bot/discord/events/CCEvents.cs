@@ -22,6 +22,7 @@ namespace SophBot.bot.discord.events
             try
             {
                 string cmd = (msg.Contains(' ')) ? msg.Substring(1, msg.IndexOf(' ')-1).ToLower() : msg.Substring(1);
+
                 SLogger.Log(LogLevel.Debug, $"Got cmd {cmd}", "CCEvents.cs");
                 string text = (msg.Contains(' ')) ? msg.Substring(msg.IndexOf(' ')+1) : "";
                 SLogger.Log(LogLevel.Debug, $"Got parameters {text}", "CCEvents.cs");
@@ -29,7 +30,7 @@ namespace SophBot.bot.discord.events
 
                 SDiscordServer server = new(e.Guild);
                 SLogger.Log(LogLevel.Debug, "Try to get command output", "CCEvents.cs");
-                string? output = await server.getCCOutputAsync(cmd);
+                string? output = await server.Commands.getOutputAsync(cmd);
 
 
                 if (output == "")
@@ -110,18 +111,18 @@ namespace SophBot.bot.discord.events
             SDiscordServer server = new(e.Interaction.Guild!);
             try
             {
-                if (!(await server.getCCOutputAsync(command) == ""))
+                if (!(await server.Commands.getOutputAsync(command) == ""))
                 {
                     if (value == "")
                     {
                         SLogger.Log(LogLevel.Debug, "Deleting command", "CCEvents.cs");
-                        await server.deleteCCAsync(command);
+                        await server.Commands.deleteAsync(command);
                         await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Command !{command} wurde gelöscht!"));
                     }
                     else
                     {
                         SLogger.Log(LogLevel.Debug, "Modifying command", "CCEvents.cs");
-                        await server.modifyCCAsync(command, value);
+                        await server.Commands.modifyAsync(command, value);
                         await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Command !{command} wurde bearbeitet!"));
                     }
                 }
@@ -130,7 +131,7 @@ namespace SophBot.bot.discord.events
                     if (value != "")
                     {
                         SLogger.Log(LogLevel.Debug, "Creating command", "CCEvents.cs");
-                        await server.createCCAsync(command, value);
+                        await server.Commands.createAsync(command, value);
                         await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Command !{command} wurde erstellt!"));
                     }
                     else await e.Interaction.DeleteOriginalResponseAsync();

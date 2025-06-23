@@ -9,7 +9,7 @@ namespace SophBot.bot.discord.commands.choiceProviders
         public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
         {
             SDiscordServer server = new(ctx.Guild!);
-            var commands = await server.getCCListAsync();
+            var commands = await server.Commands.getListAsync();
 
             if (commands == null) return new List<DiscordAutoCompleteChoice>() { new DiscordAutoCompleteChoice("404 Not Found", "") };
             

@@ -3,7 +3,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
-using SophBot.bot.discord.features.wiki;
+using SophBot.bot.discord.features;
 using SophBot.bot.logs;
 
 namespace SophBot.bot.discord.events

@@ -37,6 +37,7 @@ namespace SophBot.bot.discord
                     events.AddEventHandlers<ClientEvents>();
                     events.AddEventHandlers<WelcomeEvents>();
                     events.AddEventHandlers<CCEvents>();
+                    events.AddEventHandlers<ProfileEvents>();
                     events.AddEventHandlers<WikiEvents>();
                     events.AddEventHandlers<RREvents>();
                     events.AddEventHandlers<RuleEvents>();
@@ -54,7 +55,7 @@ namespace SophBot.bot.discord
 
                     TextCommandProcessor textCommandProcessor = new(new()
                     {
-                        PrefixResolver = new DefaultPrefixResolver(false, "!").ResolvePrefixAsync,
+                        PrefixResolver = new DefaultPrefixResolver(false, "?").ResolvePrefixAsync,
                     });
                     SlashCommandProcessor slashCommandProcessor = new(new SlashCommandConfiguration()
                     {
@@ -66,7 +67,7 @@ namespace SophBot.bot.discord
                 },
                 new CommandsConfiguration()
                 {
-                    UseDefaultCommandErrorHandler = true,
+                    UseDefaultCommandErrorHandler = false,
                 });
 
 

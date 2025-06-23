@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Entities;
-using SophBot.bot.discord.features.wiki;
+using SophBot.bot.discord.features;
 using SophBot.bot.logs;
 
 namespace SophBot.bot.discord.commands

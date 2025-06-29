@@ -15,7 +15,7 @@ namespace SophBot.bot.discord.commands
             SDiscordUser user = new(member);
 
             await user.AddWarningAsnyc(reason);
-            await ctx.EditResponseAsync($"Die Verwarnung für {member.Mention} wurde erstellt!\n > {reason}\n> {DateTime.Now.AddHours(2).ToString("dd.MM.yyyy - HH:mm")}");
+            await ctx.EditResponseAsync($"Die Verwarnung für {member.Mention} wurde erstellt!\n > {reason}\n> {DateTime.Now.ToString("dd.MM.yyyy - HH:mm")}");
         }
         [Command("Get"), Description("Erhalte eine Lister aller Verwarnungen eines Nutzers")]
         public async ValueTask getWarnings(CommandContext ctx, DiscordMember member)

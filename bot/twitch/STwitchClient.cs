@@ -30,7 +30,7 @@ namespace SophBot.bot.twitch
                 api.Settings.AccessToken = await getAccessTokenAsync();
 
                 SLogger.Log(LogLevel.Debug, "Create Monitor Service", "STwitchClient.cs");
-                Monitoring = new LiveStreamMonitorService(api, 60);
+                Monitoring = new LiveStreamMonitorService(api, 10);
                 Monitoring.OnStreamOnline += async (s, e) => await StreamOnline(s, e);
                 Monitoring.OnServiceStarted += (s, e) => SLogger.Log(LogLevel.Debug, "Service started!", "STwitchClient.cs");
                 Monitoring.OnChannelsSet += (s, e) => SLogger.Log(LogLevel.Debug, $"Set channels {string.Join(", ", e.Channels)}!", "STwitchClient.cs");
@@ -41,9 +41,9 @@ namespace SophBot.bot.twitch
                 if (channelList == null) throw new Exception("Couldn't find channels for twitch monitoring");
                 foreach (string channel in channelList)
                 {
-                    SLogger.Log(LogLevel.Debug, $"Found channel {channel},", "STwitchClient.cs");
+                    SLogger.Log(LogLevel.Debug, $"Found channel {channel}.", "STwitchClient.cs");
                     if (list.Contains(channel)) continue;
-                    SLogger.Log(LogLevel.Debug, $"Added channel {channel} to list,", "STwitchClient.cs");
+                    SLogger.Log(LogLevel.Debug, $"Added channel {channel} to list.", "STwitchClient.cs");
                     list.Add(channel);
                 }
 
@@ -78,7 +78,7 @@ namespace SophBot.bot.twitch
             SLogger.Log(LogLevel.Debug, "Sending AT Request", "STwitchClient.cs");
             var response = await client.PostAsync(destination, request);
             var responseString = await response.Content.ReadAsStringAsync();
-            SLogger.Log(LogLevel.Debug, "Got AT Response", "STwitchClient.cs");
+            SLogger.Log(LogLevel.Debug, $"Got AT Response: \n{responseString}", "STwitchClient.cs");
 
             var data = JsonConvert.DeserializeObject<tokenResponse>(responseString);
             if (data != null)
@@ -93,7 +93,8 @@ namespace SophBot.bot.twitch
         }
         internal class tokenResponse
         {
-            public string access_token = "errorTwitch";
+            #pragma warning disable CS0649
+            public string access_token;
         }
 
 
@@ -102,6 +103,7 @@ namespace SophBot.bot.twitch
             SLogger.Log(LogLevel.Debug, $"Stream {e.Channel} went online", "TwitchEvents.cs");
             List<SDBValue> conditions = new();
             conditions.Add(new(SDBColumn.Name, e.Channel));
+
             string twitchChannel = e.Channel;
             var time = e.Stream.StartedAt.AddHours(2); // 2 For German time
 
@@ -114,12 +116,15 @@ namespace SophBot.bot.twitch
                 DiscordChannel discordChannel = await SBotClient.Client.GetChannelAsync(discordChannelId);
                 SLogger.Log(LogLevel.Debug, $"Found channel {discordChannel}", "TwitchEvents.cs");
 
+                DiscordGuild guild = await SBotClient.Client.GetGuildAsync(discordChannel.GuildId!.Value);
+                SLogger.Log(LogLevel.Debug, $"Found guild ({guild}) for channel", "STwichClient");
+
                 conditions.Add(new(SDBColumn.NotificationChannelID, discordChannelIdStr));
                 ulong mentionRoleId;
                 SLogger.Log(LogLevel.Debug, $"Selection mention role", "TwitchEvents.cs");
                 ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.TwitchMonitorings, SDBColumn.MentionRoleID, conditions, limit: 1))!.First(), out mentionRoleId);
                 conditions.Remove(new(SDBColumn.NotificationChannelID, discordChannelIdStr));
-                DiscordRole mentionRole = await discordChannel.Guild.GetRoleAsync(mentionRoleId);
+                DiscordRole mentionRole = await guild.GetRoleAsync(mentionRoleId);
                 SLogger.Log(LogLevel.Debug, $"Found role {mentionRole}", "TwitchEvents.cs");
 
                 string url = e.Stream.ThumbnailUrl.Replace("{width}", "1920").Replace("{height}", "1080");

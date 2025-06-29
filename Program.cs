@@ -13,7 +13,7 @@ namespace SophBot
     {
         public static async Task Main(string[] args)
         {
-            SConfig.LogLevel = LogLevel.Debug;
+            SConfig.LogLevel = LogLevel.Information;
             await SConfig.ReadConfigAsync();
             await SDBEngine.Initialize();
 

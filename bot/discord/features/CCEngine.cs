@@ -96,7 +96,6 @@ namespace SophBot.bot.discord.features
         {
             try
             {
-
                 List<SDBValue> conditions = new();
                 conditions.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
 

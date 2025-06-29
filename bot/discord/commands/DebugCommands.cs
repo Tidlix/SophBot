@@ -8,10 +8,11 @@ using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
 using SophBot.bot.conf;
 using SophBot.bot.logs;
+using SophBot.bot.twitch;
 
 namespace SophBot.bot.discord.commands
 {
-    [Command("debug"), RequireApplicationOwner, AllowedProcessors<TextCommandProcessor>, RequireGuild]
+    [Command("debug"), RequireApplicationOwner/*, AllowedProcessors<TextCommandProcessor>*/, RequireGuild]
     public class DebugCommands
     {
         [Command("serverconfig")]
@@ -100,17 +101,21 @@ namespace SophBot.bot.discord.commands
         [Command("currentTest")]
         public async ValueTask currentTest(CommandContext ctx)
         {
-            SDiscordServer server = new(ctx.Guild!);
-            var leaderboard = await server.getPointsLeaderboardAsync();
+            await ctx.DeferResponseAsync();
+            await ctx.EditResponseAsync("Test123");
+            throw new Exception("Test");
+        }
 
-            string output = "\n";
-            foreach (var current in leaderboard)
+        [Command("monitoringlist")]
+        public async ValueTask monitoringList(CommandContext ctx)
+        {
+            string response = "All monitored channels:";
+            var list = STwitchClient.Monitoring.ChannelsToMonitor;
+            foreach (string channel in list)
             {
-                output += $"{current.Key} - {current.Value} \n";
+                response += $"\n* {channel}";
             }
-
-
-            await ctx.RespondAsync("Done!" + output);
+            await ctx.RespondAsync(response);
         }
     }
 }

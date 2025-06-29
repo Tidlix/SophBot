@@ -31,7 +31,9 @@ namespace SophBot.bot.conf
         public static class AI
         {
 #pragma warning disable CS8618
-            public static string ApiKey;
+            public static string GeminiKey;
+            public static string GroqKey;
+            public static string SystemInstructions;
         }
 
         public static async ValueTask ReadConfigAsync()
@@ -73,9 +75,9 @@ namespace SophBot.bot.conf
                 confFile = await sr.ReadToEndAsync();
                 SLogger.Log(LogLevel.Debug, confFile, "ai.conf");
 
-                AI.ApiKey = getValue(confFile, "API_Key");
-
-
+                AI.GeminiKey = getValue(confFile, "Gemini_Key");
+                AI.GroqKey = getValue(confFile, "Groq_Key");
+                AI.SystemInstructions = getValue(confFile, "Sys_Instruction");
             }
             catch (Exception ex)
             {

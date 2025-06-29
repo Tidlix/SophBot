@@ -41,13 +41,9 @@ namespace SophBot.bot.discord.commands
                 ))
             };
 
-            try {
-                var channel = await server.getChannelAsync(SDiscordChannel.RuleChannel);
-                var msg = await channel.SendMessageAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new (components, false, DiscordColor.SpringGreen)));
-                await ctx.EditResponseAsync($"Nachricht gesendet! {msg.JumpLink}");
-            } catch (Exception ex) {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(ex.Message));
-            }
+            var channel = await server.getChannelAsync(SDiscordChannel.RuleChannel);
+            var msg = await channel.SendMessageAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new (components, false, DiscordColor.SpringGreen)));
+            await ctx.EditResponseAsync($"Nachricht gesendet! {msg.JumpLink}");
         }
     }
 }

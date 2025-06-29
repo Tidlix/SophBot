@@ -8,7 +8,6 @@ namespace SophBot.bot.database
         RuleChannelID,
         WelcomeChannelID,
         NotificationChannelID,
-        TwitchChannel,
         MemberRoleID,
         MentionRoleID,
         Name,

@@ -74,13 +74,12 @@ namespace SophBot.bot.discord.commands
             }
             catch (Exception ex)
             {
-                SLogger.Log(LogLevel.Warning, "Couldn't create ReactionRole message", "RRCommands.cs -> createRR()", ex);
                 if (ex.Message == "Role group mismatch!")
                 {
                     await ctx.RespondAsync("Ein Fehler ist aufgetreten! Bitte gib für jede Rolle eine Beschreibung an, sowie umgekehrt!");
                     return;
                 }
-                await ctx.RespondAsync("Ein Fehler ist aufgetreten! Bitte kontaktiere den Entwickler!");
+                throw;
             }
 
         }

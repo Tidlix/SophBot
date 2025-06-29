@@ -139,7 +139,7 @@ namespace SophBot.bot.discord.events
             }
             catch (Exception ex)
             {
-                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Ein Fehler ist aufgetreten! Bitte kontaktiere den Entwickler!"));
+                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Ein Fehler ist aufgetreten!"));
                 SLogger.Log(LogLevel.Error, $"Couldn't access Custom Command", "CCEvents.cs", ex);
             }
 

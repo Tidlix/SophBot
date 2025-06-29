@@ -5,6 +5,7 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.InteractionNamingPolicies;
 using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
+using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
 using SophBot.bot.conf;
 using SophBot.bot.discord.events;
@@ -52,6 +53,18 @@ namespace SophBot.bot.discord
                 builder.UseCommands((IServiceProvider serviceProvider, CommandsExtension extension) =>
                 {
                     extension.AddCommands(Assembly.GetExecutingAssembly());
+                    extension.CommandErrored += async (s, e) =>
+                    {
+                        SLogger.Log(LogLevel.Error, $"A Command failed", $"{e.CommandObject}", e.Exception);
+
+                        try { await e.Context.RespondAsync("Ein Fehler ist aufgetreten!"); }
+                        catch {await e.Context.FollowupAsync("Ein Fehler ist aufgetreten!");
+}                        /*DiscordMessage? response = await e.Context.GetResponseAsync();
+                        if (response! != null!)
+                            await response!.RespondAsync("Ein Fehler ist aufgetreten!");
+                        else
+                            await e.Context.RespondAsync("Ein Fehler ist aufgetreten!");*/
+                    };
 
                     TextCommandProcessor textCommandProcessor = new(new()
                     {

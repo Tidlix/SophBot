@@ -43,7 +43,7 @@ namespace SophBot.bot.discord.events
             }
             catch (Exception ex)
             {
-                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent("Ein Fehler ist aufgetreten! Bitte kontaktiere den Entwickler!"));
+                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent("Ein Fehler ist aufgetreten! "));
 
                 SLogger.Log(LogLevel.Error, "Failed to add/remove role", "RREvents.cs", ex);
             }

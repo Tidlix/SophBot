@@ -14,8 +14,7 @@ namespace SophBot.bot.discord.events
             SDiscordUser user = new(e.Author, e.Guild);
             await user.AddMessageCountAsnyc();
 
-            var msgs = await user.GetMessageCountAsnyc(); // only full numbers 1,2,3,...
-
+            var msgs = await user.GetMessageCountAsnyc(); 
             if (msgs % 10 == 0) await user.AddPointsAsnyc(20); 
         }
     }

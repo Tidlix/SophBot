@@ -45,7 +45,7 @@ namespace SophBot.bot.discord.events
             catch (Exception ex)
             {
                 SLogger.Log(LogLevel.Error, "Couldn't send rule message", "RuleEvents.cs", ex);
-                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Ein Fehler ist aufgetreten! Bitte kontaktiere den Entwickler!"));
+                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Ein Fehler ist aufgetreten!"));
             }
         }
 
@@ -71,9 +71,8 @@ namespace SophBot.bot.discord.events
             }
             catch (Exception ex)
             {
-                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent(ex.Message));
+                SLogger.Log(LogLevel.Error, "Couldn't add/remove role", "RuleEvents.cs", ex);
             }
-
         }
     }
 }

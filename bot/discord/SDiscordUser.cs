@@ -20,13 +20,34 @@ namespace SophBot.bot.discord
         #region Warnings
         public async ValueTask AddWarningAsnyc(string reason)
         {
-            await Task.Delay(1); // Just for disabling missing await operator warning - Delete Later
-            throw new NotImplementedException();
+            List<SDBValue> values = new();
+            values.Add(new(SDBColumn.ServerID, Member.Guild.Id.ToString()));
+            values.Add(new(SDBColumn.UserID, Member.Id.ToString()));
+            values.Add(new(SDBColumn.Description, reason));
+            values.Add(new(SDBColumn.DateTime, DateTime.Now.AddHours(2).ToString("dd.MM.yyyy - HH:mm")));
+
+            await SDBEngine.InsertAsync(values, SDBTable.Warnings, false);
         }
-        public async ValueTask GetWarningsAsync()
+        public async ValueTask<Dictionary<string, string>> GetWarningsAsync()
         {
-            await Task.Delay(1); // Just for disabling missing await operator warning - Delete Later
-            throw new NotImplementedException();
+            Dictionary<string, string> result = new();
+            List<SDBValue> conditions = new();
+            conditions.Add(new(SDBColumn.ServerID, Member.Guild.Id.ToString()));
+            conditions.Add(new(SDBColumn.UserID, Member.Id.ToString()));
+
+            List<string>? reasons = await SDBEngine.SelectAsync(SDBTable.Warnings, SDBColumn.Description, conditions, orderBy: SDBColumn.DateTime);
+            List<string>? time = await SDBEngine.SelectAsync(SDBTable.Warnings, SDBColumn.DateTime, conditions, orderBy: SDBColumn.DateTime);
+
+            if (reasons == null) result.Add("Noch keine Warnung vorhanden", "");
+            else
+            {
+                for (int i = 0; i < reasons.Count; i++)
+                {
+                    result.Add(reasons[i], time![i]);
+                }
+            }
+
+            return result;
         }
         #endregion
 

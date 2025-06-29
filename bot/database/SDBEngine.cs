@@ -40,8 +40,6 @@ namespace SophBot.bot.database
                     return "welcomechannel";
                 case SDBColumn.NotificationChannelID:
                     return "notificationchannel";
-                case SDBColumn.TwitchChannel:
-                    return "twitchchannel";
                 case SDBColumn.MemberRoleID:
                     return "memberrole";
                 case SDBColumn.MentionRoleID:
@@ -107,8 +105,7 @@ namespace SophBot.bot.database
             };
             public static SDBColumn[] TwitchMonitorings =
             {
-                SDBColumn.ServerID,
-                SDBColumn.TwitchChannel,
+                SDBColumn.Name,
                 SDBColumn.NotificationChannelID,
                 SDBColumn.MentionRoleID
             };
@@ -400,7 +397,7 @@ namespace SophBot.bot.database
                     command += $"WHERE {string.Join(" AND ", conditionsList)} ";
                 }
 
-                if (orderBy != null) command += $"ORDER BY {orderBy} " + ((desc == true) ? "DESC " : "");
+                if (orderBy != null) command += $"ORDER BY {getColumnString((SDBColumn)orderBy)} " + ((desc == true) ? "DESC " : "");
 
                 if (limit != null) command += $"LIMIT {limit}";
 

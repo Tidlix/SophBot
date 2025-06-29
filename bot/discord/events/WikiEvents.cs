@@ -87,7 +87,7 @@ namespace SophBot.bot.discord.events
             catch (Exception ex)
             {
                 SLogger.Log(LogLevel.Warning, "Something went wrong at wiki article/site switch/modification", "WikiEvents.cs", ex);
-                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent("Ein Fehler ist aufgetreten! Bitte kontaktiere den Entwickler!"));
+                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent("Ein Fehler ist aufgetreten! "));
             }
         }
 
@@ -129,7 +129,7 @@ namespace SophBot.bot.discord.events
             catch (Exception ex)
             {
                 SLogger.Log(LogLevel.Warning, "Something went wrong at wiki article/site switch/modification", "WikiEvents.cs -> HandleEventAsync()", ex);
-                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Ein Fehler ist aufgetreten! Bitte kontaktiere den Entwickler!"));
+                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Ein Fehler ist aufgetreten!"));
             }
         }
     }

@@ -93,7 +93,7 @@ namespace SophBot.bot.discord.commands
             {
                 if (member.Value.IsBot) continue;
                 SDiscordUser user = new(member.Value);
-                await user.CreateProfileAsnyc();
+                await user.CreateProfileAsync();
             }
             await ctx.EditResponseAsync("Profile erstellt!");
         }

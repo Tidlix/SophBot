@@ -19,7 +19,7 @@ namespace SophBot.bot.discord.commands
             ));
             components.Add(new DiscordTextDisplayComponent($"**Name:** {member.DisplayName}"));
             components.Add(new DiscordTextDisplayComponent($"**Mitglied seit:** {member.JoinedAt.ToString("dd.MM.yyyy - HH:mm")}"));
-            components.Add(new DiscordTextDisplayComponent($"**Channelpoints:** {await user.GetPointsAsnyc()}"));
+            components.Add(new DiscordTextDisplayComponent($"**Channelpoints:** {await user.GetPointsAsync()}"));
             components.Add(new DiscordTextDisplayComponent($"**Gesendete Nachrichten:** -- Coming Soon --"));
 
             await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new (components, false, DiscordColor.Gold)));
@@ -49,7 +49,7 @@ namespace SophBot.bot.discord.commands
                 }
                 components.Add(new DiscordTextDisplayComponent(leaderboard));
                 components.Add(new DiscordSeparatorComponent(true));
-                components.Add(new DiscordTextDisplayComponent($"Deine Channelpoints: {await user.GetPointsAsnyc()}"));
+                components.Add(new DiscordTextDisplayComponent($"Deine Channelpoints: {await user.GetPointsAsync()}"));
 
                 await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new (components, false, DiscordColor.Gold)));
             }

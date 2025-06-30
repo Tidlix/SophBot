@@ -12,10 +12,10 @@ namespace SophBot.bot.discord.events
             if (e.Message.Content.StartsWith('!') || e.Message.Content.StartsWith('?')) return;
 
             SDiscordUser user = new(e.Author, e.Guild);
-            await user.AddMessageCountAsnyc();
+            await user.AddMessageCountAsync();
 
             var msgs = await user.GetMessageCountAsnyc(); 
-            if (msgs % 10 == 0) await user.AddPointsAsnyc(20); 
+            if (msgs % 10 == 0) await user.AddPointsAsync(20); 
         }
     }
 }

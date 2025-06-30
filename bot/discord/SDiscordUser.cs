@@ -18,7 +18,7 @@ namespace SophBot.bot.discord
         }
 
         #region Warnings
-        public async ValueTask AddWarningAsnyc(string reason)
+        public async ValueTask AddWarningAsync(string reason)
         {
             List<SDBValue> values = new();
             values.Add(new(SDBColumn.ServerID, Member.Guild.Id.ToString()));
@@ -52,7 +52,7 @@ namespace SophBot.bot.discord
         #endregion
 
         #region Points/UserProfiles
-        public async ValueTask CreateProfileAsnyc()
+        public async ValueTask CreateProfileAsync()
         {
             List<SDBValue> values = new();
             values.Add(new(SDBColumn.ServerID, Member.Guild.Id.ToString()));
@@ -71,9 +71,9 @@ namespace SophBot.bot.discord
             await SDBEngine.InsertAsync(values, SDBTable.UserProfiles, true);
         }
 
-        public async ValueTask AddPointsAsnyc(ulong points)
+        public async ValueTask AddPointsAsync(ulong points)
         {
-            ulong current = await GetPointsAsnyc();
+            ulong current = await GetPointsAsync();
 
             List<SDBValue> values = new();
             values.Add(new SDBValue(SDBColumn.Points, (current + points).ToString()));
@@ -83,9 +83,9 @@ namespace SophBot.bot.discord
 
             await SDBEngine.ModifyAsync(values, SDBTable.UserProfiles, conditions);
         }
-        public async ValueTask RemovePointsAsnyc(ulong points)
+        public async ValueTask RemovePointsAsync(ulong points)
         {
-            ulong current = await GetPointsAsnyc();
+            ulong current = await GetPointsAsync();
 
             List<SDBValue> values = new();
             values.Add(new SDBValue(SDBColumn.Points, (current - points).ToString()));
@@ -95,7 +95,7 @@ namespace SophBot.bot.discord
 
             await SDBEngine.ModifyAsync(values, SDBTable.UserProfiles, conditions);
         }
-        public async ValueTask SetPointsAsnyc(ulong points)
+        public async ValueTask SetPointsAsync(ulong points)
         {
             List<SDBValue> values = new();
             values.Add(new SDBValue(SDBColumn.Points, points.ToString()));
@@ -105,7 +105,7 @@ namespace SophBot.bot.discord
 
             await SDBEngine.ModifyAsync(values, SDBTable.UserProfiles, conditions);
         }
-        public async ValueTask<ulong> GetPointsAsnyc()
+        public async ValueTask<ulong> GetPointsAsync()
         {
             ulong points;
             List<SDBValue> conditions = new();
@@ -117,7 +117,7 @@ namespace SophBot.bot.discord
             return points;
         }
 
-        public async ValueTask AddMessageCountAsnyc()
+        public async ValueTask AddMessageCountAsync()
         {
             ulong current = await GetMessageCountAsnyc();
 

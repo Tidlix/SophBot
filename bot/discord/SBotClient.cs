@@ -39,6 +39,7 @@ namespace SophBot.bot.discord
                     events.AddEventHandlers<WelcomeEvents>();
                     events.AddEventHandlers<CCEvents>();
                     events.AddEventHandlers<ProfileEvents>();
+                    events.AddEventHandlers<GambleEvents>();
                     events.AddEventHandlers<WikiEvents>();
                     events.AddEventHandlers<RREvents>();
                     events.AddEventHandlers<RuleEvents>();
@@ -58,12 +59,7 @@ namespace SophBot.bot.discord
                         SLogger.Log(LogLevel.Error, $"A Command failed", $"{e.CommandObject}", e.Exception);
 
                         try { await e.Context.RespondAsync("Ein Fehler ist aufgetreten!"); }
-                        catch {await e.Context.FollowupAsync("Ein Fehler ist aufgetreten!");
-}                        /*DiscordMessage? response = await e.Context.GetResponseAsync();
-                        if (response! != null!)
-                            await response!.RespondAsync("Ein Fehler ist aufgetreten!");
-                        else
-                            await e.Context.RespondAsync("Ein Fehler ist aufgetreten!");*/
+                        catch { await e.Context.FollowupAsync("Ein Fehler ist aufgetreten!"); }
                     };
 
                     TextCommandProcessor textCommandProcessor = new(new()

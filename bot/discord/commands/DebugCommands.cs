@@ -12,7 +12,7 @@ using SophBot.bot.twitch;
 
 namespace SophBot.bot.discord.commands
 {
-    [Command("debug"), RequireApplicationOwner/*, AllowedProcessors<TextCommandProcessor>*/, RequireGuild]
+    [Command("debug"), RequireApplicationOwner, AllowedProcessors<TextCommandProcessor>, RequireGuild]
     public class DebugCommands
     {
         [Command("serverconfig")]

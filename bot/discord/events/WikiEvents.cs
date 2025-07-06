@@ -64,6 +64,9 @@ namespace SophBot.bot.discord.events
 
             if (customId.Contains("modify"))
             {
+                DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
+                if (!member.Permissions.Contains(DiscordPermission.Administrator)) return;
+
                 string? value = await WikiEngine.getSite(article, site);
                 value ??= "";
 

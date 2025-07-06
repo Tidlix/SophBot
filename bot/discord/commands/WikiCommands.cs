@@ -13,7 +13,7 @@ namespace SophBot.bot.discord.commands
         {
             await ctx.DeferResponseAsync();
 
-            var msg = await WikiEngine.getWikiMessage("default", 0);
+            var msg = await WikiEngine.getWikiMessage("Startseite", 0);
             
             await ctx.EditResponseAsync(msg);
         }

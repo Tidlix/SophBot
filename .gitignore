@@ -1,2 +1,5 @@
 bin/
 obj/
+*.conf
+*.exe
+*.dll

@@ -9,7 +9,7 @@ namespace SophBot.bot.discord.commands
 {
     public class RRCommands
     {
-        [Command("create_rr"), RequirePermissions(DiscordPermission.ManageRoles)]
+        [Command("create_rr"), Description("Erstelle eine Nachricht mit ReaktionRoles"), RequirePermissions(DiscordPermission.ManageRoles)]
         public async ValueTask createRR(CommandContext ctx,
             [Description("Rolle 1")] DiscordRole role1, [Description("Beschreibung für Rolle 1")] string role1Description,                  // Both always needed
             [Description("Rolle 2")] DiscordRole? role2 = null, [Description("Beschreibung für Rolle 2")] string? role2Description = null,  // When one is set, the other one has too 

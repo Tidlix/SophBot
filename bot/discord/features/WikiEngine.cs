@@ -70,8 +70,9 @@ namespace SophBot.bot.discord.features
             articleRow.Add(new DiscordSelectComponent("wikiArticleSelect", article, await getArticleList()));
 
             List<DiscordComponent> siteRow = new();
-            siteRow.Add(new DiscordButtonComponent(DiscordButtonStyle.Secondary, $"wiki_article={article};site={site - 1};", "Vorherige Seite", (site <= 0) ? true : false));
-            siteRow.Add(new DiscordButtonComponent(DiscordButtonStyle.Secondary, $"wiki_article={article};site={site + 1};", "Nächste Seite", (site >= await countSites(article)-1) ? true : false));
+            siteRow.Add(new DiscordButtonComponent(DiscordButtonStyle.Primary, $"wiki_article={article};site={site - 1};", "Vorherige Seite", (site <= 0) ? true : false));
+            siteRow.Add(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "wiki_article_site", $"Seite {site + 1}", true));
+            siteRow.Add(new DiscordButtonComponent(DiscordButtonStyle.Primary, $"wiki_article={article};site={site + 1};", "Nächste Seite", (site >= await countSites(article)-1) ? true : false));
 
 
             List<DiscordComponent> components = new();

@@ -6,9 +6,11 @@ using SophBot.bot.logs;
 
 namespace SophBot.bot.discord
 {
-    public enum SDiscordChannel {
-        WelcomeChannel, 
-        RuleChannel
+    public enum SDiscordChannel
+    {
+        WelcomeChannel,
+        RuleChannel,
+        LogChannel
     }
     public enum SDiscordRole {
         MemberRole
@@ -25,21 +27,23 @@ namespace SophBot.bot.discord
             this.Commands = new(guild);
         }
 
-        public async ValueTask createConfigAsync(DiscordChannel welcomeChannel, DiscordChannel ruleChannel, DiscordRole memberRole)
+        public async ValueTask createConfigAsync(DiscordChannel welcomeChannel, DiscordChannel ruleChannel, DiscordChannel logChannel, DiscordRole memberRole)
         {
             List<SDBValue> values = new();
             values.Add(new SDBValue(SDBColumn.ServerID, Guild.Id.ToString()));
             values.Add(new SDBValue(SDBColumn.WelcomeChannelID, welcomeChannel.Id.ToString()));
             values.Add(new SDBValue(SDBColumn.RuleChannelID, ruleChannel.Id.ToString()));
+            values.Add(new SDBValue(SDBColumn.LogChannelID, logChannel.Id.ToString()));
             values.Add(new SDBValue(SDBColumn.MemberRoleID, memberRole.Id.ToString()));
 
             await SDBEngine.InsertAsync(values, SDBTable.ServerConfig);
         }
-        public async ValueTask modifyConfigAsync(DiscordChannel? welcomeChannel = null, DiscordChannel? ruleChannel = null, DiscordRole? memberRole = null)
+        public async ValueTask modifyConfigAsync(DiscordChannel? welcomeChannel = null, DiscordChannel? ruleChannel = null, DiscordChannel? logChannel = null, DiscordRole? memberRole = null)
         {
             List<SDBValue> values = new();
             if (welcomeChannel! != null!) values.Add(new SDBValue(SDBColumn.WelcomeChannelID, welcomeChannel.Id.ToString()));
             if (ruleChannel! != null!) values.Add(new SDBValue(SDBColumn.RuleChannelID, ruleChannel.Id.ToString()));
+            if (logChannel! != null!) values.Add(new SDBValue(SDBColumn.LogChannelID, logChannel.Id.ToString()));
             if (memberRole! != null!) values.Add(new SDBValue(SDBColumn.MemberRoleID, memberRole.Id.ToString()));
 
             if (values.Count == 0) throw new Exception("Modifying values are all null!");
@@ -63,6 +67,9 @@ namespace SophBot.bot.discord
                     case SDiscordChannel.RuleChannel:
                         ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.ServerConfig, SDBColumn.RuleChannelID))!.First(), out channelID);
                         break;
+                    case SDiscordChannel.LogChannel:
+                        ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.ServerConfig, SDBColumn.LogChannelID))!.First(), out channelID);
+                        break;
 
                     default:
                         throw new Exception("Unknown channel");
@@ -73,7 +80,7 @@ namespace SophBot.bot.discord
             catch (Exception ex)
             {
                 SLogger.Log(LogLevel.Error, "Couldn't get Server Channel", "SDiscordServer.cs", ex);
-                throw new Exception(ex.Message);
+                throw;
             }
         }
         public async ValueTask<DiscordRole> getRoleAsync(SDiscordRole role)

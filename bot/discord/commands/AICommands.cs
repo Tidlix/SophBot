@@ -10,7 +10,7 @@ namespace SophBot.bot.discord.commands
     [Command("AI")]
     public class AICommands
     {
-        [Command("gemini"), Description("Leistungsstärker aber womöglich unzuverlässigeres Modell")]
+        [Command("gemini"), Description("Leistungsstärker Modell, aber noch im Testmodus (Bevorzugt)")]
         public async ValueTask gemini(CommandContext ctx, string promt)
         {
             await ctx.DeferResponseAsync();
@@ -26,7 +26,7 @@ namespace SophBot.bot.discord.commands
 
             await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new(components)));
         }
-        [Command("groq"), Description("Schwächeres aber womöglich zuverlässigeres Modell")]
+        [Command("groq"), Description("Schwächeres Modell, dafür schneller und zuverlässiger (Backup)")]
         public async ValueTask groq(CommandContext ctx, string promt)
         {
             await ctx.DeferResponseAsync();

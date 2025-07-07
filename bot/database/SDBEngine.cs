@@ -40,6 +40,8 @@ namespace SophBot.bot.database
                     return "welcomechannel";
                 case SDBColumn.NotificationChannelID:
                     return "notificationchannel";
+                case SDBColumn.LogChannelID:
+                    return "logchannel";
                 case SDBColumn.MemberRoleID:
                     return "memberrole";
                 case SDBColumn.MentionRoleID:
@@ -88,7 +90,8 @@ namespace SophBot.bot.database
                 SDBColumn.ServerID,
                 SDBColumn.RuleChannelID,
                 SDBColumn.WelcomeChannelID,
-                SDBColumn.MemberRoleID
+                SDBColumn.MemberRoleID,
+                SDBColumn.LogChannelID
             };
             public static SDBColumn[] UserProfiles =
             {

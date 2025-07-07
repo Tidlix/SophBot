@@ -19,19 +19,19 @@ namespace SophBot.bot.discord.commands
         public class Serverconfig
         {
             [Command("Create")]
-            public async ValueTask createSC(CommandContext ctx, DiscordChannel welcomeChannel, DiscordChannel ruleChannel, DiscordRole memberRole)
+            public async ValueTask createSC(CommandContext ctx, DiscordChannel welcomeChannel, DiscordChannel ruleChannel, DiscordChannel logChannel, DiscordRole memberRole)
             {
                 SDiscordServer Server = new(ctx.Guild!);
-                await Server.createConfigAsync(welcomeChannel, ruleChannel, memberRole);
+                await Server.createConfigAsync(welcomeChannel, ruleChannel, logChannel, memberRole);
                 await ctx.RespondAsync($"Server config created!");
             }
             [Command("Modify"), AllowedProcessors<SlashCommandProcessor>]
-            public async ValueTask modifySC(CommandContext ctx, DiscordChannel? welcomeChannel = null, DiscordChannel? ruleChannel = null, DiscordRole? memberRole = null)
+            public async ValueTask modifySC(CommandContext ctx, DiscordChannel? welcomeChannel = null, DiscordChannel? ruleChannel = null, DiscordChannel? logChannel = null, DiscordRole? memberRole = null)
             {
                 SDiscordServer Server = new(ctx.Guild!);
                 try
                 {
-                    await Server.modifyConfigAsync(welcomeChannel, ruleChannel, memberRole);
+                    await Server.modifyConfigAsync(welcomeChannel, ruleChannel, logChannel, memberRole);
                     await ctx.RespondAsync($"Server config modified!");
                 }
                 catch (Exception ex)

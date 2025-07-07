@@ -36,6 +36,7 @@ namespace SophBot.bot.discord
                 {
                     events.AddEventHandlers<ErrorEvents>();
                     events.AddEventHandlers<ClientEvents>();
+                    events.AddEventHandlers<LogEvents>();
                     events.AddEventHandlers<WelcomeEvents>();
                     events.AddEventHandlers<CCEvents>();
                     events.AddEventHandlers<ProfileEvents>();

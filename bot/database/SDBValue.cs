@@ -7,6 +7,7 @@ namespace SophBot.bot.database
         ServerID,
         RuleChannelID,
         WelcomeChannelID,
+        LogChannelID,
         NotificationChannelID,
         MemberRoleID,
         MentionRoleID,

@@ -2,6 +2,7 @@ using System.ComponentModel;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
+using SophBot.bot.discord.events;
 
 namespace SophBot.bot.discord.commands
 {
@@ -16,6 +17,7 @@ namespace SophBot.bot.discord.commands
 
             await user.AddWarningAsync(reason);
             await ctx.EditResponseAsync($"Die Verwarnung für {member.Mention} wurde erstellt!\n > {reason}\n> {DateTime.Now.ToString("dd.MM.yyyy - HH:mm")}");
+            await LogEvents.LogMessageAsync(ctx.Guild!, $"{member.Mention} wurde verwarnt!", $"**Verwarnt von:**\n{ctx.Member!.Mention}\n\n**Grund:**\n{reason}", (await ctx.GetResponseAsync())!.JumpLink.AbsoluteUri);
         }
         [Command("Get"), Description("Erhalte eine Lister aller Verwarnungen eines Nutzers")]
         public async ValueTask getWarnings(CommandContext ctx, DiscordMember member)

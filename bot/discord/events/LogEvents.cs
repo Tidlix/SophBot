@@ -14,7 +14,7 @@ namespace SophBot.bot.discord.events
         public async Task HandleEventAsync(DiscordClient s, MessageDeletedEventArgs e)
         {
             if (e.Message.Author!.IsCurrent) return;
-            await LogMessageAsync(e.Guild, $"{e.Message.Author!.Mention} hat eine Nachricht gelöscht!", $"**Author:**\n{e.Message.Author}\n\n**Nachricht gesendet am:**\n{e.Message.Timestamp.ToString("dd.MM.yy - HH:mm:ss")}\n\n**Message ID:**\n{e.Message.Id}\n\n**Die Nachricht:**\n{e.Message.Content}", e.Message.JumpLink.AbsoluteUri);//$"https://discord.com/channels/{e.Guild.Id}/{e.Channel!.Id}");
+            await LogMessageAsync(e.Guild, $"Eine Nachricht von {e.Message.Author.Mention} wurde gelöscht!", $"**Author:**\n{e.Message.Author}\n\n**Nachricht gesendet am:**\n{e.Message.Timestamp.ToString("dd.MM.yy - HH:mm:ss")}\n\n**Message ID:**\n{e.Message.Id}\n\n**Die Nachricht:**\n{e.Message.Content}", e.Message.JumpLink.AbsoluteUri);//$"https://discord.com/channels/{e.Guild.Id}/{e.Channel!.Id}");
         }
         public async Task HandleEventAsync(DiscordClient s, MessageUpdatedEventArgs e)
         {
@@ -40,7 +40,7 @@ namespace SophBot.bot.discord.events
         }
 
 
-        static async ValueTask LogMessageAsync(DiscordGuild guild, string title, string content, string? jumpLink = null)
+        public static async ValueTask LogMessageAsync(DiscordGuild guild, string title, string content, string? jumpLink = null)
         {
             SDiscordServer server = new(guild);
             DiscordChannel logChannel = await server.getChannelAsync(SDiscordChannel.LogChannel);

@@ -6,6 +6,8 @@ using GenerativeAI;
 using GenerativeAI.Clients;
 using GenerativeAI.Types;
 using SophBot.bot.conf;
+using SophBot.bot.database;
+using SophBot.bot.discord.features;
 using SophBot.bot.logs;
 
 namespace SophBot.bot.ai
@@ -17,7 +19,7 @@ namespace SophBot.bot.ai
         private static GoogleAi GoogleAI;
 #pragma warning restore CS8618
 
-        public static void StartSession()
+        public static async Task StartSession()
         {
             GoogleAI = new GoogleAi(SConfig.AI.GeminiKey);
 
@@ -33,7 +35,9 @@ namespace SophBot.bot.ai
                 ThinkingConfig = thinkConf
             };
 
-            Session = model.StartChat(config: genConf, systemInstruction: SConfig.AI.SystemInstructions);
+            var dbValues = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Description);
+
+            Session = model.StartChat(config: genConf, systemInstruction: SConfig.AI.SystemInstructions + " aditional information from db: " + string.Join(" - ", dbValues!));
         }
 
         public static async ValueTask<string> GenerateResponseAsync(string prompt)

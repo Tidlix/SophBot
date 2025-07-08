@@ -35,19 +35,19 @@ namespace SophBot.bot.discord.commands
 
                 await ctx.EditResponseAsync($"Du hast {points} Channelpoints an {target.Mention} gegeben!");
             }
-            /*
-            [Command("Set"), Description("Lege die Channelpoints eines Nutzers fest"), RequirePermissions(DiscordPermission.Administrator)]
-            public async ValueTask pointSet(CommandContext ctx, DiscordMember target, ulong points)
-            {
-                await ctx.DeferResponseAsync();
-                SDiscordUser user = new(target);
-
-                await user.SetPointsAsync(points);
-
-                await ctx.EditResponseAsync($"Du hast die Channelpoints von {target.Mention} auf {points} Channelpoints gesetzt!");
-            }
-            */
+            
         }
+        
+        [Command("Setpoints"), Description("Lege die Channelpoints eines Nutzers fest"), RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async ValueTask pointSet(CommandContext ctx, DiscordMember target, ulong points)
+        {
+            await ctx.DeferResponseAsync();
+            SDiscordUser user = new(target);
+
+            await user.SetPointsAsync(points);
+            await ctx.EditResponseAsync($"Du hast die Channelpoints von {target.Mention} auf {points} Channelpoints gesetzt!");
+        }
+            
 
         [Command("Leaderboard")]
         public class Leaderboard

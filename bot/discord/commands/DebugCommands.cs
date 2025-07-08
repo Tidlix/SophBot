@@ -6,6 +6,7 @@ using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Commands.Trees.Metadata;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
+using SophBot.bot.ai;
 using SophBot.bot.conf;
 using SophBot.bot.logs;
 using SophBot.bot.twitch;
@@ -83,6 +84,7 @@ namespace SophBot.bot.discord.commands
             string customId = $"modify-wiki_article={article};site={site};";
         }
 
+
         [Command("createProfiles")]
         public async ValueTask createProfiles(CommandContext ctx)
         {
@@ -98,13 +100,6 @@ namespace SophBot.bot.discord.commands
             await ctx.EditResponseAsync("Profile erstellt!");
         }
 
-        [Command("currentTest")]
-        public async ValueTask currentTest(CommandContext ctx)
-        {
-            await ctx.DeferResponseAsync();
-            await ctx.EditResponseAsync("Test123");
-            throw new Exception("Test");
-        }
 
         [Command("monitoringlist")]
         public async ValueTask monitoringList(CommandContext ctx)
@@ -116,6 +111,14 @@ namespace SophBot.bot.discord.commands
                 response += $"\n* {channel}";
             }
             await ctx.RespondAsync(response);
+        }
+
+        [Command("restart_ai")]
+        public async ValueTask restartAi(CommandContext ctx)
+        {
+            await ctx.DeferResponseAsync();
+            await SGeminiEngine.StartSession();
+            await ctx.EditResponseAsync("Restarted Session!");
         }
     }
 }

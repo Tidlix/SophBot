@@ -17,7 +17,7 @@ namespace SophBot
             await SConfig.ReadConfigAsync();
             await SDBEngine.Initialize();
 
-            SGeminiEngine.StartSession();
+            await SGeminiEngine.StartSession();
             await SBotClient.CreateClientAsync();
             await STwitchClient.CreateTwitchMonitoringAsnyc();
 

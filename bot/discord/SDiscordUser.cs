@@ -65,7 +65,7 @@ namespace SophBot.bot.discord
 
 
             values.Add(new(SDBColumn.Points, "200"));
-            values.Add(new(SDBColumn.Number, "0"));
+            values.Add(new(SDBColumn.Number, "1"));
 
 
             await SDBEngine.InsertAsync(values, SDBTable.UserProfiles, true);

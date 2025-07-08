@@ -12,6 +12,8 @@ namespace SophBot.bot.discord.events
         public async Task HandleEventAsync(DiscordClient s, GuildMemberAddedEventArgs e)
         {
             SDiscordServer server = new(e.Guild);
+            SDiscordUser user = new(e.Member);
+            await user.CreateProfileAsync();
 
             DiscordChannel welcomeChannel = await server.getChannelAsync(SDiscordChannel.WelcomeChannel);
             DiscordChannel ruleChannel = await server.getChannelAsync(SDiscordChannel.RuleChannel);

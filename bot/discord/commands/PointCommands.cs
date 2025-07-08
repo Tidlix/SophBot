@@ -35,7 +35,8 @@ namespace SophBot.bot.discord.commands
 
                 await ctx.EditResponseAsync($"Du hast {points} Channelpoints an {target.Mention} gegeben!");
             }
-            [Command("Set"), Description("Lege die Channelpoints eines Nutzers fest"), RequirePermissions(DiscordPermission.ModerateMembers)]
+            /*
+            [Command("Set"), Description("Lege die Channelpoints eines Nutzers fest"), RequirePermissions(DiscordPermission.Administrator)]
             public async ValueTask pointSet(CommandContext ctx, DiscordMember target, ulong points)
             {
                 await ctx.DeferResponseAsync();
@@ -45,6 +46,7 @@ namespace SophBot.bot.discord.commands
 
                 await ctx.EditResponseAsync($"Du hast die Channelpoints von {target.Mention} auf {points} Channelpoints gesetzt!");
             }
+            */
         }
 
         [Command("Leaderboard")]

@@ -61,7 +61,7 @@ namespace SophBot.bot.discord.features
                 else
                 {
                     string draws = "";
-                    while (bPoints < 21 && bPoints < pPoints)
+                    while (bPoints < 21 && bPoints <= pPoints)
                     {
                         Card drawnCard = new();
                         int rank = (int)drawnCard.rank;
@@ -110,6 +110,10 @@ namespace SophBot.bot.discord.features
                 actionRow.Add(new DiscordButtonComponent(DiscordButtonStyle.Success, $"blackjackHold_owner={player.Id};ppoints={pPoints};bpoints={bPoints};bet={bet};", "Karten Halten"));
                 components.Add(new DiscordActionRowComponent(actionRow));
                 components.Add(new DiscordSeparatorComponent(true));
+            }
+            else
+            {
+                components.Add(new DiscordTextDisplayComponent($"-# Du hast nun {await user.GetPointsAsync()} Channelpoints!"));
             }
             
 

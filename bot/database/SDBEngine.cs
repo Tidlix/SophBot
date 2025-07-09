@@ -372,7 +372,7 @@ namespace SophBot.bot.database
                 throw new Exception("Database Error - Check Console for more information!");
             }
         }
-        public static async ValueTask<List<string>?> SelectAsync(SDBTable table, SDBColumn column, List<SDBValue>? conditions = null, SDBColumn? orderBy = null, bool? desc = null, int? limit = null)
+        public static async ValueTask<List<string>?> SelectAsync(SDBTable table, SDBColumn column, List<SDBValue>? conditions = null, SDBColumn? orderBy = null, bool? orderInt = null, bool? desc = null, int? limit = null)
         {
             try
             {
@@ -400,7 +400,7 @@ namespace SophBot.bot.database
                     command += $"WHERE {string.Join(" AND ", conditionsList)} ";
                 }
 
-                if (orderBy != null) command += $"ORDER BY {getColumnString((SDBColumn)orderBy)} " + ((desc == true) ? "DESC " : "");
+                if (orderBy != null) command += $"ORDER BY {getColumnString((SDBColumn)orderBy)}{((orderInt == true) ? "::integer" : "")} " + ((desc == true) ? "DESC " : "");
 
                 if (limit != null) command += $"LIMIT {limit}";
 

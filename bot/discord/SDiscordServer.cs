@@ -115,7 +115,7 @@ namespace SophBot.bot.discord
 
             List<SDBValue> conditions = new();
             conditions.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
-            var users = await SDBEngine.SelectAsync(SDBTable.UserProfiles, SDBColumn.UserID, conditions, SDBColumn.Points, true, 10);
+            var users = await SDBEngine.SelectAsync(SDBTable.UserProfiles, SDBColumn.UserID, conditions, SDBColumn.Points, true, true, 10);
 
             foreach (var user in users!)
             {
@@ -151,7 +151,7 @@ namespace SophBot.bot.discord
 
             List<SDBValue> conditions = new();
             conditions.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
-            var users = await SDBEngine.SelectAsync(SDBTable.UserProfiles, SDBColumn.UserID, conditions, SDBColumn.Number, true, 10);
+            var users = await SDBEngine.SelectAsync(SDBTable.UserProfiles, SDBColumn.UserID, conditions, SDBColumn.Number, true, true, 10);
 
             foreach (var user in users!)
             {

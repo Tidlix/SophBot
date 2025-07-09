@@ -86,7 +86,7 @@ namespace SophBot.bot.discord.commands
                 }
                 components.Add(new DiscordTextDisplayComponent(leaderboard));
                 components.Add(new DiscordSeparatorComponent(true));
-                components.Add(new DiscordTextDisplayComponent($"Deine {((type == "points") ? "Channelpoints:" : "gesendeten Nachrichten:")} {((type == "points") ? await user.GetPointsAsync() : await user.GetMessageCountAsnyc())}"));
+                components.Add(new DiscordTextDisplayComponent($"-# Deine {((type == "points") ? "Channelpoints:" : "gesendeten Nachrichten:")} {((type == "points") ? await user.GetPointsAsync() : await user.GetMessageCountAsnyc())}"));
 
                 await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new (components, false, DiscordColor.Gold)));
             }

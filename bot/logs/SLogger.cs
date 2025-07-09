@@ -20,6 +20,9 @@ namespace SophBot.bot.logs
 
             if (exception != null)
                 Console.WriteLine(exception);
+
+
+            File.AppendAllText($"{AppDomain.CurrentDomain.BaseDirectory}/__log.txt", $"[{time} - {level}] {source} -> {message}\n{((exception != null) ? exception + "\n" : "")}");
         }
 
         private static ConsoleColor GetColor(LogLevel level) => level switch

@@ -162,13 +162,14 @@ namespace SophBot.bot.discord
 
                 try
                 {
-                    DiscordUser current = await Guild.GetMemberAsync(userId);
-                    name = current.GlobalName;
+                    DiscordMember current = await Guild.GetMemberAsync(userId);
+                    name = current.Mention;
                 }
                 catch
                 {
                     name = "404 - User not found!";
                 }
+                name ??= "404 - User not found!";
 
                 SLogger.Log(LogLevel.Debug, $"Getting Points for {name} (Leaderboard)", "SDiscordServer.cs");
                 List<SDBValue> conditions2 = new();

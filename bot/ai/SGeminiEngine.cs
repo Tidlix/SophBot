@@ -35,9 +35,14 @@ namespace SophBot.bot.ai
                 ThinkingConfig = thinkConf
             };
 
-            var dbValues = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Description);
+            string SystemInstructions = SConfig.AI.SystemInstructions;
 
-            Session = model.StartChat(config: genConf, systemInstruction: SConfig.AI.SystemInstructions + " aditional information from db: " + string.Join(" - ", dbValues!));
+            if (SConfig.AI.UseWiki)
+            {
+                var dbValues = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Description);
+                SystemInstructions += " aditional information from internal wiki: " + string.Join(" - ", dbValues!);
+            }
+            Session = model.StartChat(config: genConf, systemInstruction: SystemInstructions);
         }
 
         public static async ValueTask<string> GenerateResponseAsync(string prompt)

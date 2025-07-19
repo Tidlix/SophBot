@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Security.Cryptography;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
@@ -67,6 +68,15 @@ namespace SophBot.bot.discord.commands
             await ctx.RespondAsync($"LogLevel changed to `{logLevel}`");
         }
 
+        [Command("reload_config")]
+        public async ValueTask reloadConfig(CommandContext ctx)
+        {
+            await ctx.DeferResponseAsync();
+            await SConfig.ReadConfigAsync();
+            SLogger.Log(LogLevel.Information, "Config was reloaded!", "DebugCommands.cs");
+            await ctx.EditResponseAsync("Config reloaded");
+        }
+
         [Command("insert_wiki")]
         public async ValueTask insertWiki(CommandContext ctx, string article, int site)
         {
@@ -85,7 +95,7 @@ namespace SophBot.bot.discord.commands
         }
 
 
-        [Command("createProfiles")]
+        [Command("create_profiles")]
         public async ValueTask createProfiles(CommandContext ctx)
         {
             await ctx.DeferResponseAsync();
@@ -101,7 +111,7 @@ namespace SophBot.bot.discord.commands
         }
 
 
-        [Command("monitoringlist")]
+        [Command("list_monitorings")]
         public async ValueTask monitoringList(CommandContext ctx)
         {
             string response = "All monitored channels:";

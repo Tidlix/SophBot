@@ -34,6 +34,7 @@ namespace SophBot.bot.conf
             public static string GeminiKey;
             public static string GroqKey;
             public static string SystemInstructions;
+            public static bool UseWiki;
         }
 
         public static async ValueTask ReadConfigAsync()
@@ -77,7 +78,11 @@ namespace SophBot.bot.conf
 
                 AI.GeminiKey = getValue(confFile, "Gemini_Key");
                 AI.GroqKey = getValue(confFile, "Groq_Key");
-                AI.SystemInstructions = getValue(confFile, "Sys_Instruction");
+                AI.UseWiki = bool.Parse(getValue(confFile, "Use_Wiki"));
+                sr = new StreamReader($"{AppDomain.CurrentDomain.BaseDirectory}/config/ai.promt");
+                SLogger.Log(LogLevel.Debug, $"Reading file: ai.prompt", "SConfig.cs");
+                confFile = await sr.ReadToEndAsync();
+                AI.SystemInstructions = confFile;
             }
             catch (Exception ex)
             {

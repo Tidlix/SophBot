@@ -133,6 +133,7 @@ namespace SophBot.bot.discord
                 {
                     name = "404 - User not found!";
                 }
+                name ??= "404 - User not found!";
 
                 SLogger.Log(LogLevel.Debug, $"Getting Points for {name} (Leaderboard)", "SDiscordServer.cs");
                 List<SDBValue> conditions2 = new();

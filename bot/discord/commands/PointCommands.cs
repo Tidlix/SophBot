@@ -65,30 +65,33 @@ namespace SophBot.bot.discord.commands
         }
 
 
-
         private static async ValueTask LeaderBoardCmdAsync(CommandContext ctx, string type)
+        {
+            await ctx.DeferResponseAsync();
+
+            SDiscordServer server = new(ctx.Guild!);
+            SDiscordUser user = new(ctx.Member!);
+            var dict = (type == "points") ? await server.getPointsLeaderboardAsync() : await server.getMessagesLeaderboardAsync(); 
+
+            List<DiscordComponent> components = new();
+            components.Add(new DiscordTextDisplayComponent((type == "points") ? "## Channelpoints Bestenliste:" : "## Messages Bestenliste:"));
+            components.Add(new DiscordSeparatorComponent(true));
+
+            string Leaderboard = "";
+            foreach (var current in dict)
             {
-                await ctx.DeferResponseAsync();
+                string name = current.Key;
+                string count = current.Value.ToString();
 
-                SDiscordServer server = new(ctx.Guild!);
-                SDiscordUser user = new(ctx.Member!);
-                var dict = (type == "points") ? await server.getPointsLeaderboardAsync() : await server.getMessagesLeaderboardAsync(); 
 
-                List<DiscordComponent> components = new();
-                components.Add(new DiscordTextDisplayComponent((type == "points") ? "## Channelpoints Bestenliste:" : "## Messages Bestenliste:"));
-                components.Add(new DiscordSeparatorComponent(true));
-                int i = 0;
-                string leaderboard = "";
-                foreach (var current in dict)
-                {
-                    i++;
-                    leaderboard += $"**{i} - {current.Key}: ** {current.Value} {((type == "points") ? "Channelpoints" : "gesendete Nachrichten")}\n";
-                }
-                components.Add(new DiscordTextDisplayComponent(leaderboard));
-                components.Add(new DiscordSeparatorComponent(true));
-                components.Add(new DiscordTextDisplayComponent($"-# Deine {((type == "points") ? "Channelpoints:" : "gesendeten Nachrichten:")} {((type == "points") ? await user.GetPointsAsync() : await user.GetMessageCountAsnyc())}"));
-
-                await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new (components, false, DiscordColor.Gold)));
+                Leaderboard += $"{name} -  `{count} {((type == "points") ? "Channelpoints" : "gesendete Nachrichten")}`\n";
             }
+
+            components.Add(new DiscordTextDisplayComponent(Leaderboard));
+            components.Add(new DiscordSeparatorComponent(true));
+            components.Add(new DiscordTextDisplayComponent($"-# Deine {((type == "points") ? "Channelpoints:" : "gesendeten Nachrichten:")} {((type == "points") ? await user.GetPointsAsync() : await user.GetMessageCountAsnyc())}"));
+
+            await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new (components, false, DiscordColor.Gold)));
+        }
     }
 }

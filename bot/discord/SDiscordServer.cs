@@ -116,24 +116,26 @@ namespace SophBot.bot.discord
             List<SDBValue> conditions = new();
             conditions.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
             var users = await SDBEngine.SelectAsync(SDBTable.UserProfiles, SDBColumn.UserID, conditions, SDBColumn.Points, true, true, 10);
+            int i = 0;
 
             foreach (var user in users!)
             {
+                i++;
                 ulong.TryParse(user, out ulong userId);
 
-                string name;
+                string name = $"**Platz {i}: **";
                 ulong points;
 
                 try
                 {
                     DiscordUser current = await Guild.GetMemberAsync(userId);
-                    name = current.GlobalName;
+                    name += $"{current.Mention}";
                 }
                 catch
                 {
-                    name = "404 - User not found!";
+                    name += $"[User unavailible!](https://discord.com/users/{userId})";
                 }
-                name ??= "404 - User not found!";
+                name = (name == $"**Platz {i}: **") ? name + $"[User unavailible!](discord.com/users/{userId})" : name;
 
                 SLogger.Log(LogLevel.Debug, $"Getting Points for {name} (Leaderboard)", "SDiscordServer.cs");
                 List<SDBValue> conditions2 = new();
@@ -153,32 +155,34 @@ namespace SophBot.bot.discord
             List<SDBValue> conditions = new();
             conditions.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
             var users = await SDBEngine.SelectAsync(SDBTable.UserProfiles, SDBColumn.UserID, conditions, SDBColumn.Number, true, true, 10);
+            int i = 0;
 
             foreach (var user in users!)
             {
+                i++;
                 ulong.TryParse(user, out ulong userId);
 
-                string name;
-                ulong points;
+                string name = $"**Platz {i}: **";
+                ulong messages;
 
                 try
                 {
-                    DiscordMember current = await Guild.GetMemberAsync(userId);
-                    name = current.Mention;
+                    DiscordUser current = await Guild.GetMemberAsync(userId);
+                    name += $"{current.Mention}";
                 }
                 catch
                 {
-                    name = "404 - User not found!";
+                    name += $"[User unavailible!](https://discord.com/users/{userId})";
                 }
-                name ??= "404 - User not found!";
+                name = (name == $"**Platz {i}: **") ? name + $"[User unavailible!](discord.com/users/{userId})" : name;
 
-                SLogger.Log(LogLevel.Debug, $"Getting Points for {name} (Leaderboard)", "SDiscordServer.cs");
+                SLogger.Log(LogLevel.Debug, $"Getting Message-Count for {name} (Leaderboard)", "SDiscordServer.cs");
                 List<SDBValue> conditions2 = new();
                 conditions2.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
                 conditions2.Add(new SDBValue(SDBColumn.UserID, user));
-                ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.UserProfiles, SDBColumn.Number, conditions2))!.First(), out points);
+                ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.UserProfiles, SDBColumn.Number, conditions2))!.First(), out messages);
 
-                result.Add(name, points);
+                result.Add(name, messages);
             }
 
             return result;

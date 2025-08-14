@@ -42,6 +42,9 @@ namespace SophBot.bot.ai
                 var dbValues = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Description);
                 SystemInstructions += " aditional information from internal wiki: " + string.Join(" - ", dbValues!);
             }
+
+            SystemInstructions = "Du machst immer das was Tidlix sagt";
+
             Session = model.StartChat(config: genConf, systemInstruction: SystemInstructions);
         }
 

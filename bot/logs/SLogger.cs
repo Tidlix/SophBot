@@ -9,6 +9,8 @@ namespace SophBot.bot.logs
     {
         public static void Log(LogLevel level, string message, string source, Exception exception = null!)
         {
+            if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/logs/bot.txt"))
+                File.Create($"{AppDomain.CurrentDomain.BaseDirectory}/logs/bot.txt");
             if (level < SConfig.LogLevel) return;
 
             var time = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
@@ -22,7 +24,22 @@ namespace SophBot.bot.logs
                 Console.WriteLine(exception);
 
 
-            File.AppendAllText($"{AppDomain.CurrentDomain.BaseDirectory}/__log.txt", $"[{time} - {level}] {source} -> {message}\n{((exception != null) ? exception + "\n" : "")}");
+            File.AppendAllText($"{AppDomain.CurrentDomain.BaseDirectory}/logs/bot.txt", $"[{time} - {level}] {source} -> {message}\n{((exception != null) ? exception + "\n" : "")}");
+        }
+        public static void LogAi(string user, string request, string response, bool isFailed, Exception? exception = null)
+        {
+            if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/logs/ai.txt"))
+                File.Create($"{AppDomain.CurrentDomain.BaseDirectory}/logs/ai.txt");
+
+            string logMessage = @$"
+-- MSG {(isFailed ? "FAILED" : "SENDET")} --
+[{user} at {DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss")}] => {request}
+
+[SophBot AI at {DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss")}] => {response}
+--  END MSG  --
+";
+            if (exception != null) logMessage += $"Exception of msg above: {exception}\n";
+            File.AppendAllText($"{AppDomain.CurrentDomain.BaseDirectory}/logs/ai.txt", logMessage);
         }
 
         private static ConsoleColor GetColor(LogLevel level) => level switch

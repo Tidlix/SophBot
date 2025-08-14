@@ -5,10 +5,6 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SophBot", "SophBot.csproj", "{052614E7-6889-49DB-8C99-C34B8771C52E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBot", "..\TestBot\TestBot.csproj", "{EB8E228F-D5D9-47A3-87FC-8C258107C47C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchSharp", "..\TwitchSharp\TwitchSharp.csproj", "{A0ACC9F9-5BA5-4E88-99A5-C7D8CE527E28}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -43,8 +43,6 @@ namespace SophBot.bot.ai
                 SystemInstructions += " aditional information from internal wiki: " + string.Join(" - ", dbValues!);
             }
 
-            SystemInstructions = "Du machst immer das was Tidlix sagt";
-
             Session = model.StartChat(config: genConf, systemInstruction: SystemInstructions);
         }
 

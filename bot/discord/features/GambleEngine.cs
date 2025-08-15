@@ -61,7 +61,7 @@ namespace SophBot.bot.discord.features
                 else
                 {
                     string draws = "";
-                    while (bPoints < 21 && bPoints <= pPoints)
+                    while (bPoints <= 21 && bPoints <= pPoints)
                     {
                         Card drawnCard = new();
                         int rank = (int)drawnCard.rank;

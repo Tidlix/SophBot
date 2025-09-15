@@ -1,7 +1,7 @@
 using DSharpPlus.Entities;
 using SophBot.bot.database;
 using SophBot.bot.logs;
-using Microsoft.Extensions.Logging; 
+using Microsoft.Extensions.Logging;
 
 namespace SophBot.bot.discord.features
 {
@@ -9,59 +9,76 @@ namespace SophBot.bot.discord.features
     {
         private static async ValueTask<List<DiscordSelectComponentOption>> getArticleList()
         {
-            var articles = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Name);
+            var articlesRaw = await SDBEngine.SelectFromAsync("wiki", ["title"]);
 
-            if (articles == null) return new List<DiscordSelectComponentOption>() { new DiscordSelectComponentOption("404 Not Found", "") };
+            if (articlesRaw == null || articlesRaw.Length == 0)
+                return new List<DiscordSelectComponentOption>() { new DiscordSelectComponentOption("404 Not Found", "") };
 
-            List<string> articleList = new();
-            foreach (var article in articles) if (!articleList.Contains(article)) articleList.Add(article);
-
+            var articleList = articlesRaw.Select(r => r[0]?.ToString() ?? string.Empty).Distinct().ToList();
             List<DiscordSelectComponentOption> options = new();
+
             foreach (var article in articleList)
             {
-                SLogger.Log(LogLevel.Debug, "Got Wiki Article " + article, "WikiEngine.cs");
-
+                SLogger.Log(LogLevel.Debug, $"Got Wiki Article {article}", "WikiEngine.cs");
                 options.Add(new DiscordSelectComponentOption(article, article));
             }
 
             return options;
         }
+
         public static async ValueTask<string> getSite(string article, int site)
         {
-            List<SDBValue> conditions = new();
-            conditions.Add(new SDBValue(SDBColumn.Name, article));
-            conditions.Add(new SDBValue(SDBColumn.Number, site.ToString()));
+            var conditions = new Dictionary<string, object>
+            {
+                { "title", article },
+                { "site", site }
+            };
 
-            var result = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Description, conditions, limit: 1);
+            var result = await SDBEngine.SelectFromAsync(
+                "wiki",
+                new string[] { "value" },
+                conditions: conditions,
+                limit: 1);
 
-            SLogger.Log(LogLevel.Debug, "Got Wiki Site " + result!.First(), "WikiEngine.cs");
-
-            return result!.First();
+            var description = result.FirstOrDefault()?[0]?.ToString() ?? string.Empty;
+            SLogger.Log(LogLevel.Debug, $"Got Wiki Site {description}", "WikiEngine.cs");
+            return description;
         }
+
         public static async ValueTask setSite(string article, int site, string input)
         {
-            List<SDBValue> values = new();
-            values.Add(new SDBValue(SDBColumn.Name, article));
-            values.Add(new SDBValue(SDBColumn.Number, site.ToString()));
+            var conditions = new Dictionary<string, object>
+            {
+                { "title", article },
+                { "site", site }
+            };
 
             try
             {
-                await SDBEngine.DeleteAsync(SDBTable.Wiki, values);    
-            } catch {}
-            
+                await SDBEngine.DeleteFromAsync("wiki", conditions);
+            }
+            catch {}
 
-            values.Add(new SDBValue(SDBColumn.Description, input));
+            var values = new Dictionary<string, object>
+            {
+                { "title", article },
+                { "site", site },
+                { "value", input }
+            };
 
-            await SDBEngine.InsertAsync(values, SDBTable.Wiki);
+            await SDBEngine.InsertToAsync("wiki", [values]);
         }
+
         private static async ValueTask<int> countSites(string article)
         {
-            List<SDBValue> conditions = new();
-            conditions.Add(new SDBValue(SDBColumn.Name, article));
+            var conditions = new Dictionary<string, object>
+            {
+                { "title", article }
+            };
 
-            var sites = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Number, conditions);
-            SLogger.Log(LogLevel.Debug, $"Found {sites!.Count} sites for wiki article {article}", "WikiEngine.cs");
-            return sites.Count;
+            var sites = await SDBEngine.SelectFromAsync("wiki", ["site"] , conditions);
+            SLogger.Log(LogLevel.Debug, $"Found {sites.Length} sites for wiki article {article}", "WikiEngine.cs");
+            return sites.Length;
         }
 
         public static async ValueTask<DiscordMessageBuilder> getWikiMessage(string article, int site)
@@ -70,10 +87,9 @@ namespace SophBot.bot.discord.features
             articleRow.Add(new DiscordSelectComponent("wikiArticleSelect", article, await getArticleList()));
 
             List<DiscordComponent> siteRow = new();
-            siteRow.Add(new DiscordButtonComponent(DiscordButtonStyle.Primary, $"wiki_article={article};site={site - 1};", "Vorherige Seite", (site <= 0) ? true : false));
+            siteRow.Add(new DiscordButtonComponent(DiscordButtonStyle.Primary, $"wiki_article={article};site={site - 1};", "Vorherige Seite", site <= 0));
             siteRow.Add(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "wiki_article_site", $"Seite {site + 1}", true));
-            siteRow.Add(new DiscordButtonComponent(DiscordButtonStyle.Primary, $"wiki_article={article};site={site + 1};", "Nächste Seite", (site >= await countSites(article)-1) ? true : false));
-
+            siteRow.Add(new DiscordButtonComponent(DiscordButtonStyle.Primary, $"wiki_article={article};site={site + 1};", "Nächste Seite", site >= await countSites(article) - 1));
 
             List<DiscordComponent> components = new();
             components.Add(new DiscordTextDisplayComponent("## Soph-Wiki"));

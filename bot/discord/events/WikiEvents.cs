@@ -62,25 +62,25 @@ namespace SophBot.bot.discord.events
                     }
                 }
 
-            if (customId.Contains("modify"))
-            {
-                DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
-                if (!member.Permissions.Contains(DiscordPermission.Administrator)) return;
+                if (customId.Contains("modify"))
+                {
+                    DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
+                    if (!member.Permissions.Contains(DiscordPermission.Administrator)) return;
 
-                string? value = await WikiEngine.getSite(article, site);
-                value ??= "";
+                    string? value = await WikiEngine.getSite(article, site);
+                    value ??= "";
 
-                var modal = new DiscordInteractionResponseBuilder()
-                    .WithTitle($"{article}.{site}")
-                    .WithCustomId($"modify-wiki_article={article};site={site};")
-                    .AddTextInputComponent(new DiscordTextInputComponent(
-                        label: "Input",
-                        customId: "articleInput",
-                        value: value,
-                        style: DiscordTextInputStyle.Paragraph));
-                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.Modal, modal);
-                await e.Message.DeleteAsync();
-                return;
+                    var modal = new DiscordInteractionResponseBuilder()
+                        .WithTitle($"{article}.{site}")
+                        .WithCustomId($"modify-wiki_article={article};site={site};")
+                        .AddTextInputComponent(new DiscordTextInputComponent(
+                            label: "Input",
+                            customId: "articleInput",
+                            value: value,
+                            style: DiscordTextInputStyle.Paragraph));
+                    await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.Modal, modal);
+                    await e.Message.DeleteAsync();
+                    return;
                 }
 
                 var responseMsg = await WikiEngine.getWikiMessage(article, site);

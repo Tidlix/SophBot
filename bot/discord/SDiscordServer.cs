@@ -29,51 +29,53 @@ namespace SophBot.bot.discord
 
         public async ValueTask createConfigAsync(DiscordChannel welcomeChannel, DiscordChannel ruleChannel, DiscordChannel logChannel, DiscordRole memberRole)
         {
-            List<SDBValue> values = new();
-            values.Add(new SDBValue(SDBColumn.ServerID, Guild.Id.ToString()));
-            values.Add(new SDBValue(SDBColumn.WelcomeChannelID, welcomeChannel.Id.ToString()));
-            values.Add(new SDBValue(SDBColumn.RuleChannelID, ruleChannel.Id.ToString()));
-            values.Add(new SDBValue(SDBColumn.LogChannelID, logChannel.Id.ToString()));
-            values.Add(new SDBValue(SDBColumn.MemberRoleID, memberRole.Id.ToString()));
+            Dictionary<string, object>[] values = [
+                new Dictionary<string, object> {
+                    {"serverid", Guild.Id},
+                    {"rulechannelid", ruleChannel.Id},
+                    {"welcomechannelid", welcomeChannel.Id},
+                    {"logchannelid", logChannel.Id},
+                    {"memberroleid", memberRole.Id}
+                }
+            ];
 
-            await SDBEngine.InsertAsync(values, SDBTable.ServerConfig);
+            await SDBEngine.InsertToAsync("warnings", values, false);
         }
         public async ValueTask modifyConfigAsync(DiscordChannel? welcomeChannel = null, DiscordChannel? ruleChannel = null, DiscordChannel? logChannel = null, DiscordRole? memberRole = null)
         {
-            List<SDBValue> values = new();
-            if (welcomeChannel! != null!) values.Add(new SDBValue(SDBColumn.WelcomeChannelID, welcomeChannel.Id.ToString()));
-            if (ruleChannel! != null!) values.Add(new SDBValue(SDBColumn.RuleChannelID, ruleChannel.Id.ToString()));
-            if (logChannel! != null!) values.Add(new SDBValue(SDBColumn.LogChannelID, logChannel.Id.ToString()));
-            if (memberRole! != null!) values.Add(new SDBValue(SDBColumn.MemberRoleID, memberRole.Id.ToString()));
 
-            if (values.Count == 0) throw new Exception("Modifying values are all null!");
+            Dictionary<string, object> values = new Dictionary<string, object>();
 
-            List<SDBValue> condition = new();
-            condition.Add(new SDBValue(SDBColumn.ServerID, Guild.Id.ToString()));
 
-            await SDBEngine.ModifyAsync(values, SDBTable.ServerConfig, condition);
+            if (welcomeChannel is not null) values.Add("welcomechannelid", welcomeChannel.Id);
+            if (ruleChannel is not null) values.Add("rulechannelid", ruleChannel.Id);
+            if (logChannel is not null) values.Add("logchannelid", logChannel.Id);
+            if (memberRole is not null) values.Add("memberroleid", memberRole.Id);
+
+            await SDBEngine.ModifyAtAsync("serverconfig", values, new Dictionary<string, object> { {"serverid", Guild.Id} } );
         }
 
         public async ValueTask<DiscordChannel> getChannelAsync(SDiscordChannel type)
         {
             try
             {
-                ulong channelID;
+                string channel = string.Empty;
                 switch (type)
                 {
                     case SDiscordChannel.WelcomeChannel:
-                        ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.ServerConfig, SDBColumn.WelcomeChannelID))!.First(), out channelID);
+                        channel = "welcomechannelid";
                         break;
                     case SDiscordChannel.RuleChannel:
-                        ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.ServerConfig, SDBColumn.RuleChannelID))!.First(), out channelID);
+                        channel = "rulechannelid";
                         break;
                     case SDiscordChannel.LogChannel:
-                        ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.ServerConfig, SDBColumn.LogChannelID))!.First(), out channelID);
+                        channel = "logchannelid";
                         break;
 
                     default:
                         throw new Exception("Unknown channel");
                 }
+                ulong channelID = (ulong)(await SDBEngine.SelectFromAsync("serverconfig", [channel], new Dictionary<string, object> { { "serverid", Guild.Id } }))[0][0];
 
                 return await Guild.GetChannelAsync(channelID);
             }
@@ -83,21 +85,21 @@ namespace SophBot.bot.discord
                 throw;
             }
         }
-        public async ValueTask<DiscordRole> getRoleAsync(SDiscordRole role)
+        public async ValueTask<DiscordRole> getRoleAsync(SDiscordRole type)
         {
             try
             {
-                ulong roleID;
-                switch (role)
+                string role = string.Empty;
+                switch (type)
                 {
                     case SDiscordRole.MemberRole:
-                        ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.ServerConfig, SDBColumn.MemberRoleID))!.First(), out roleID);
+                        role = "memberroleid";
                         break;
-
 
                     default:
                         throw new Exception("Unknown role");
                 }
+                ulong roleID = (ulong)(await SDBEngine.SelectFromAsync("serverconfig", [role], new Dictionary<string, object> { { "serverid", Guild.Id } }))[0][0];
 
                 return await Guild.GetRoleAsync(roleID);
             }
@@ -108,42 +110,29 @@ namespace SophBot.bot.discord
             }
         }
 
-
+        
         public async ValueTask<Dictionary<string, ulong>> getPointsLeaderboardAsync()
         {
             Dictionary<string, ulong> result = new();
 
-            List<SDBValue> conditions = new();
-            conditions.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
-            var users = await SDBEngine.SelectAsync(SDBTable.UserProfiles, SDBColumn.UserID, conditions, SDBColumn.Points, true, true, 10);
-            int i = 0;
+            var leaderboard = await SDBEngine.SelectFromAsync("serverconfig", ["userid", "points"], new Dictionary<string, object> { { "serverid", Guild.Id } }, "points", true, 10);
 
-            foreach (var user in users!)
+            int i = 0;
+            foreach (var current in leaderboard)
             {
                 i++;
-                ulong.TryParse(user, out ulong userId);
-
-                string name = $"**Platz {i}: **";
-                ulong points;
-
+                string name = $"**Platz {i}:** ";
                 try
                 {
-                    DiscordUser current = await Guild.GetMemberAsync(userId);
-                    name += $"{current.Mention}";
+                    DiscordUser user = await Guild.GetMemberAsync((ulong)current[0]);
+                    name += user.Username;
                 }
                 catch
                 {
-                    name += $"[User unavailible!](https://discord.com/users/{userId})";
+                    name += $"[User unavailible!](https://discord.com/users/{current[0]})";
                 }
-                name = (name == $"**Platz {i}: **") ? name + $"[User unavailible!](discord.com/users/{userId})" : name;
 
-                SLogger.Log(LogLevel.Debug, $"Getting Points for {name} (Leaderboard)", "SDiscordServer.cs");
-                List<SDBValue> conditions2 = new();
-                conditions2.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
-                conditions2.Add(new SDBValue(SDBColumn.UserID, user));
-                ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.UserProfiles, SDBColumn.Points, conditions2))!.First(), out points);
-
-                result.Add(name, points);
+                result.Add(name, (ulong)current[1]);                
             }
 
             return result;
@@ -152,37 +141,24 @@ namespace SophBot.bot.discord
         {
             Dictionary<string, ulong> result = new();
 
-            List<SDBValue> conditions = new();
-            conditions.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
-            var users = await SDBEngine.SelectAsync(SDBTable.UserProfiles, SDBColumn.UserID, conditions, SDBColumn.Number, true, true, 10);
-            int i = 0;
+            var leaderboard = await SDBEngine.SelectFromAsync("serverconfig", ["userid", "number"], new Dictionary<string, object> { { "serverid", Guild.Id } }, "number", true, 10);
 
-            foreach (var user in users!)
+            int i = 0;
+            foreach (var current in leaderboard)
             {
                 i++;
-                ulong.TryParse(user, out ulong userId);
-
-                string name = $"**Platz {i}: **";
-                ulong messages;
-
+                string name = $"**Platz {i}:** ";
                 try
                 {
-                    DiscordUser current = await Guild.GetMemberAsync(userId);
-                    name += $"{current.Mention}";
+                    DiscordUser user = await Guild.GetMemberAsync((ulong)current[0]);
+                    name += user.Username;
                 }
                 catch
                 {
-                    name += $"[User unavailible!](https://discord.com/users/{userId})";
+                    name += $"[User unavailible!](https://discord.com/users/{current[0]})";
                 }
-                name = (name == $"**Platz {i}: **") ? name + $"[User unavailible!](discord.com/users/{userId})" : name;
 
-                SLogger.Log(LogLevel.Debug, $"Getting Message-Count for {name} (Leaderboard)", "SDiscordServer.cs");
-                List<SDBValue> conditions2 = new();
-                conditions2.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
-                conditions2.Add(new SDBValue(SDBColumn.UserID, user));
-                ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.UserProfiles, SDBColumn.Number, conditions2))!.First(), out messages);
-
-                result.Add(name, messages);
+                result.Add(name, (ulong)current[1]);                
             }
 
             return result;

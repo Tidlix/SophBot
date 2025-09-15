@@ -27,7 +27,7 @@ namespace SophBot.bot.discord.commands
                 components.Add(new DiscordSeparatorComponent(true));
 
                 SLogger.Log(LogLevel.Debug, $"Try to get response for {promt}", "AICommands.cs");
-                response = await SGeminiEngine.GenerateResponseAsync($"{ctx.User.Username} sagt: {promt}");
+                response = await SGeminiEngine.GenerateResponseAsync(new AIRequest(ctx.User.Username, promt, AIResponseChannelType.Discord, 4000-promt.Length));
                 components.Add(new DiscordTextDisplayComponent(response));
                 SLogger.Log(LogLevel.Debug, $"Got response - sending message", "AICommands.cs");
 

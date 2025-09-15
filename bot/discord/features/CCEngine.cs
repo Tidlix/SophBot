@@ -13,17 +13,18 @@ namespace SophBot.bot.discord.features
             this.Guild = guild;
         }
 
-
-
         public async ValueTask createAsync(string command, string output)
         {
             try
             {
-                List<SDBValue> values = new();
-                values.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
-                values.Add(new(SDBColumn.Name, command));
-                values.Add(new(SDBColumn.Description, output));
-                await SDBEngine.InsertAsync(values, SDBTable.CustomCommands);
+                var values = new Dictionary<string, object>
+                {
+                    { "serverid", Guild.Id.ToString() },
+                    { "command", command },
+                    { "value", output }
+                };
+
+                await SDBEngine.InsertToAsync("customcommands", new Dictionary<string, object>[] { values });
             }
             catch (Exception ex)
             {
@@ -36,18 +37,23 @@ namespace SophBot.bot.discord.features
                 throw;
             }
         }
+
         public async ValueTask modifyAsync(string command, string output)
         {
             try
             {
-                List<SDBValue> values = new();
-                values.Add(new(SDBColumn.Description, output));
+                var values = new Dictionary<string, object>
+                {
+                    { "value", output }
+                };
 
-                List<SDBValue> conditions = new();
-                conditions.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
-                conditions.Add(new(SDBColumn.Name, command));
+                var conditions = new Dictionary<string, object>
+                {
+                    { "serverid", Guild.Id.ToString() },
+                    { "command", command }
+                };
 
-                await SDBEngine.ModifyAsync(values, SDBTable.CustomCommands, conditions);
+                await SDBEngine.ModifyAtAsync("customcommands", values, conditions);
             }
             catch (Exception ex)
             {
@@ -55,15 +61,18 @@ namespace SophBot.bot.discord.features
                 throw;
             }
         }
+
         public async ValueTask deleteAsync(string command)
         {
             try
             {
-                List<SDBValue> conditions = new();
-                conditions.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
-                conditions.Add(new(SDBColumn.Name, command));
+                var conditions = new Dictionary<string, object>
+                {
+                    { "serverid", Guild.Id.ToString() },
+                    { "command", command }
+                };
 
-                await SDBEngine.DeleteAsync(SDBTable.CustomCommands, conditions);
+                await SDBEngine.DeleteFromAsync("customcommands", conditions);
             }
             catch (Exception ex)
             {
@@ -71,17 +80,19 @@ namespace SophBot.bot.discord.features
                 throw;
             }
         }
+
         public async ValueTask<string> getOutputAsync(string command)
         {
             try
             {
-                List<SDBValue> conditions = new();
-                conditions.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
-                conditions.Add(new(SDBColumn.Name, command));
+                var conditions = new Dictionary<string, object>
+                {
+                    { "serverid", Guild.Id.ToString() },
+                    { "command", command }
+                };
 
-                string response;
-                var select = await SDBEngine.SelectAsync(SDBTable.CustomCommands, SDBColumn.Description, conditions, limit: 1);
-                response = (select == null) ? "" : select.First();
+                var select = await SDBEngine.SelectFromAsync("customcommands", new string[] { "value" }, conditions, limit: 1);
+                var response = (select == null || select.Length == 0) ? "" : select.First()[0]?.ToString() ?? "";
 
                 return response;
             }
@@ -92,14 +103,18 @@ namespace SophBot.bot.discord.features
                 return "";
             }
         }
+
         public async ValueTask<List<string>?> getListAsync()
         {
             try
             {
-                List<SDBValue> conditions = new();
-                conditions.Add(new(SDBColumn.ServerID, Guild.Id.ToString()));
+                var conditions = new Dictionary<string, object>
+                {
+                    { "serverid", Guild.Id.ToString() }
+                };
 
-                return await SDBEngine.SelectAsync(SDBTable.CustomCommands, SDBColumn.Name, conditions);
+                var select = await SDBEngine.SelectFromAsync("customcommands", new string[] { "command" }, conditions);
+                return select?.Select(r => r[0]?.ToString() ?? "").ToList();
             }
             catch (Exception ex)
             {
@@ -107,6 +122,5 @@ namespace SophBot.bot.discord.features
                 throw;
             }
         }
-
     }
 }

@@ -11,11 +11,18 @@ namespace SophBot
 {
     public class Program
     {
+        /*
+        SOPHBOT V3 TO DO:
+        - AI Memory
+        - Wiki Modify
+        - Twitch Integration
+        - Profile System with Twitch and Discord profile
+
+        */
         public static async Task Main(string[] args)
         {
-            SConfig.LogLevel = LogLevel.Information;
+            SConfig.LogLevel = LogLevel.Debug;
             await SConfig.ReadConfigAsync();
-            await SDBEngine.Initialize();
 
             await SGeminiEngine.StartSession();
             await SBotClient.CreateClientAsync();

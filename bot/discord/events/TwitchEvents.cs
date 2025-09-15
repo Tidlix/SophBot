@@ -11,27 +11,23 @@ namespace SophBot.bot.discord.events
         public static async Task StreamOnline(object? sender, OnStreamOnlineArgs e)
         {
             SLogger.Log(LogLevel.Debug, $"Stream {e.Channel} went online", "TwitchEvents.cs");
-            List<SDBValue> conditions = new();
-            conditions.Add(new(SDBColumn.Name, e.Channel));
+
             string twitchChannel = e.Channel;
             var time = e.Stream.StartedAt.AddHours(2); // 2 For German time
 
             SLogger.Log(LogLevel.Debug, $"Selecting discord channels", "TwitchEvents.cs");
-            List<string> discordChannels = (await SDBEngine.SelectAsync(SDBTable.TwitchMonitorings, SDBColumn.NotificationChannelID, conditions))!; 
+            var notifications = await SDBEngine.SelectFromAsync(
+                table: "twitchmonitorings",
+                columns: ["notificationchannel", "mentionrole"],
+                conditions: new Dictionary<string, object> { { "channel", twitchChannel } });
 
-            foreach (var discordChannelIdStr in discordChannels)
+            foreach (var notification in notifications)
             {
-                ulong.TryParse(discordChannelIdStr, out ulong discordChannelId);
-                DiscordChannel discordChannel = await SBotClient.Client.GetChannelAsync(discordChannelId);
-                SLogger.Log(LogLevel.Debug, $"Found channel {discordChannel}", "TwitchEvents.cs");
+                DiscordChannel notificationChannel = await SBotClient.Client.GetChannelAsync((ulong)notification[0]);
+                DiscordRole mentionRole = await notificationChannel.Guild.GetRoleAsync((ulong)notification[1]);
 
-                conditions.Add(new(SDBColumn.NotificationChannelID, discordChannelIdStr));
-                ulong mentionRoleId;
-                SLogger.Log(LogLevel.Debug, $"Selection mention role", "TwitchEvents.cs");
-                ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.TwitchMonitorings, SDBColumn.MentionRoleID, conditions, limit: 1))!.First(), out mentionRoleId);
-                conditions.Remove(new(SDBColumn.NotificationChannelID, discordChannelIdStr));
-                DiscordRole mentionRole = await discordChannel.Guild.GetRoleAsync(mentionRoleId);
-                SLogger.Log(LogLevel.Debug, $"Found role {mentionRole}", "TwitchEvents.cs");
+                SLogger.Log(LogLevel.Debug, $"Found channel {notificationChannel}", "STwichClient.cs");
+                SLogger.Log(LogLevel.Debug, $"Found guild ({mentionRole})", "STwichClient");
 
                 string url = e.Stream.ThumbnailUrl.Replace("{width}", "1920").Replace("{height}", "1080");
 
@@ -49,8 +45,8 @@ namespace SophBot.bot.discord.events
                     .EnableV2Components()
                     .AddContainerComponent(new DiscordContainerComponent(components, color: DiscordColor.Purple))
                     .WithAllowedMention(new RoleMention(mentionRole));
-                    SLogger.Log(LogLevel.Debug, $"Sending message", "TwitchEvents.cs");
-                await discordChannel.SendMessageAsync(msg);
+                SLogger.Log(LogLevel.Debug, $"Sending message", "TwitchEvents.cs");
+                await notificationChannel.SendMessageAsync(msg);
             }
         }
     }

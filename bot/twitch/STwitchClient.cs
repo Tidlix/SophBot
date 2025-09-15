@@ -31,20 +31,20 @@ namespace SophBot.bot.twitch
 
                 SLogger.Log(LogLevel.Debug, "Create Monitor Service", "STwitchClient.cs");
                 Monitoring = new LiveStreamMonitorService(api, 10);
-                Monitoring.OnStreamOnline += async (s, e) => await StreamOnline(s, e);
+                Monitoring.OnStreamOnline += async (s, e) => await TwitchEvents.StreamOnline(s, e);
                 Monitoring.OnServiceStarted += (s, e) => SLogger.Log(LogLevel.Debug, "Service started!", "STwitchClient.cs");
                 Monitoring.OnChannelsSet += (s, e) => SLogger.Log(LogLevel.Debug, $"Set channels {string.Join(", ", e.Channels)}!", "STwitchClient.cs");
 
                 SLogger.Log(LogLevel.Debug, "Setting Monitoring list", "STwitchClient.cs");
                 var list = new List<string>();
-                var channelList = await SDBEngine.SelectAsync(SDBTable.TwitchMonitorings, SDBColumn.Name);
+                var channelList = await SDBEngine.SelectFromAsync("twitchmonitorings", ["channel"]);
                 if (channelList == null) throw new Exception("Couldn't find channels for twitch monitoring");
-                foreach (string channel in channelList)
+                foreach (string[] channel in channelList)
                 {
-                    SLogger.Log(LogLevel.Debug, $"Found channel {channel}.", "STwitchClient.cs");
-                    if (list.Contains(channel)) continue;
-                    SLogger.Log(LogLevel.Debug, $"Added channel {channel} to list.", "STwitchClient.cs");
-                    list.Add(channel);
+                    SLogger.Log(LogLevel.Debug, $"Found channel {channel[0]}.", "STwitchClient.cs");
+                    if (list.Contains(channel[0])) continue;
+                    SLogger.Log(LogLevel.Debug, $"Added channel {channel[0]} to list.", "STwitchClient.cs");
+                    list.Add(channel[0]);
                 }
 
                 Monitoring.SetChannelsByName(list);
@@ -98,54 +98,6 @@ namespace SophBot.bot.twitch
         }
 
 
-        public static async Task StreamOnline(object? sender, OnStreamOnlineArgs e)
-        {
-            SLogger.Log(LogLevel.Debug, $"Stream {e.Channel} went online", "TwitchEvents.cs");
-            List<SDBValue> conditions = new();
-            conditions.Add(new(SDBColumn.Name, e.Channel));
-
-            string twitchChannel = e.Channel;
-            var time = e.Stream.StartedAt.AddHours(2); // 2 For German time
-
-            SLogger.Log(LogLevel.Debug, $"Selecting discord channels", "TwitchEvents.cs");
-            List<string> discordChannels = (await SDBEngine.SelectAsync(SDBTable.TwitchMonitorings, SDBColumn.NotificationChannelID, conditions))!;
-
-            foreach (var discordChannelIdStr in discordChannels)
-            {
-                ulong.TryParse(discordChannelIdStr, out ulong discordChannelId);
-                DiscordChannel discordChannel = await SBotClient.Client.GetChannelAsync(discordChannelId);
-                SLogger.Log(LogLevel.Debug, $"Found channel {discordChannel}", "TwitchEvents.cs");
-
-                DiscordGuild guild = await SBotClient.Client.GetGuildAsync(discordChannel.GuildId!.Value);
-                SLogger.Log(LogLevel.Debug, $"Found guild ({guild}) for channel", "STwichClient");
-
-                conditions.Add(new(SDBColumn.NotificationChannelID, discordChannelIdStr));
-                ulong mentionRoleId;
-                SLogger.Log(LogLevel.Debug, $"Selection mention role", "TwitchEvents.cs");
-                ulong.TryParse((await SDBEngine.SelectAsync(SDBTable.TwitchMonitorings, SDBColumn.MentionRoleID, conditions, limit: 1))!.First(), out mentionRoleId);
-                conditions.Remove(new(SDBColumn.NotificationChannelID, discordChannelIdStr));
-                DiscordRole mentionRole = await guild.GetRoleAsync(mentionRoleId);
-                SLogger.Log(LogLevel.Debug, $"Found role {mentionRole}", "TwitchEvents.cs");
-
-                string url = e.Stream.ThumbnailUrl.Replace("{width}", "1920").Replace("{height}", "1080");
-
-
-                DiscordComponent[] components = [
-                    new DiscordTextDisplayComponent($"# {e.Stream.UserName} ist nun Live!"),
-                        new DiscordSeparatorComponent(true),
-                        new DiscordTextDisplayComponent($"## {e.Stream.Title}"),
-                        new DiscordMediaGalleryComponent(new DiscordMediaGalleryItem(url, "test", false)),
-                        new DiscordSeparatorComponent(true),
-                        new DiscordSectionComponent(new DiscordTextDisplayComponent($"**{mentionRole.Mention}** \n*{time.ToString("dd.MM.yyyy - HH:mm")}*"), new DiscordLinkButtonComponent($"https://twitch.tv/{twitchChannel}", label: "Jetzt auf Twitch.tv ansehen!"))
-                ];
-
-                var msg = new DiscordMessageBuilder()
-                    .EnableV2Components()
-                    .AddContainerComponent(new DiscordContainerComponent(components, color: DiscordColor.Purple))
-                    .WithAllowedMention(new RoleMention(mentionRole));
-                SLogger.Log(LogLevel.Debug, $"Sending message", "TwitchEvents.cs");
-                await discordChannel.SendMessageAsync(msg);
-            }
-        }
+        
     }
 }

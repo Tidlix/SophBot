@@ -41,7 +41,7 @@ namespace SophBot.bot.ai
             if (SConfig.AI.UseWiki)
             {
                 var dbValues = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Description);
-                //SystemInstructions += " aditional information from internal wiki: " + string.Join(" - ", dbValues!);
+                SystemInstructions += " aditional information from internal wiki: " + string.Join(" - ", dbValues!);
             }
             model.UseGoogleSearch = true;
 

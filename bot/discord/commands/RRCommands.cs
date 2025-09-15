@@ -70,7 +70,7 @@ namespace SophBot.bot.discord.commands
                 await ctx.DeleteResponseAsync();
 
                 DiscordChannel channel = ctx.Channel;
-                await channel.SendMessageAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new(components, false, role1.Color)));
+                await channel.SendMessageAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new(components, false, color: role1.Colors.PrimaryColor))); 
             }
             catch (Exception ex)
             {

@@ -27,12 +27,13 @@ namespace SophBot.bot.ai
 
             ThinkingConfig thinkConf = new ThinkingConfig
             {
-                ThinkingBudget = 0
+                ThinkingBudget = 50
             };
 
             GenerationConfig genConf = new GenerationConfig
             {
-                ThinkingConfig = thinkConf
+                ThinkingConfig = thinkConf,
+                Temperature = 1
             };
 
             string SystemInstructions = SConfig.AI.SystemInstructions;
@@ -42,6 +43,7 @@ namespace SophBot.bot.ai
                 var dbValues = await SDBEngine.SelectAsync(SDBTable.Wiki, SDBColumn.Description);
                 SystemInstructions += " aditional information from internal wiki: " + string.Join(" - ", dbValues!);
             }
+            model.UseGoogleSearch = true;
 
             Session = model.StartChat(config: genConf, systemInstruction: SystemInstructions);
         }

@@ -59,8 +59,41 @@ namespace SophBot.bot.database
             try
             {
                 using var conn = new NpgsqlConnection(ConnString);
-                using var cmd = new NpgsqlCommand();
+                await conn.OpenAsync();
 
+                // Spaltentypen abrufen, um Parameter korrekt zu setzen
+                var columnTypes = new Dictionary<string, NpgsqlDbType>();
+                using (var typeCmd = new NpgsqlCommand(
+                    $"SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = @schema AND table_name = @table",
+                    conn))
+                {
+                    typeCmd.Parameters.AddWithValue("@schema", SConfig.Database.Schema);
+                    typeCmd.Parameters.AddWithValue("@table", table);
+
+                    using var reader = await typeCmd.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        string colName = reader.GetString(0);
+                        string dataType = reader.GetString(1);
+
+                        columnTypes[colName] = dataType switch
+                        {
+                            "integer" => NpgsqlDbType.Integer,
+                            "bigint" => NpgsqlDbType.Bigint,
+                            "smallint" => NpgsqlDbType.Smallint,
+                            "text" => NpgsqlDbType.Text,
+                            "character varying" => NpgsqlDbType.Varchar,
+                            "boolean" => NpgsqlDbType.Boolean,
+                            "uuid" => NpgsqlDbType.Uuid,
+                            "timestamp without time zone" => NpgsqlDbType.Timestamp,
+                            "timestamp with time zone" => NpgsqlDbType.TimestampTz,
+                            "numeric" => NpgsqlDbType.Numeric,
+                            _ => NpgsqlDbType.Text
+                        };
+                    }
+                }
+
+                using var cmd = new NpgsqlCommand();
                 string quotedCols = string.Join(", ", columns.Select(c => $"\"{c}\""));
                 string command = $"SELECT {quotedCols} FROM \"{SConfig.Database.Schema}\".\"{table}\"";
 
@@ -73,9 +106,34 @@ namespace SophBot.bot.database
                     {
                         string paramName = $"@p{paramIndex}";
                         whereClauses.Add($"\"{kvp.Key}\" = {paramName}");
-                        cmd.Parameters.AddWithValue(paramName, ConvertToDbValue(kvp.Value));
+
+                        if (columnTypes.TryGetValue(kvp.Key, out var npgType))
+                        {
+                            object value = kvp.Value ?? DBNull.Value;
+
+                            value = npgType switch
+                            {
+                                NpgsqlDbType.Integer => Convert.ToInt32(value),
+                                NpgsqlDbType.Bigint => Convert.ToInt64(value),
+                                NpgsqlDbType.Smallint => Convert.ToInt16(value),
+                                NpgsqlDbType.Boolean => Convert.ToBoolean(value),
+                                NpgsqlDbType.Numeric => Convert.ToDecimal(value),
+                                NpgsqlDbType.Timestamp => Convert.ToDateTime(value),
+                                NpgsqlDbType.TimestampTz => Convert.ToDateTime(value),
+                                NpgsqlDbType.Uuid => Guid.Parse(value.ToString()!),
+                                _ => value
+                            };
+
+                            cmd.Parameters.Add(new NpgsqlParameter(paramName, npgType) { Value = value });
+                        }
+                        else
+                        {
+                            cmd.Parameters.AddWithValue(paramName, ConvertToDbValue(kvp.Value));
+                        }
+
                         paramIndex++;
                     }
+
 
                     command += $" WHERE {string.Join(" AND ", whereClauses)}";
                 }
@@ -89,25 +147,21 @@ namespace SophBot.bot.database
                 cmd.CommandText = command;
                 cmd.Connection = conn;
 
-                SLogger.Log(Microsoft.Extensions.Logging.LogLevel.Debug,
+                SLogger.Log(LogLevel.Debug,
                     $"Executing SQL: {command} with params: {string.Join(", ", cmd.Parameters.Cast<NpgsqlParameter>().Select(p => p.ParameterName + '=' + p.Value))}",
                     "SDBEngine.cs");
 
-                await conn.OpenAsync();
-                using (var reader = await cmd.ExecuteReaderAsync())
+                using var resultReader = await cmd.ExecuteReaderAsync();
+                var results = new List<object[]>();
+
+                while (await resultReader.ReadAsync())
                 {
-                    var results = new List<object[]>();
-
-                    while (await reader.ReadAsync())
-                    {
-                        var row = new object[reader.FieldCount];
-                        reader.GetValues(row);
-                        results.Add(row);
-                    }
-
-                    return results.ToArray();
+                    var row = new object[resultReader.FieldCount];
+                    resultReader.GetValues(row);
+                    results.Add(row);
                 }
-                
+
+                return results.ToArray();
             }
             catch (Exception ex)
             {
@@ -146,7 +200,7 @@ namespace SophBot.bot.database
                 cmd.CommandText = command;
                 cmd.Connection = conn;
 
-                SLogger.Log(Microsoft.Extensions.Logging.LogLevel.Debug,
+                SLogger.Log(LogLevel.Debug,
                     $"Executing SQL: {command} with params: {string.Join(", ", cmd.Parameters.Cast<NpgsqlParameter>().Select(p => p.ParameterName + '=' + p.Value))}",
                     "SDBEngine.cs");
 
@@ -173,7 +227,7 @@ namespace SophBot.bot.database
                 cmd.CommandText = command;
                 cmd.Connection = conn;
 
-                SLogger.Log(Microsoft.Extensions.Logging.LogLevel.Debug,
+                SLogger.Log(LogLevel.Debug,
                     $"Executing SQL: {command} with params: {string.Join(", ", cmd.Parameters.Cast<NpgsqlParameter>().Select(p => p.ParameterName + '=' + p.Value))}",
                     "SDBEngine.cs");
 
@@ -201,7 +255,7 @@ namespace SophBot.bot.database
                 cmd.CommandText = command;
                 cmd.Connection = conn;
 
-                SLogger.Log(Microsoft.Extensions.Logging.LogLevel.Debug,
+                SLogger.Log(LogLevel.Debug,
                     $"Executing SQL: {command} with params: {string.Join(", ", cmd.Parameters.Cast<NpgsqlParameter>().Select(p => p.ParameterName + '=' + p.Value))}",
                     "SDBEngine.cs");
 

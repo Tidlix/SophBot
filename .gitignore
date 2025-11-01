@@ -3,3 +3,5 @@ obj/
 *.conf
 *.exe
 *.dll
+.vs/
+.vscode/

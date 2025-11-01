@@ -1,35 +1,39 @@
-﻿using SophBot.bot.conf;
-using SophBot.bot.logs;
-using SophBot.bot.discord;
-using SophBot.bot.database;
-using Microsoft.Extensions.Logging;
-using SophBot.bot.ai;
-using SophBot.bot.twitch;
-using System.Diagnostics;
+﻿using System.Data;
+using SophBot.Universal;
 
 namespace SophBot
 {
     public class Program
     {
-        /*
-        SOPHBOT V3 TO DO:
-        - AI Memory
-        - Wiki Modify
-        - Twitch Integration
-        - Profile System with Twitch and Discord profile
-
-        */
         public static async Task Main(string[] args)
         {
-            SConfig.LogLevel = LogLevel.Debug;
-            await SConfig.ReadConfigAsync();
+            // Read Config
+            Config.Read();
 
-            await SGeminiEngine.StartSession();
-            await SBotClient.CreateClientAsync();
-            await STwitchClient.CreateTwitchMonitoringAsnyc();
+            // Initialize DB
+            DatabaseEngine.Initialize();            
 
+            // Start AI
+            GeminiEngine.Initialize(Config.Ai.Token);
 
-            while (true) ;
+            // Start Discord
+            // Start Twitch
+
+            while (true)
+            {
+                Console.Write("> ");
+                string? command = Console.ReadLine();
+                if (command is null or "") continue;
+
+                if (command.StartsWith("STOP")) break;
+                else
+                {
+                    string response = await GeminiEngine.GenerateResponseAsync(new AiRequest(command, true));
+                    Console.WriteLine("\n---------------------------------------------");
+                    Console.WriteLine(response);
+                    Console.WriteLine("---------------------------------------------\n");
+                }
+            }
         }   
     }
 }

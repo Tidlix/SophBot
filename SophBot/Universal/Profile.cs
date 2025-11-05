@@ -1,4 +1,4 @@
-using DSharpPlus.Entities;
+/*using DSharpPlus.Entities;
 using TwitchSharp.Entitys;
 
 namespace SophBot.Universal
@@ -38,3 +38,4 @@ namespace SophBot.Universal
 #pragma warning restore CS0114
     }
 }
+*/

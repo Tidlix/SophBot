@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using SophBot.Discord;
 using SophBot.Universal;
 
 namespace SophBot
@@ -11,12 +12,14 @@ namespace SophBot
             Config.Read();
 
             // Initialize DB
-            DatabaseEngine.Initialize();            
+            DatabaseEngine.Initialize();
 
             // Start AI
             GeminiEngine.Initialize(Config.Ai.Token);
 
             // Start Discord
+            await DiscordEngine.Initialize(Config.Discord.Token);
+            
             // Start Twitch
 
             while (true)

@@ -1,5 +1,5 @@
+using DSharpPlus.Commands;
 using DSharpPlus.Entities;
-using TwitchSharp.Entitys;
 using GenerativeAI;
 using GenerativeAI.Tools;
 using System.Data;
@@ -25,23 +25,22 @@ namespace SophBot.Universal
 
             MainModel.UseGoogleSearch = false;
             MainModel.SystemInstruction = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}/ai/promt.txt");
+
             MainModel.EnableFunctions();
             MainModel.AddFunctionTool(new QuickTool(() => ReadMemory(), "ReadMemory", "Lies die gespeicherten Informationen"));
             MainModel.AddFunctionTool(new QuickTool((string content) => WriteMemory(content), "WriteMemory", "Speichere eine neue Information"));
             MainModel.AddFunctionTool(new QuickTool((long id, string newContent) => ModifyMemory(id, newContent), "ModifyMemory", "Bearbeite eine Information anhand der id (readMemory)"));
             MainModel.AddFunctionTool(new QuickTool((long id) => DeleteMemory(id), "DeleteMemory", "Lösche eine Information anhand der id (readMemory)"));
+            MainModel.AddFunctionTool(new QuickTool(() => ReadWiki(), "ReadWiki", "Erhalte die Informationen des Internen Soph-Wikis"));
+            MainModel.AddFunctionTool(new QuickTool((string request) => AskGoogleAi(request), "AskGoogleAi", "Frage ein KI-Modell, mit der möglichkeit google zu durchsuchen, nach Informationen"));
 
-            /*
-            To Do Functions:
-            - google
-            - readLastMessages
-            - recode memory (see below)
-            */
 
             GoogleModel.UseGoogleSearch = true;
 
             StartNewMainChat();
             StartNewGoogleChat();
+
+            GoogleChat.DisableFunctions();
 
             GenerateResponseAsync(new AiRequest("liese deine gespeicherten Informationen - Gib diese nicht aus und warte auf weitere Anfragen")).Wait();
         }
@@ -62,6 +61,7 @@ namespace SophBot.Universal
 
 
 
+        #region Function Tools
         private static string ReadMemory()
         {
             string result = string.Empty;
@@ -92,45 +92,96 @@ namespace SophBot.Universal
             DatabaseEngine.DeleteData(DatabaseEngine.DBTable.AI_Memory, [new("id", "=", id)]);
             return $"Erfolgreich! Neue Informations-Tabelle: \n" + ReadMemory();
         }
+
+        private static string ReadWiki()
+        {
+            string result = string.Empty;
+            DataTable data = DatabaseEngine.SelectTable(DatabaseEngine.DBTable.Wiki, "article");
+
+            result += string.Join(" | ", data.Columns.Cast<DataColumn>().Select(c => c.ColumnName));
+            result += "\n";
+
+            foreach (DataRow row in data.Rows)
+            {
+                result += string.Join(" | ", row.ItemArray);
+                result += "\n";
+            }
+            return result;
+        }
+        
+        private static string AskGoogleAi(string request)
+        {
+            try
+            {
+                return GoogleChat.GenerateContentAsync(request).Result.Text;
+            }
+            catch
+            {
+                return "Google Request failed!";
+            }
+        }
+        
+
+        #endregion
     }
+    #region Requests
     public class AiRequest
     {
         public SourceType Source;
-        public string Name { get; private set; }
-        public string Id { get; private set; }
-        public string Promt { get; private set; }
+        public ulong Channel;
         public bool IsPrivate { get; private set; }
+        public string Name { get; private set; }
+        public long Id { get; private set; }
+        public string Promt { get; private set; }
 
-        public AiRequest(DiscordUser user, string promt, bool isPrivate)
-        {
-            Source = SourceType.Discord;
-            Id = user.Id.ToString();
-            Name = user.GlobalName;
-            Promt = promt;
-            IsPrivate = isPrivate;
-        }
-        public AiRequest(TwitchUser user, string promt, bool isPrivate)
-        {
-            Source = SourceType.Twitch;
-            Id = user.ID;
-            Name = user.DisplayName;
-            Promt = promt;
-            IsPrivate = isPrivate;
-        }
+
+
         public AiRequest(string promt, bool isConsole = false)
         {
             Source = SourceType.Console;
-            Id = isConsole ? "0" : "-1";
+            Id = isConsole ? 0 : -1;
             Name = isConsole ? "CONSOLE" : "SYSTEM";
             Promt = promt;
             IsPrivate = true;
+        }
+        public AiRequest(DiscordUser discordUser, DiscordChannel channel, string promt)
+        {
+            Source = SourceType.Discord;
+            Channel = channel.Id;
+            IsPrivate = channel.IsPrivate;
+            Name = discordUser.GlobalName;
+            Id = 404;
+            Promt = promt;
         }
 
 #pragma warning disable CS0114
         public string ToString()
         {
-            // [DateTime] {Name} (id={id}) schreibt über {Plattform} {Optional: (Im Privaten)}: {Promt}
-            return $"[{DateTime.Now.ToString("dd.MM.yyyy - HH:mm:ss")}] {Name} (id={Id}) schreibt über {Source}{(IsPrivate ? "( Im Privaten)" : "")}: {Promt}";
+            int maxChars = 0;
+            switch(Source)
+            {
+                case SourceType.Console:
+                    maxChars = -1;
+                    break;
+                case SourceType.Twitch:
+                    maxChars = 500;
+                    break;
+                case SourceType.Discord:
+                    maxChars = IsPrivate ? 4000 : (4000 - Promt.Length - 50);
+                    break;
+            }
+
+            string result = @$"
+            Datum/Zeit: {DateTime.Now.ToString("dd.MM.yyyy - HH:mm:ss")}
+            Nutzer: {Name}
+            ID: {Id}
+            Privates gespräch: {IsPrivate}
+            Quelle: {Source}
+            Channel: {Channel}
+            Promt: {Promt}
+            max. Zeichen: {maxChars}
+            ";
+            return result;
         }
 #pragma warning restore CS0114 
 
@@ -141,4 +192,5 @@ namespace SophBot.Universal
             Console
         }
     }    
+    #endregion
 }

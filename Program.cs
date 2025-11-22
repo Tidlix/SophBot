@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using SophBot.Discord;
+using SophBot.Twitch;
 using SophBot.Universal;
 
 namespace SophBot
@@ -21,6 +22,8 @@ namespace SophBot
             await DiscordEngine.Initialize(Config.Discord.Token);
             
             // Start Twitch
+            await TwitchEngine.Initialize(Config.Twitch.ClientId, Config.Twitch.ClientSecret);
+
 
             while (true)
             {
@@ -31,7 +34,7 @@ namespace SophBot
                 if (command.StartsWith("STOP")) break;
                 else
                 {
-                    string response = await GeminiEngine.GenerateResponseAsync(new AiRequest(command, true));
+                    string response = await GeminiEngine.GenerateResponseAsync(new ConsoleAiRequest(command));
                     Console.WriteLine("\n---------------------------------------------");
                     Console.WriteLine(response);
                     Console.WriteLine("---------------------------------------------\n");

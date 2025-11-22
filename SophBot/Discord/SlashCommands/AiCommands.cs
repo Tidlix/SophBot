@@ -12,7 +12,7 @@ namespace SophBot.Discord.SlashCommands
         public async Task AiCmd(CommandContext ctx, [Description("Der Promt für die AI")] string promt)
         {
             await ctx.DeferResponseAsync();
-            string response = await GeminiEngine.GenerateResponseAsync(new AiRequest(ctx.User, ctx.Channel, promt));
+            string response = await GeminiEngine.GenerateResponseAsync(new DiscordAiRequest(ctx.Channel, ctx.User, promt));
             List<DiscordComponent> components =
             [
                 new DiscordTextDisplayComponent("### " + promt),

@@ -8,13 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02554" />
-    <PackageReference Include="DSharpPlus.Analyzers" Version="5.0.0-nightly-02554" />
-    <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02554" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02554" />
-    <PackageReference Include="Google_GenerativeAI" Version="3.4.0" />
-    <PackageReference Include="Google_GenerativeAI.Tools" Version="3.4.0" />
-    <PackageReference Include="Npgsql" Version="9.0.3" />
+    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02558" />
+    <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02558" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02558" />
+    <PackageReference Include="Google_GenerativeAI" Version="3.4.1" />
+    <PackageReference Include="Google_GenerativeAI.Tools" Version="3.4.1" />
+    <PackageReference Include="Npgsql" Version="9.0.4" />
     <PackageReference Include="Websocket.Client" Version="5.3.0" />
   </ItemGroup>
 

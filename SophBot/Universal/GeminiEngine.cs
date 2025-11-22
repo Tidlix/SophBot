@@ -3,6 +3,7 @@ using DSharpPlus.Entities;
 using GenerativeAI;
 using GenerativeAI.Tools;
 using System.Data;
+using TwitchSharp.Entities;
 
 namespace SophBot.Universal
 {
@@ -42,7 +43,7 @@ namespace SophBot.Universal
 
             GoogleChat.DisableFunctions();
 
-            GenerateResponseAsync(new AiRequest("liese deine gespeicherten Informationen - Gib diese nicht aus und warte auf weitere Anfragen")).Wait();
+            GenerateResponseAsync(new SystemAiRequest("liese deine gespeicherten Informationen - Gib diese nicht aus und warte auf weitere Anfragen")).Wait();
         }
 
         public static void StartNewMainChat()
@@ -54,9 +55,17 @@ namespace SophBot.Universal
             GoogleChat = GoogleModel.StartChat();
         }
 
-        public static async Task<string> GenerateResponseAsync(AiRequest request)
+        public static async Task<string> GenerateResponseAsync(BaseAiRequest request)
         {
-            return (await MainChat.GenerateContentAsync(request.ToString())).Text;
+            try
+            {
+                return (await MainChat.GenerateContentAsync(request.ToString())).Text;
+            } catch (Exception ex)
+            {
+                if (ex.Message.Contains("The model is overloaded")) return "System Überladen! - Bitte später erneut versuchen!";
+                return $"Unknown Error: {ex.Message}";
+            }
+            
         }
 
 
@@ -125,72 +134,106 @@ namespace SophBot.Universal
         #endregion
     }
     #region Requests
-    public class AiRequest
+    public abstract class BaseAiRequest
     {
-        public SourceType Source;
-        public ulong Channel;
-        public bool IsPrivate { get; private set; }
-        public string Name { get; private set; }
-        public long Id { get; private set; }
-        public string Promt { get; private set; }
+        public readonly string Name;
+        public long Id { get; init; }
+        public readonly string Promt;
+        public readonly AiRequestType Source;
 
-
-
-        public AiRequest(string promt, bool isConsole = false)
+        public BaseAiRequest(AiRequestType source, string name, long id, string promt)
         {
-            Source = SourceType.Console;
-            Id = isConsole ? 0 : -1;
-            Name = isConsole ? "CONSOLE" : "SYSTEM";
+            Source = source;
+            Name = name;
+            Id = id;
             Promt = promt;
-            IsPrivate = true;
         }
-        public AiRequest(DiscordUser discordUser, DiscordChannel channel, string promt)
+
+        public abstract override string ToString();
+    }
+    public class DiscordAiRequest : BaseAiRequest
+    {
+        public readonly DiscordChannel Channel;
+        public readonly bool IsPrivate;
+        public DiscordAiRequest(DiscordChannel channel, DiscordUser sender, string promt)
+            : base(AiRequestType.DISCORD, sender.GlobalName, 0 , promt)
         {
-            Source = SourceType.Discord;
-            Channel = channel.Id;
+            Channel = channel;
             IsPrivate = channel.IsPrivate;
-            Name = discordUser.GlobalName;
-            Id = 404;
-            Promt = promt;
+            Profile profile = new Profile(sender.Id);
+            Id = profile.ID;
         }
 
-#pragma warning disable CS0114
-        public string ToString()
+        public override string ToString()
         {
-            int maxChars = 0;
-            switch(Source)
-            {
-                case SourceType.Console:
-                    maxChars = -1;
-                    break;
-                case SourceType.Twitch:
-                    maxChars = 500;
-                    break;
-                case SourceType.Discord:
-                    maxChars = IsPrivate ? 4000 : (4000 - Promt.Length - 50);
-                    break;
-            }
-
-            string result = @$"
-            Datum/Zeit: {DateTime.Now.ToString("dd.MM.yyyy - HH:mm:ss")}
-            Nutzer: {Name}
-            ID: {Id}
-            Privates gespräch: {IsPrivate}
-            Quelle: {Source}
-            Channel: {Channel}
-            Promt: {Promt}
-            max. Zeichen: {maxChars}
+            return $@"Quelle: {Source}
+            Channelname (Id): {Channel.Name} ({Channel.Id})
+            Private Konversation: {IsPrivate}
+            Nutzer (Id): {Name} ({Id})
+            Anfrage: {Promt}
             ";
-            return result;
         }
-#pragma warning restore CS0114 
-
-        public enum SourceType
+    }
+    public class TwitchAiRequest : BaseAiRequest
+    {
+        public readonly string Channel;
+        public readonly bool IsPrivate;
+        public TwitchAiRequest(string channel, bool isPrivateChat, TwitchUser sender, string promt)
+            : base(AiRequestType.TWITCH, sender.DisplayName, 0 , promt)
         {
-            Twitch,
-            Discord,
-            Console
+            Channel = channel;
+            IsPrivate = isPrivateChat;
+            Profile profile = new Profile(sender.ID);
+            Id = profile.ID;
         }
-    }    
+
+        public override string ToString()
+        {
+            return $@"Quelle: {Source}
+            Channelname: {Channel} 
+            Private Konversation: {IsPrivate}
+            Nutzer (Id): {Name} ({Id})
+            Anfrage: {Promt}
+            ";
+        }
+    }
+    public class ConsoleAiRequest : BaseAiRequest
+    {
+        public ConsoleAiRequest(string promt)
+            : base(AiRequestType.CONSOLE, "CONSOLE", -100 , promt)
+        {
+            
+        }
+
+        public override string ToString()
+        {
+            return $@"Quelle: {Source}
+            Anfrage: {Promt}
+            ";
+        }
+    }
+    public class SystemAiRequest : BaseAiRequest
+    {
+        public SystemAiRequest(string promt)
+            : base(AiRequestType.SYSTEM, "SYSTEM", -101 , promt)
+        {
+            
+        }
+
+        public override string ToString()
+        {
+            return $@"Quelle: {Source}
+            Anfrage: {Promt}
+            ";
+        }
+    }
+
+    public enum AiRequestType
+    {
+        DISCORD,
+        TWITCH,
+        CONSOLE,
+        SYSTEM
+    }
     #endregion
 }

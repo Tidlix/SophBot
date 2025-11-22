@@ -6,7 +6,10 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.InteractionNamingPolicies;
 using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
+using SophBot.Discord.EventHandlers;
 
 namespace SophBot.Discord
 {
@@ -28,13 +31,17 @@ namespace SophBot.Discord
             });
             builder.ConfigureEventHandlers(e =>
             {
-                //e.AddEventHandlers<EventClass>();
+                e.AddEventHandlers<MessageEventHandler>();
             });
             builder.ConfigureExtraFeatures(f =>
             {
                 f.LogUnknownAuditlogs = false;
                 f.LogUnknownEvents = false;
             });
+
+            builder.UseInteractivity();
+            
+
             builder.UseCommands((IServiceProvider sp, CommandsExtension ce) =>
             {
                 ce.AddCommands(Assembly.GetExecutingAssembly());
@@ -61,7 +68,9 @@ namespace SophBot.Discord
             {
                 UseDefaultCommandErrorHandler = false,
             });
+
             Client = builder.Build();
+            
             await Client.ConnectAsync();
         }
     }

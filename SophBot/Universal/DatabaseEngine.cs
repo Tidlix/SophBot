@@ -30,6 +30,19 @@ namespace SophBot.Universal
             AI_Memory       // id ; content
         }
         public record DBCondition(string Column, string Operator, object Value);
+        
+        private static object ConvertParameterValue(object value)
+        {
+            if (value == null)
+                return DBNull.Value;
+            
+            if (value is ulong ulongValue)
+                return (long)ulongValue;
+
+            
+            return value;
+        }
+
         private static string TableString(DBTable table)
         {
             string result = schema + ".";
@@ -65,7 +78,7 @@ namespace SophBot.Universal
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to Execute DB-Reader. - {ex.Message}");
+                throw new Exception($"Failed to Execute DB-Reader. - {ex.Message}"); // Failed to Execute DB-Reader. - Writing values of 'System.UInt64' is not supported for parameters having no NpgsqlDbType or DataTypeName. Try setting one of these values to the expected database type..'
             }
         }
 
@@ -77,6 +90,7 @@ namespace SophBot.Universal
                 {
                     conn.Open();
                     cmd.Connection = conn;
+                    //Console.WriteLine(cmd.CommandText);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -109,7 +123,7 @@ namespace SophBot.Universal
         {
             using var cmd = new NpgsqlCommand();
 
-            string columnStr = string.Join(", ", columns);
+            string columnStr = string.Join(", ", columns.Select(column => $"\"{column}\""));
             
             List<string> conditionList = new();
             int i = 0;
@@ -118,7 +132,7 @@ namespace SophBot.Universal
             {
                 string paramName = $"@p{i}";
                 conditionList.Add($"\"{current.Column}\" {current.Operator} {paramName}");
-                cmd.Parameters.AddWithValue(paramName, current.Value);
+                cmd.Parameters.AddWithValue(paramName, ConvertParameterValue(current.Value));
                 i++;
             }
 
@@ -128,7 +142,6 @@ namespace SophBot.Universal
                 FROM {TableString(table)}
                 {(conditions.Any() ? $"WHERE {conditionStr}" : string.Empty)}";
 
-            Console.WriteLine(cmd.CommandText);
             return ExecuteReader(cmd);
         }
         #endregion
@@ -145,7 +158,7 @@ namespace SophBot.Universal
             int i = 0;
             foreach (var current in data)
             {
-                cmd.Parameters.AddWithValue($"@p{i}", current.Value ?? DBNull.Value);
+                cmd.Parameters.AddWithValue($"@p{i}", ConvertParameterValue(current.Value));
                 i++;
             }
 
@@ -167,8 +180,9 @@ namespace SophBot.Universal
             int i = 0;
             foreach (var current in data)
             {
-                cmd.Parameters.AddWithValue($"@d{i}", current.Value);
-                dataList.Add($"{current.Key} = @d{i}");
+                cmd.Parameters.AddWithValue($"@d{i}", ConvertParameterValue(current.Value));
+                dataList.Add($"\"{current.Key}\" = @d{i}");
+                i++;
             }
 
             int j = 0;
@@ -176,7 +190,7 @@ namespace SophBot.Universal
             {
                 string paramName = $"@p{j}";
                 conditionList.Add($"\"{current.Column}\" {current.Operator} {paramName}");
-                cmd.Parameters.AddWithValue(paramName, current.Value);
+                cmd.Parameters.AddWithValue(paramName, ConvertParameterValue(current.Value));
                 j++;
             }
 
@@ -202,7 +216,7 @@ namespace SophBot.Universal
             {
                 string paramName = $"@p{i}";
                 conditionList.Add($"\"{current.Column}\" {current.Operator} {paramName}");
-                cmd.Parameters.AddWithValue(paramName, current.Value);
+                cmd.Parameters.AddWithValue(paramName, ConvertParameterValue(current.Value));
                 i++;
             }
 

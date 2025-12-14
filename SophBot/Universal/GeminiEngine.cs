@@ -24,6 +24,7 @@ namespace SophBot.Universal
             MainModel = GoogleAI.CreateGenerativeModel("models/gemini-2.5-flash");
             GoogleModel = GoogleAI.CreateGenerativeModel("models/gemini-2.5-flash");
 
+
             MainModel.UseGoogleSearch = false;
             MainModel.SystemInstruction = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}/ai/promt.txt");
 

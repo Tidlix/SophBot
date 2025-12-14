@@ -17,6 +17,7 @@ namespace SophBot.Discord
     {
 #pragma warning disable CS8618 
         public static DiscordClient Client { get; private set; }
+        public static InteractivityExtension Interactivity { get; private set; }
 #pragma warning restore CS8618 
 
         public static async Task Initialize(string token)
@@ -31,7 +32,8 @@ namespace SophBot.Discord
             });
             builder.ConfigureEventHandlers(e =>
             {
-                e.AddEventHandlers<MessageEventHandler>();
+                e.AddEventHandlers<BasicMessageEventHandler>();
+                e.AddEventHandlers<WikiEventHandler>();
             });
             builder.ConfigureExtraFeatures(f =>
             {
@@ -70,7 +72,7 @@ namespace SophBot.Discord
             });
 
             Client = builder.Build();
-            
+            Interactivity =  (Client.ServiceProvider.GetService(typeof(InteractivityExtension)) as InteractivityExtension)!;
             await Client.ConnectAsync();
         }
     }

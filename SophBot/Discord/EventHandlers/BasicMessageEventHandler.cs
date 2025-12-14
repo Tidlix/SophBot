@@ -4,7 +4,7 @@ using SophBot.Universal;
 
 namespace SophBot.Discord.EventHandlers
 {
-    public class MessageEventHandler : IEventHandler<MessageCreatedEventArgs>
+    public class BasicMessageEventHandler : IEventHandler<MessageCreatedEventArgs>
     {
         public async Task HandleEventAsync(DiscordClient s, MessageCreatedEventArgs e)
         {

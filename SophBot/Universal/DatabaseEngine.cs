@@ -78,7 +78,7 @@ namespace SophBot.Universal
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to Execute DB-Reader. - {ex.Message}"); // Failed to Execute DB-Reader. - Writing values of 'System.UInt64' is not supported for parameters having no NpgsqlDbType or DataTypeName. Try setting one of these values to the expected database type..'
+                throw new Exception($"Failed to Execute DB-Reader. - {ex.Message}"); 
             }
         }
 

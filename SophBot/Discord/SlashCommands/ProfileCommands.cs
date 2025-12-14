@@ -41,8 +41,7 @@ namespace SophBot.Discord.SlashCommands
             int rand = new Random().Next(100000, 999999);
             await twitchUser.SendWhisperAsync($"Dein Synchronisationscode lautet '{rand}'. Gib diesen Code niemanden weiter. Du hast nicht versucht dich anzumelden? In dem Fall ignorier diese Nachricht einfach!");
 
-            InteractivityExtension interactivity = (ctx.Client.ServiceProvider.GetService(typeof(InteractivityExtension)) as InteractivityExtension)!;
-            var mdlResponse = await interactivity.WaitForModalAsync($"SyncTwitchUserMdl.{ctx.User.Id}", TimeSpan.FromMinutes(5));
+            var mdlResponse = await DiscordEngine.Interactivity.WaitForModalAsync($"SyncTwitchUserMdl.{ctx.User.Id}", TimeSpan.FromMinutes(5));
 
             await mdlResponse.Result.Interaction.DeferAsync();
             if (mdlResponse.TimedOut)

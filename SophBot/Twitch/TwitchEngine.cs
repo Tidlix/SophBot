@@ -48,8 +48,9 @@ namespace SophBot.Twitch
             var loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder
-                    .SetMinimumLevel(LogLevel.Debug)
-                    .AddConsole();
+                    .ClearProviders()
+                    .AddProvider(new Logs.LogProvider())
+                    .SetMinimumLevel(LogLevel.Debug);
             });
 
             TwitchLibClient = new TwitchLib.Client.TwitchClient(loggerFactory: loggerFactory);

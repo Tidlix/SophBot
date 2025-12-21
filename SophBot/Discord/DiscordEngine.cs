@@ -10,6 +10,7 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using SophBot.Discord.EventHandlers;
+using SophBot.Universal;
 
 namespace SophBot.Discord
 {
@@ -23,12 +24,12 @@ namespace SophBot.Discord
         public static async Task Initialize(string token)
         {
             DiscordClientBuilder builder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All);
-            //builder.DisableDefaultLogging();
+            builder.DisableDefaultLogging();
             builder.ConfigureLogging(l =>
             {
-                //l.ClearProviders();
-                //l.AddProvider(LoggerProvider);
-                l.SetMinimumLevel(LogLevel.Information);
+                l.ClearProviders();
+                l.AddProvider(new Logs.LogProvider());
+                l.SetMinimumLevel(LogLevel.Debug);
             });
             builder.ConfigureEventHandlers(e =>
             {

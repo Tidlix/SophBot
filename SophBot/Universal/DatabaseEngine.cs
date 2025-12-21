@@ -27,7 +27,8 @@ namespace SophBot.Universal
             Commands,       // NC  command ; content
             Wiki,           // article ; site ; content
             Monitorings,    // NC  discord-channel ; twitch-channel 
-            AI_Memory       // id ; content
+            AI_Memory,      // id ; content
+            Logs            // id ; datetime ; loglevel ; content ; source
         }
         public record DBCondition(string Column, string Operator, object Value);
         
@@ -54,6 +55,8 @@ namespace SophBot.Universal
                     return result + "\"wiki\"";
                 case DBTable.AI_Memory:
                     return result + "\"ai-memory\"";
+                case DBTable.Logs:
+                    return result + "\"logs\"";
                 default:
                     throw new NotImplementedException($"Table ({table}) not implemented yet!");
             }

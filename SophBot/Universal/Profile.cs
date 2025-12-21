@@ -3,6 +3,8 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using SophBot.Discord;
 using SophBot.Twitch;
+using TwitchLib.Api.Helix.Models.Chat.GetChatters;
+using TwitchLib.Client;
 using TwitchSharp.Entities;
 
 namespace SophBot.Universal
@@ -31,6 +33,7 @@ namespace SophBot.Universal
                 data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Profiles, ["id", "discord-id", "twitch-id", "discord-messages", "twitch-messages", "channel-points"], [new ("discord-id", "=", discordId)]);
             } 
             ConvertData(data);
+
         }
         /*
         * GET PROFILE BY TWITCH ACCOUNT
@@ -72,7 +75,7 @@ namespace SophBot.Universal
 
             ID = (long)row["id"];
             DiscordUser = (row["discord-id"] == DBNull.Value) ? null : DiscordEngine.Client.GetUserAsync((ulong)(long)row["discord-id"]).Result;
-            TwitchUser = (row["twitch-id"] == DBNull.Value) ? null : TwitchEngine.Client.GetUserByIDAsync((string)row["twitch-id"]).Result;
+            TwitchUser = (row["twitch-id"] == DBNull.Value) ? null : TwitchEngine.TwitchSharpClient.GetUserByIDAsync((string)row["twitch-id"]).Result;
             DiscordMessages = (int)row["discord-messages"];
             TwitchMessages = (int)row["twitch-messages"];
             Channelpoints = (long)row["channel-points"];

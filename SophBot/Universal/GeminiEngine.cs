@@ -168,6 +168,7 @@ namespace SophBot.Universal
         public override string ToString()
         {
             return $@"Quelle: {Source}
+            Datum/Zeit: {DateTime.Now.ToString("dd.MM.yyyy - HH:mm:ss")}
             Channelname (Id): {Channel.Name} ({Channel.Id})
             Private Konversation: {IsPrivate}
             Nutzer (Id): {Name} ({Id})
@@ -191,6 +192,7 @@ namespace SophBot.Universal
         public override string ToString()
         {
             return $@"Quelle: {Source}
+            Datum/Zeit: {DateTime.Now.ToString("dd.MM.yyyy - HH:mm:ss")}
             Channelname: {Channel} 
             Private Konversation: {IsPrivate}
             Nutzer (Id): {Name} ({Id})
@@ -209,6 +211,7 @@ namespace SophBot.Universal
         public override string ToString()
         {
             return $@"Quelle: {Source}
+            Datum/Zeit: {DateTime.Now.ToString("dd.MM.yyyy - HH:mm:ss")}
             Anfrage: {Promt}
             ";
         }
@@ -224,6 +227,7 @@ namespace SophBot.Universal
         public override string ToString()
         {
             return $@"Quelle: {Source}
+            Datum/Zeit: {DateTime.Now.ToString("dd.MM.yyyy - HH:mm:ss")}
             Anfrage: {Promt}
             ";
         }

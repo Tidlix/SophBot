@@ -1,41 +1,80 @@
-using SophBot.Twitch.EventHandlers;
+using Microsoft.Extensions.Logging;
+using SophBot.Twitch.Events;
+using SophBot.Universal;
+using TwitchLib.Api;
+using TwitchLib.Api.Core.HttpCallHandlers;
+using TwitchLib.Client;
+using TwitchLib.Client.Models;
 using TwitchSharp;
-using TwitchSharp.Entities;
-using TwitchSharp.Events.Types;
 
 namespace SophBot.Twitch
 {
-    public static class TwitchEngine
-    {
-#pragma warning disable CS8618 
-        public static TwitchClient Client;
-#pragma warning restore CS8618
+    public static class TwitchEngine {
+        #pragma warning disable CS8618
+        public static TwitchSharp.TwitchClient TwitchSharpClient;
+        public static TwitchLib.Client.TwitchClient TwitchLibClient;
+        #pragma warning restore CS8618
 
-        public static async Task Initialize(string clientId, string clientSecret)
+        public static async Task Initialize()
         {
-            string token = await TwitchSharpEngine.GenerateRefreshTokenAsync(new ()
+            TwitchRefreshTokenConfig tokenConf = new ()
             {
-                ClientID = clientId,
-                ClientSecret = clientSecret,
+                ClientID = Config.Twitch.ClientId,
+                ClientSecret = Config.Twitch.ClientSecret,
                 RedirectUri = "https://localhost:3000",
-                Scopes = ["user:bot", "user:read:chat", "user:write:chat", "user:read:whispers", "user:manage:whispers", "moderator:read:chatters", "moderator:read:followers", "moderator:read:moderators", ]
-            });
-            var clientConf = new TwitchClientConfig()
-            {
-                ClientID = clientId,
-                ClientSecret = clientSecret,
-                RefreshToken = token
+                Scopes = [
+                    "chat:read",
+                    "chat:edit",
+                    "user:bot",
+                    "user:read:chat",
+                    "user:write:chat",
+                    "user:read:whispers",
+                    "user:manage:whispers",
+                    "moderator:read:chatters",
+                    "moderator:read:followers",
+                    "moderator:read:moderators"
+                ]
             };
-            Client = new TwitchClient(clientConf);
+            string refreshToken = await TwitchSharpEngine.GenerateRefreshTokenAsync(tokenConf);
 
-            var events = Client.UseEvents();
-            events.OnChannelChatMessageReceived += async (s, e) => await ChannelChatMessageReceivedHandler.OnReceive(s, e); 
-            events.OnClientWhisperReceived += async (s, e) => await ClientWhisperReceivedHandler.OnReceive(s, e);
+            TwitchClientConfig clientConf = new ()
+            {
+                ClientID = Config.Twitch.ClientId,
+                ClientSecret = Config.Twitch.ClientSecret,
+                RefreshToken = refreshToken
+            };
+            TwitchSharpClient = new TwitchSharp.TwitchClient(clientConf);
 
-            TwitchUser mainBroadcaster = await Client.GetUserByLoginAsync("tidlix");
+            var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .SetMinimumLevel(LogLevel.Debug)
+                    .AddConsole();
+            });
 
-            await events.SubscribeToEventAsync(new ChannelChatMessageReceivedEvent(mainBroadcaster));
-            await events.SubscribeToEventAsync(new ClientWhisperReceivedEvent());
+            TwitchLibClient = new TwitchLib.Client.TwitchClient(loggerFactory: loggerFactory);
+            ConnectionCredentials credentials = new ConnectionCredentials(TwitchSharpClient.CurrentUser.LoginName, await TwitchSharpClient.GetUserAccessTokenAsync());
+            TwitchLibClient.Initialize(credentials, TwitchSharpClient.CurrentUser.LoginName);
+
+
+
+            TwitchLibClient.ChatCommandIdentifiers.Add("!");
+            //TwitchLibClient.ChatCommandIdentifiers.Add($"@{TwitchSharpClient.CurrentUser.LoginName}"); 
+            //TwitchLibClient.ChatCommandIdentifiers.Add($"@{TwitchSharpClient.CurrentUser.DisplayName}"); 
+            TwitchLibClient.OnChatCommandReceived += Commands.CommandHandler.OnCommandSend;
+
+            TwitchLibClient.OnMessageReceived += async (s, args) =>
+            {
+                Console.WriteLine(args.ChatMessage.Message); // Also not in console
+            };
+
+            TwitchLibClient.OnMessageReceived += MessageEvents.OnMessageReceived;
+
+            await TwitchLibClient.ConnectAsync();
+
+            await TwitchLibClient.JoinChannelAsync("xsophe");
+            await TwitchLibClient.JoinChannelAsync("tidlix");
+
         }
     }
 }

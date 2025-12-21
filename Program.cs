@@ -22,7 +22,7 @@ namespace SophBot
             await DiscordEngine.Initialize(Config.Discord.Token);
             
             // Start Twitch
-            await TwitchEngine.Initialize(Config.Twitch.ClientId, Config.Twitch.ClientSecret);
+            await TwitchEngine.Initialize();
 
 
             while (true)

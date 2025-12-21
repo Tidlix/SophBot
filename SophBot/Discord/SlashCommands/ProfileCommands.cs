@@ -22,7 +22,7 @@ namespace SophBot.Discord.SlashCommands
             {
                 await ctx.RespondAsync("Du hast bereits einen Twitch Account verbunden! \n-# Ist das ein Fehler? Bitte kontaktiere Tidlix!");
             }
-            TwitchUser twitchUser = await TwitchEngine.Client.GetUserByLoginAsync(TwitchName.ToLower());
+            TwitchUser twitchUser = await TwitchEngine.TwitchSharpClient.GetUserByLoginAsync(TwitchName.ToLower());
             Profile twitch = new Profile(twitchUser.ID);
             if (twitch.DiscordUser is not null)
             {

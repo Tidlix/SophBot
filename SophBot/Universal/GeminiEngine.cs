@@ -21,7 +21,7 @@ namespace SophBot.Universal
         public static void Initialize(string token)
         {
             GoogleAI = new GoogleAi(token);
-            MainModel = GoogleAI.CreateGenerativeModel("models/gemini-2.5-flash");
+            MainModel = GoogleAI.CreateGenerativeModel("models/gemini-3-flash-preview"); 
             GoogleModel = GoogleAI.CreateGenerativeModel("models/gemini-2.5-flash");
 
 
@@ -34,6 +34,7 @@ namespace SophBot.Universal
             MainModel.AddFunctionTool(new QuickTool((long id, string newContent) => ModifyMemory(id, newContent), "ModifyMemory", "Bearbeite eine Information anhand der id (readMemory)"));
             MainModel.AddFunctionTool(new QuickTool((long id) => DeleteMemory(id), "DeleteMemory", "Lösche eine Information anhand der id (readMemory)"));
             MainModel.AddFunctionTool(new QuickTool(() => ReadWiki(), "ReadWiki", "Erhalte die Informationen des Internen Soph-Wikis"));
+            MainModel.AddFunctionTool(new QuickTool((long id) => GetProfile(id), "GetProfile", "Erhalte mehr Informationen über einen Benutzer"));
             MainModel.AddFunctionTool(new QuickTool((string request) => AskGoogleAi(request), "AskGoogleAi", "Frage ein KI-Modell, mit der möglichkeit google zu durchsuchen, nach Informationen"));
 
 
@@ -118,7 +119,12 @@ namespace SophBot.Universal
             }
             return result;
         }
-        
+
+        private static string GetProfile(long id)
+        {
+            Profile profile = new Profile(id);
+            return profile.ToString();
+        }        
         private static string AskGoogleAi(string request)
         {
             try

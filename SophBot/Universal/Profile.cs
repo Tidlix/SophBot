@@ -1,4 +1,5 @@
 using System.Data;
+using System.Threading.Channels;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using SophBot.Discord;
@@ -14,8 +15,8 @@ namespace SophBot.Universal
         public long ID { get; private set; }
         public DiscordUser? DiscordUser { get; private set; }
         public TwitchUser? TwitchUser { get; private set; }
-        public int DiscordMessages { get; private set; }
-        public int TwitchMessages { get; private set; }
+        public long DiscordMessages { get; private set; }
+        public long TwitchMessages { get; private set; }
         public long Channelpoints { get; private set; }
 
         #region Constructors
@@ -76,8 +77,8 @@ namespace SophBot.Universal
             ID = (long)row["id"];
             DiscordUser = (row["discord-id"] == DBNull.Value) ? null : DiscordEngine.Client.GetUserAsync((ulong)(long)row["discord-id"]).Result;
             TwitchUser = (row["twitch-id"] == DBNull.Value) ? null : TwitchEngine.TwitchSharpClient.GetUserByIDAsync((string)row["twitch-id"]).Result;
-            DiscordMessages = (int)row["discord-messages"];
-            TwitchMessages = (int)row["twitch-messages"];
+            DiscordMessages = (long)row["discord-messages"];
+            TwitchMessages = (long)row["twitch-messages"];
             Channelpoints = (long)row["channel-points"];
         }
         #endregion
@@ -142,12 +143,20 @@ namespace SophBot.Universal
 
         public override string ToString()
         {
-            string discordUserStr = DiscordUser is null ? "Discord not Synced!" : $"Name: {DiscordUser.GlobalName}, ID: {DiscordUser.Id}, Gesendete Nachrichten: {DiscordMessages}";
-            string twitchUserStr = TwitchUser is null ? "Twitch not Synced!" : $"Name: {TwitchUser.DisplayName}, ID: {TwitchUser.ID}, Gesendete Nachrichten: {TwitchMessages}";
-            return $@"UserID: {ID},
-Discord: {{{discordUserStr}}}; 
-Twitch: {{{twitchUserStr}}}; 
-Channelpoints: {Channelpoints};";
+            string result = string.Empty;
+            result += $"**Nutzer ID:** {ID}\n";
+            if (DiscordUser is not null)
+            {
+                result += $"**Discord:**\n  **Name:** {DiscordUser.GlobalName}\n  **Discord ID:** {DiscordUser.Id}\n";
+            }
+            if (TwitchUser is not null)
+            {
+                result += $"**Twitch:**\n  **Name:** {TwitchUser.DisplayName}\n  **Discord ID:** {TwitchUser.ID}\n";
+            }
+            result += $"**Gesendete Nachrichten:**\n  **Discord:** {DiscordMessages}\n  **Twitch:** {TwitchMessages}\n  **Gesamt:** {DiscordMessages+TwitchMessages}\n";
+            result += $"**Channelpoints:** {Channelpoints}\n";
+
+            return result;
         }
         #endregion
     }

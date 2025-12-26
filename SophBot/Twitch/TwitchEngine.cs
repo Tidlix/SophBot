@@ -64,11 +64,6 @@ namespace SophBot.Twitch
             //TwitchLibClient.ChatCommandIdentifiers.Add($"@{TwitchSharpClient.CurrentUser.DisplayName}"); 
             TwitchLibClient.OnChatCommandReceived += Commands.CommandHandler.OnCommandSend;
 
-            TwitchLibClient.OnMessageReceived += async (s, args) =>
-            {
-                Console.WriteLine(args.ChatMessage.Message); // Also not in console
-            };
-
             TwitchLibClient.OnMessageReceived += MessageEvents.OnMessageReceived;
 
             await TwitchLibClient.ConnectAsync();

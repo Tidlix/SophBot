@@ -10,7 +10,9 @@ namespace SophBot.Discord.Tools.OptionProviders
     {
         public class ArticleProvider : IAutoCompleteProvider
         {
+            #pragma warning disable CS1998
             public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext context)
+            #pragma warning restore CS1998
             {
                 var result = new List<DiscordAutoCompleteChoice>();
                 var articles = new List<string>();

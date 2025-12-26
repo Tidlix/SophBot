@@ -26,7 +26,7 @@ namespace SophBot.Universal
             Servers,        // NC  server-id ; 
             Commands,       // NC  command ; content
             Wiki,           // article ; site ; content
-            Monitorings,    // NC  discord-channel ; twitch-channel 
+            Monitorings,    // NC  discord-channel ; twitch-channel ; mention-role
             AI_Memory,      // id ; content
             Logs            // id ; datetime ; loglevel ; content ; source
         }
@@ -57,6 +57,8 @@ namespace SophBot.Universal
                     return result + "\"ai-memory\"";
                 case DBTable.Logs:
                     return result + "\"logs\"";
+                case DBTable.Monitorings:
+                    return result + "\"monitorings\"";
                 default:
                     throw new NotImplementedException($"Table ({table}) not implemented yet!");
             }

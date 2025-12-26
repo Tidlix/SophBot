@@ -2,8 +2,8 @@ using Microsoft.Extensions.Logging;
 using SophBot.Twitch.Events;
 using SophBot.Universal;
 using TwitchLib.Api;
-using TwitchLib.Api.Core.HttpCallHandlers;
-using TwitchLib.Client;
+using TwitchLib.Api.Services;
+using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 using TwitchLib.Client.Models;
 using TwitchSharp;
 
@@ -13,6 +13,7 @@ namespace SophBot.Twitch
         #pragma warning disable CS8618
         public static TwitchSharp.TwitchClient TwitchSharpClient;
         public static TwitchLib.Client.TwitchClient TwitchLibClient;
+        public static LiveStreamMonitorService MonitorService;
         #pragma warning restore CS8618
 
         public static async Task Initialize()
@@ -57,6 +58,13 @@ namespace SophBot.Twitch
             ConnectionCredentials credentials = new ConnectionCredentials(TwitchSharpClient.CurrentUser.LoginName, await TwitchSharpClient.GetUserAccessTokenAsync());
             TwitchLibClient.Initialize(credentials, TwitchSharpClient.CurrentUser.LoginName);
 
+            TwitchAPI api = new();
+            api.Settings.ClientId = Config.Twitch.ClientId;
+            api.Settings.Secret = Config.Twitch.ClientSecret;
+            api.Settings.AccessToken = await TwitchSharpClient.GetAppAccessTokenAsync();
+
+            MonitorService = new LiveStreamMonitorService(api, 10);
+            MonitorService.OnStreamOnline += async (s, e) => await StreamOnlineEvents.OnStreamOnlineAsync(s, e);
 
 
             TwitchLibClient.ChatCommandIdentifiers.Add("!");
@@ -65,6 +73,8 @@ namespace SophBot.Twitch
             TwitchLibClient.OnChatCommandReceived += Commands.CommandHandler.OnCommandSend;
 
             TwitchLibClient.OnMessageReceived += MessageEvents.OnMessageReceived;
+            
+            
 
             await TwitchLibClient.ConnectAsync();
 

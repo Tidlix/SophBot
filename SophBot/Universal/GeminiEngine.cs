@@ -2,7 +2,9 @@ using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using GenerativeAI;
 using GenerativeAI.Tools;
+using SophBot.Twitch;
 using System.Data;
+using TwitchLib.Client;
 using TwitchSharp.Entities;
 
 namespace SophBot.Universal
@@ -29,12 +31,13 @@ namespace SophBot.Universal
             MainModel.SystemInstruction = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}/ai/promt.txt");
 
             MainModel.EnableFunctions();
-            MainModel.AddFunctionTool(new QuickTool(() => ReadMemory(), "ReadMemory", "Lies die gespeicherten Informationen"));
+            MainModel.AddFunctionTool(new QuickTool((string? filter = null) => ReadMemory(filter), "ReadMemory", "Lies die gespeicherten Informationen (mit dem optionalen filter kannst du nur die Einträge anzeigen, die genau diesen string enthalten)"));
             MainModel.AddFunctionTool(new QuickTool((string content) => WriteMemory(content), "WriteMemory", "Speichere eine neue Information"));
             MainModel.AddFunctionTool(new QuickTool((long id, string newContent) => ModifyMemory(id, newContent), "ModifyMemory", "Bearbeite eine Information anhand der id (readMemory)"));
             MainModel.AddFunctionTool(new QuickTool((long id) => DeleteMemory(id), "DeleteMemory", "Lösche eine Information anhand der id (readMemory)"));
             MainModel.AddFunctionTool(new QuickTool(() => ReadWiki(), "ReadWiki", "Erhalte die Informationen des Internen Soph-Wikis"));
             MainModel.AddFunctionTool(new QuickTool((long id) => GetProfile(id), "GetProfile", "Erhalte mehr Informationen über einen Benutzer"));
+            MainModel.AddFunctionTool(new QuickTool(async() => await GetCurrentStream(), "GetCurrentStream", "Erhalte den Informationen über den aktuell Laufenden Stream"));
             MainModel.AddFunctionTool(new QuickTool((string request) => AskGoogleAi(request), "AskGoogleAi", "Frage ein KI-Modell, mit der möglichkeit google zu durchsuchen, nach Informationen"));
 
 
@@ -73,7 +76,7 @@ namespace SophBot.Universal
 
 
         #region Function Tools
-        private static string ReadMemory()
+        private static string ReadMemory(string? filter = null)
         {
             string result = string.Empty;
             DataTable data = DatabaseEngine.SelectTable(DatabaseEngine.DBTable.AI_Memory, "id");
@@ -83,6 +86,8 @@ namespace SophBot.Universal
 
             foreach (DataRow row in data.Rows)
             {
+                if (filter is not null && !((string)row["content"]).ToLower().Contains(filter.ToLower()))
+                    continue; // Remove all entrys without filter
                 result += string.Join(" | ", row.ItemArray);
                 result += "\n";
             }
@@ -124,7 +129,18 @@ namespace SophBot.Universal
         {
             Profile profile = new Profile(id);
             return profile.ToString();
-        }        
+        }
+        private static async Task<string> GetCurrentStream()
+        {
+            TwitchUser user = await TwitchEngine.TwitchSharpClient.GetUserByLoginAsync("xsophe");
+            TwitchStream? stream = user.GetCurrentStream();
+            if (stream is null)
+                return "Null - No Stream active!";
+            return $@"Titel: {stream.Title}
+Kategorie: {stream.GameName}
+Gestartet um: {stream.StartedAt.ToString("dd.MM.yyyy - HH:mm:ss")}
+Aktuelle Zuschauer: {stream.CurrentViewer}";
+        }     
         private static string AskGoogleAi(string request)
         {
             try

@@ -13,6 +13,8 @@ namespace SophBot.Twitch.Events
             profile.AddTwitchMessage();
             if (profile.DiscordMessages + profile.TwitchMessages % 10 == 0)
                 profile.AddChannelpoints(50);
+
+            await Task.Delay(1); // Temp fix for warning CS1998
         }
     }
 }

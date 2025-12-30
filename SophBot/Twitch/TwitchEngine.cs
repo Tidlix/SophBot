@@ -66,12 +66,39 @@ namespace SophBot.Twitch
             MonitorService = new LiveStreamMonitorService(api, 10);
             MonitorService.OnStreamOnline += async (s, e) => await StreamOnlineEvents.OnStreamOnlineAsync(s, e);
 
-
             TwitchLibClient.ChatCommandIdentifiers.Add("!");
-            //TwitchLibClient.ChatCommandIdentifiers.Add($"@{TwitchSharpClient.CurrentUser.LoginName}"); 
-            //TwitchLibClient.ChatCommandIdentifiers.Add($"@{TwitchSharpClient.CurrentUser.DisplayName}"); 
+            TwitchLibClient.ChatCommandIdentifiers.Add($"@{TwitchSharpClient.CurrentUser.LoginName}"); 
+            TwitchLibClient.ChatCommandIdentifiers.Add($"@{TwitchSharpClient.CurrentUser.DisplayName}"); 
             TwitchLibClient.OnChatCommandReceived += Commands.CommandHandler.OnCommandSend;
 
+            TwitchLibClient.OnConnectionError += async (s, e) =>
+            {
+                Logs.AddLog("TwitchLib connection Error!", LogLevel.Warning, "SophBot.TwitchEngine");
+                int connectCounter = 0;
+                while(!TwitchLibClient.IsConnected)
+                {
+                    await Task.Delay(5000);
+                    Logs.AddLog("Attempting TwitchLib Reconnect!", LogLevel.Debug, "SophBot.TwitchEngine");
+                    await TwitchLibClient.ReconnectAsync();
+                    if (TwitchLibClient.IsConnected)
+                    {
+                        Logs.AddLog("TwitchLib reconnected!", LogLevel.Information, "SophBot.TwitchEngine");
+                        connectCounter = 0;
+                    }
+                    else
+                    {
+                        Logs.AddLog("TwitchLib reconnected failed! Retrying in 5s...", LogLevel.Debug, "SophBot.TwitchEngine");
+                        connectCounter++;   
+                    }
+
+                    if (connectCounter >= 10)
+                    {
+                        Logs.AddLog("TwitchLib reconnected failed! 10 Times in a row! Waiting 5min before next attempt!");
+                        await Task.Delay(600000);
+                        connectCounter = 0;
+                    }
+                }
+            };
             TwitchLibClient.OnMessageReceived += MessageEvents.OnMessageReceived;
             
             

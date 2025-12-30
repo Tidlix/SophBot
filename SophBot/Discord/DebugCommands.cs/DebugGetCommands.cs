@@ -1,11 +1,12 @@
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.TextCommands;
+using DSharpPlus.Commands.Trees.Metadata;
 using DSharpPlus.Entities;
 
 namespace SophBot.Discord.DebugCommands
 {
-    [Command("get"), RequireApplicationOwner, RequirePermissions(DiscordPermission.Administrator)]
+    [Command("get"), RequireApplicationOwner, RequirePermissions(DiscordPermission.Administrator), AllowedProcessors<TextCommandProcessor>]
     public class DebugGetCommands
     {
         [Command("channels")]

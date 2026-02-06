@@ -34,6 +34,7 @@ namespace SophBot.Discord
             builder.ConfigureEventHandlers(e =>
             {
                 e.AddEventHandlers<BasicMessageEventHandler>();
+                e.AddEventHandlers<SystemMessageEventHandler>();
                 e.AddEventHandlers<WikiEventHandler>();
             });
             builder.ConfigureExtraFeatures(f =>

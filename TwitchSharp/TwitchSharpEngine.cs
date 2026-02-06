@@ -76,10 +76,16 @@ namespace TwitchSharp
             SendConsole("Authorization needed! Please authorize with the following link: \n" + link, ConsoleLevel.Needed);
 
             Console.Write("\nAfter redirect, insert new url here > ");
-            string? responseUrl = Console.ReadLine();
-            if (responseUrl == null) throw new Exception("Authorization code can't be null!");
+            string? authUri = Console.ReadLine();
+            if (authUri == null) throw new Exception("Authorization code can't be null!");
             Console.Clear();
-            var uri = new Uri(responseUrl);
+
+            return await GenerateRefreshTokenAsync(conf.ClientID, conf.ClientSecret, conf.RedirectUri, authUri);
+        }
+
+        public static async Task<string> GenerateRefreshTokenAsync(string client_id, string client_secret, string redirect_uri, string authUri)
+        {
+            var uri = new Uri(authUri);
             var queryParams = HttpUtility.ParseQueryString(uri.Query);
             string? auth = queryParams["code"];
 
@@ -90,11 +96,11 @@ namespace TwitchSharp
             {
                 Dictionary<string, string> parameters = new()
                 {
-                    {"client_id", $"{conf.ClientID}"},
-                    {"client_secret", $"{conf.ClientSecret}"},
+                    {"client_id", $"{client_id}"},
+                    {"client_secret", $"{client_secret}"},
                     {"code", auth},
                     {"grant_type", "authorization_code"},
-                    {"redirect_uri", conf.RedirectUri}
+                    {"redirect_uri", redirect_uri}
                 };
 
                 string destination = "https://id.twitch.tv/oauth2/token";
@@ -108,7 +114,7 @@ namespace TwitchSharp
                         JsonElement json = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
                         return json.GetProperty("refresh_token").GetString()!;
                     default:
-                        throw new Exception($"An Error occured while trying to generate User Access Token - Status code: {response.StatusCode}");
+                        throw new Exception($"An Error occured while trying to generate User Refresh Token - Status code: {response.StatusCode}");
                 }
             }
         }

@@ -21,7 +21,7 @@ namespace SophBot.Discord.EventHandlers
             if (e.Interaction.Data.ComponentType == DiscordComponentType.Button)
             {
                 string article = "";
-                int currentSite = 0;
+                int currentPage = 0;
 
                 DiscordContainerComponent container = (e.Message.Components!.First() as DiscordContainerComponent)!;
                 foreach (DiscordComponent current in container.Components)
@@ -40,13 +40,13 @@ namespace SophBot.Discord.EventHandlers
 
                             if (current2 is DiscordButtonComponent button)
                             {
-                                if (button.CustomId == "wikiSiteCount")
+                                if (button.CustomId == "wikiPageCount")
                                 {
                                     string label = button.Label;
                                     Match match = Regex.Match(label, @"Seite (\d+)/");
                                     if (match.Success)
                                     {
-                                        currentSite = int.Parse(match.Groups[1].Value);
+                                        currentPage = int.Parse(match.Groups[1].Value);
                                     }
                                 }
                             }
@@ -55,11 +55,11 @@ namespace SophBot.Discord.EventHandlers
                 }
                 if (e.Id.Contains("Prev"))
                 {
-                    wiki = WikiEngine.getArticle(article, currentSite - 1);
+                    wiki = WikiEngine.getArticle(article, currentPage - 1);
                 }
                 else if (e.Id.Contains("Next"))
                 {
-                    wiki = WikiEngine.getArticle(article, currentSite + 1);
+                    wiki = WikiEngine.getArticle(article, currentPage + 1);
                 }
             }
             if (wiki == null) return;

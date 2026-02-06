@@ -191,5 +191,34 @@ namespace SophBot.Discord.SlashCommands
             Nachrichten_Discord,
             Nachrichten_Twitch,
         }
+        
+        [Command("Gift"), Description("Schenke einem anderen Profil deine Punkte!")]
+        public async Task GiftPoints(CommandContext ctx, DiscordMember member, long points)
+        {
+            await ctx.DeferResponseAsync();
+            Profile sender = new (ctx.Member!.Id);
+            Profile receiver = new (member.Id);
+
+            if (sender == receiver)
+            {
+                await ctx.EditResponseAsync("Du kannst dir nicht selber Punkte schenken!");
+                return;
+            }
+            if (points <= 0)
+            {
+                await ctx.EditResponseAsync("Du musst mehr als 0 Punkte verschenken!");
+                return;
+            }
+            if (sender.Channelpoints < points)
+            {
+                await ctx.EditResponseAsync("Du kannst nicht mehr Punkte verschenken als du hast!");
+                return;
+            }
+
+            sender.RemoveChannelpoints(points);
+            receiver.AddChannelpoints(points);
+
+            await ctx.EditResponseAsync($"Du hast {points} Punkte an {member.Mention} gesendet!");
+        }
     }
 }

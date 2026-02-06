@@ -62,8 +62,8 @@ namespace SophBot.Discord.SlashCommands
                 WikiEngine.setArticle(title, 1, (response.Values["wikiArtCreateInput"] as TextInputModalSubmission)!.Value);
                 await response.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Der Wiki Artikel `{title}` wurde erstellt!"));
             }
-            [Command("AddSite")]
-            public async Task AddSite(SlashCommandContext ctx, [SlashAutoCompleteProvider<WikiOptionProviders.ArticleProvider>] string article)
+            [Command("AddPage")]
+            public async Task AddPage(SlashCommandContext ctx, [SlashAutoCompleteProvider<WikiOptionProviders.ArticleProvider>] string article)
             {
                 var current = WikiEngine.getArticle(article, 1);
                 if (current == null)
@@ -73,7 +73,7 @@ namespace SophBot.Discord.SlashCommands
                 }
 
                 var modal = new DiscordModalBuilder();
-                modal.WithTitle($"## Wiki- {article}:{current.SiteCount + 1}");
+                modal.WithTitle($"## Wiki- {article}:{current.PageCount + 1}");
                 modal.WithCustomId("wikiArtAdd");
                 modal.AddTextInput(new DiscordTextInputComponent(
                     customId: "wikiArtAddInput",
@@ -88,26 +88,26 @@ namespace SophBot.Discord.SlashCommands
                 var response = (await DiscordEngine.Interactivity.WaitForModalAsync("wikiArtAdd", TimeSpan.FromDays(1))).Result;
                 await response.Interaction.DeferAsync();
 
-                WikiEngine.setArticle(article, current.SiteCount + 1, (response.Values["wikiArtAddInput"] as TextInputModalSubmission)!.Value);
-                await response.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Die Seite {current.SiteCount + 1} für den Artikel `{article}` wurde erstellt!"));
+                WikiEngine.setArticle(article, current.PageCount + 1, (response.Values["wikiArtAddInput"] as TextInputModalSubmission)!.Value);
+                await response.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Die Seite {current.PageCount + 1} für den Artikel `{article}` wurde erstellt!"));
             }
-            [Command("ModifySite")]
-            public async Task ModifySite(SlashCommandContext ctx, [SlashAutoCompleteProvider<WikiOptionProviders.ArticleProvider>] string article, int site)
+            [Command("ModifyPage")]
+            public async Task ModifyPage(SlashCommandContext ctx, [SlashAutoCompleteProvider<WikiOptionProviders.ArticleProvider>] string article, int page)
             {
-                var current = WikiEngine.getArticle(article, site);
+                var current = WikiEngine.getArticle(article, page);
                 if (current == null)
                 {
                     current = WikiEngine.getArticle(article, 1);
                     if (current == null)
                         await ctx.RespondAsync($"Ungültiger Wiki-Artikel `{article}`!");
                     else
-                        await ctx.RespondAsync($"Ungültige Seiten Nr. Bitte gib eine Zahl von 1-{current.SiteCount} an!\n-# Wenn du eine neue Seite hinzufügen möchtest, nutze den Befehl `add_site`");
+                        await ctx.RespondAsync($"Ungültige Seiten Nr. Bitte gib eine Zahl von 1-{current.PageCount} an!\n-# Wenn du eine neue Seite hinzufügen möchtest, nutze den Befehl `add_page`");
 
                     return;
                 }
 
                 var modal = new DiscordModalBuilder();
-                modal.WithTitle($"## Wiki- {article}:{site}");
+                modal.WithTitle($"## Wiki- {article}:{page}");
                 modal.WithCustomId("wikiArtModify");
                 modal.AddTextInput(new DiscordTextInputComponent(
                     customId: "wikiArtModifyInput",
@@ -123,8 +123,8 @@ namespace SophBot.Discord.SlashCommands
                 var response = (await DiscordEngine.Interactivity.WaitForModalAsync("wikiArtModify", TimeSpan.FromDays(1))).Result;
                 await response.Interaction.DeferAsync();
 
-                WikiEngine.setArticle(article, site, (response.Values["wikiArtModifyInput"] as TextInputModalSubmission)!.Value);
-                await response.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Die Seite {site} für den Artikel `{article}` wurde bearbeitet!"));
+                WikiEngine.setArticle(article, page, (response.Values["wikiArtModifyInput"] as TextInputModalSubmission)!.Value);
+                await response.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"Die Seite {page} für den Artikel `{article}` wurde bearbeitet!"));
             }
         }
     }

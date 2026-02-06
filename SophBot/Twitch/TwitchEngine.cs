@@ -1,3 +1,4 @@
+using CommunityToolkit.HighPerformance;
 using Microsoft.Extensions.Logging;
 using SophBot.Twitch.Events;
 using SophBot.Universal;
@@ -16,28 +17,33 @@ namespace SophBot.Twitch
         public static LiveStreamMonitorService MonitorService;
         #pragma warning restore CS8618
 
-        public static async Task Initialize()
+        public static async Task Initialize(string? refreshToken = null)
         {
-            TwitchRefreshTokenConfig tokenConf = new ()
+            if (refreshToken is null)
             {
-                ClientID = Config.Twitch.ClientId,
-                ClientSecret = Config.Twitch.ClientSecret,
-                RedirectUri = "https://localhost:3000",
-                Scopes = [
-                    "chat:read",
-                    "chat:edit",
-                    "user:bot",
-                    "user:read:chat",
-                    "user:write:chat",
-                    "user:read:whispers",
-                    "user:manage:whispers",
-                    "moderator:read:chatters",
-                    "moderator:read:followers",
-                    "moderator:read:moderators"
-                ]
-            };
-            string refreshToken = await TwitchSharpEngine.GenerateRefreshTokenAsync(tokenConf);
+                TwitchRefreshTokenConfig tokenConf = new ()
+                {
+                    ClientID = Config.Twitch.ClientId,
+                    ClientSecret = Config.Twitch.ClientSecret,
+                    RedirectUri = "https://localhost:3000",
+                    Scopes = [
+                        "chat:read",
+                        "chat:edit",
+                        "user:bot",
+                        "user:read:chat",
+                        "user:write:chat",
+                        "user:read:whispers",
+                        "user:manage:whispers",
+                        "moderator:read:chatters",
+                        "moderator:read:followers",
+                        "moderator:read:moderators"
+                    ]
+                };
+                refreshToken = await TwitchSharpEngine.GenerateRefreshTokenAsync(tokenConf);
+            }
 
+            if (TwitchLibClient is not null) await TwitchLibClient.DisconnectAsync();
+            
             TwitchClientConfig clientConf = new ()
             {
                 ClientID = Config.Twitch.ClientId,
@@ -99,15 +105,15 @@ namespace SophBot.Twitch
                     }
                 }
             };
-            TwitchLibClient.OnMessageReceived += MessageEvents.OnMessageReceived;
-            
+            TwitchLibClient.OnMessageReceived += MessageEvents.OnMessageReceived;            
             
 
             await TwitchLibClient.ConnectAsync();
 
             await TwitchLibClient.JoinChannelAsync("xsophe");
             await TwitchLibClient.JoinChannelAsync("tidlix");
-
+            MonitorService.SetChannelsByName(["xsophe", "tidlix"]);
+            MonitorService.Start();
         }
     }
 }

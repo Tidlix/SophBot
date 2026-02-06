@@ -7,14 +7,14 @@ namespace SophBot.Discord.Tools
 {
     public static class WikiEngine
     {
-        public static WikiArticle? getArticle(string article, int site)
+        public static WikiArticle? getArticle(string article, int page)
         {
-            DataTable data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Wiki, ["article", "site", "content"], [new ("article", "=", article)]);
+            DataTable data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Wiki, ["article", "page", "content"], [new ("article", "=", article)]);
 
             if (data.Rows.Count == 0)
                 return null;
 
-            DataRow? target = data.AsEnumerable().FirstOrDefault(row => (int)row["site"] == site);
+            DataRow? target = data.AsEnumerable().FirstOrDefault(row => (int)row["page"] == page);
 
             if (target == null)
                 return null;
@@ -23,20 +23,20 @@ namespace SophBot.Discord.Tools
             {
                 Title = (string)target["article"],
                 Content = (string)target["content"],
-                CurrentSite = site,
-                SiteCount = data.Rows.Count
+                CurrentPage = page,
+                PageCount = data.Rows.Count
             };
         }
-        public static void setArticle(string article, int site, string content)
+        public static void setArticle(string article, int page, string content)
         {
-            if (getArticle(article, site) == null)
+            if (getArticle(article, page) == null)
             {
                 DatabaseEngine.InsertData(
                     DatabaseEngine.DBTable.Wiki, 
                     new ()
                     {
                         {"article", article},
-                        {"site", site},
+                        {"page", page},
                         {"content", content}
                     });
             }
@@ -45,7 +45,7 @@ namespace SophBot.Discord.Tools
                 DatabaseEngine.ModifyData(
                     DatabaseEngine.DBTable.Wiki,
                     new () { {"content", content} },
-                    [new ("article", "=", article), new ("site", "=", site)]
+                    [new ("article", "=", article), new ("page", "=", page)]
                     );
             }
         }
@@ -55,8 +55,8 @@ namespace SophBot.Discord.Tools
     {
         public required string Title;
         public required string Content;
-        public required int CurrentSite;
-        public required int SiteCount;
+        public required int CurrentPage;
+        public required int PageCount;
 
         public DiscordContainerComponent AsContainerComponent()
         {
@@ -68,9 +68,9 @@ namespace SophBot.Discord.Tools
                 new DiscordTextDisplayComponent(Content),
                 new DiscordSeparatorComponent(true),
                 new DiscordActionRowComponent([
-                    new DiscordButtonComponent(DiscordButtonStyle.Secondary, "wikiSitePrev", "Vorherige Seite", CurrentSite == 1 ? true : false),
-                    new DiscordButtonComponent(DiscordButtonStyle.Secondary, "wikiSiteCount", $"Seite {CurrentSite}/{SiteCount}", true),
-                    new DiscordButtonComponent(DiscordButtonStyle.Secondary, "wikiSiteNext", "Nächste Seite", CurrentSite == SiteCount ? true : false)
+                    new DiscordButtonComponent(DiscordButtonStyle.Secondary, "wikiPagePrev", "Vorherige Seite", CurrentPage == 1 ? true : false),
+                    new DiscordButtonComponent(DiscordButtonStyle.Secondary, "wikiPageCount", $"Seite {CurrentPage}/{PageCount}", true),
+                    new DiscordButtonComponent(DiscordButtonStyle.Secondary, "wikiPageNext", "Nächste Seite", CurrentPage == PageCount ? true : false)
                 ])
             };
             return new (components);

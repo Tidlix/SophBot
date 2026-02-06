@@ -25,8 +25,8 @@ namespace SophBot.Universal
             Profiles,       // id ; discord-id ; twitch-id ; discord-messages ; twitch-messages ; channel-points 
             Servers,        // NC  server-id ; 
             Commands,       // NC  command ; content
-            Wiki,           // article ; site ; content
-            Monitorings,    // NC  discord-channel ; twitch-channel ; mention-role
+            Wiki,           // article ; page ; content
+            Monitorings,    // discord-channel ; twitch-channel ; mention-role
             AI_Memory,      // id ; content
             Logs            // id ; datetime ; loglevel ; content ; source
         }

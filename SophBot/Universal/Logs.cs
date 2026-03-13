@@ -5,12 +5,9 @@ namespace SophBot.Universal
 {
     public static class Logs
     {
-        // DiscordEngine needs LoggerProvider
-        // TwitchEngine needs LoggerFactory
-
         public static void AddLog(string content, LogLevel logLevel = LogLevel.Information, string source = "SophBot") 
         {
-            string currentTime = DateTime.Now.ToString("yyyy/MM/dd - HH:mm:ss"); // Current time 
+            string currentTime = DateTime.Now.ToString("yyyy/MM/dd - HH:mm:ss:fff"); 
             DatabaseEngine.InsertData(DatabaseEngine.DBTable.Logs, new Dictionary<string, object>
             {
                 {"source", source},

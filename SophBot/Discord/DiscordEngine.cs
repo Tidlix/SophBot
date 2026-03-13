@@ -53,7 +53,7 @@ namespace SophBot.Discord
                 {
                     try { await e.Context.RespondAsync("Ein Fehler ist aufgetreten!"); }
                     catch { await e.Context.FollowupAsync("Ein Fehler ist aufgetreten!"); }
-                    throw new Exception($"Command ({e.Context.Command}) failed! {e.Exception.Message}");
+                    Logs.AddLog($"Command ({e.Context.Command}) failed! {e.Exception.Message}", LogLevel.Error, "SophBot.DiscordEngine");
                 };
 
                 TextCommandProcessor tcp = new(new()

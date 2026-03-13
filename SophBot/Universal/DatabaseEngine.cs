@@ -21,10 +21,8 @@ namespace SophBot.Universal
         #region DB-Tools
         public enum DBTable
         {
-            // NC - Not Created in DB yet!
             Profiles,       // id ; discord-id ; twitch-id ; discord-messages ; twitch-messages ; channel-points 
-            Servers,        // NC  server-id ; 
-            Commands,       // NC  command ; content
+            Commands,       // command ; response ; sync-vars
             Wiki,           // article ; page ; content
             Monitorings,    // discord-channel ; twitch-channel ; mention-role
             AI_Memory,      // id ; content

@@ -31,14 +31,14 @@ namespace SophBot.Universal
             MainModel.SystemInstruction = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}/ai/promt.txt");
 
             MainModel.EnableFunctions();
-            MainModel.AddFunctionTool(new QuickTool((string? filter = null) => ReadMemory(filter), "ReadMemory", "Lies die gespeicherten Informationen (mit dem optionalen filter kannst du nur die Einträge anzeigen, die genau diesen string enthalten)"));
-            MainModel.AddFunctionTool(new QuickTool((string content) => WriteMemory(content), "WriteMemory", "Speichere eine neue Information"));
-            MainModel.AddFunctionTool(new QuickTool((long id, string newContent) => ModifyMemory(id, newContent), "ModifyMemory", "Bearbeite eine Information anhand der id (readMemory)"));
-            MainModel.AddFunctionTool(new QuickTool((long id) => DeleteMemory(id), "DeleteMemory", "Lösche eine Information anhand der id (readMemory)"));
-            MainModel.AddFunctionTool(new QuickTool(() => ReadWiki(), "ReadWiki", "Erhalte die Informationen des Internen Soph-Wikis"));
-            MainModel.AddFunctionTool(new QuickTool((long id) => GetProfile(id), "GetProfile", "Erhalte mehr Informationen über einen Benutzer"));
-            MainModel.AddFunctionTool(new QuickTool(async() => await GetCurrentStream(), "GetCurrentStream", "Erhalte den Informationen über den aktuell Laufenden Stream"));
-            MainModel.AddFunctionTool(new QuickTool((string request) => AskGoogleAi(request), "AskGoogleAi", "Frage ein KI-Modell, mit der möglichkeit google zu durchsuchen, nach Informationen"));
+            //MainModel.AddFunctionTool(new QuickTool((string? filter = null) => ReadMemory(filter), "ReadMemory", "Lies die gespeicherten Informationen (mit dem optionalen filter kannst du nur die Einträge anzeigen, die genau diesen string enthalten)"));
+            //MainModel.AddFunctionTool(new QuickTool((string content) => WriteMemory(content), "WriteMemory", "Speichere eine neue Information"));
+            //MainModel.AddFunctionTool(new QuickTool((long id, string newContent) => ModifyMemory(id, newContent), "ModifyMemory", "Bearbeite eine Information anhand der id (readMemory)"));
+            //MainModel.AddFunctionTool(new QuickTool((long id) => DeleteMemory(id), "DeleteMemory", "Lösche eine Information anhand der id (readMemory)"));
+            //MainModel.AddFunctionTool(new QuickTool(() => ReadWiki(), "ReadWiki", "Erhalte die Informationen des Internen Soph-Wikis"));
+            //MainModel.AddFunctionTool(new QuickTool((long id) => GetProfile(id), "GetProfile", "Erhalte mehr Informationen über einen Benutzer"));
+            //MainModel.AddFunctionTool(new QuickTool(async() => await GetCurrentStream(), "GetCurrentStream", "Erhalte den Informationen über den aktuell Laufenden Stream"));
+            //MainModel.AddFunctionTool(new QuickTool((string request) => AskGoogleAi(request), "AskGoogleAi", "Frage ein KI-Modell, mit der möglichkeit google zu durchsuchen, nach Informationen"));
 
 
             GoogleModel.UseGoogleSearch = true;
@@ -179,7 +179,7 @@ Aktuelle Zuschauer: {stream.CurrentViewer}";
         public readonly DiscordChannel Channel;
         public readonly bool IsPrivate;
         public DiscordAiRequest(DiscordChannel channel, DiscordUser sender, string promt)
-            : base(AiRequestType.DISCORD, sender.GlobalName, 0 , promt)
+            : base(AiRequestType.DISCORD, sender.GlobalName ?? sender.Username, 0 , promt)
         {
             Channel = channel;
             IsPrivate = channel.IsPrivate;

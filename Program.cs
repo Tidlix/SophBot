@@ -1,5 +1,4 @@
-﻿using System.Data;
-using SophBot.Discord;
+﻿using SophBot.Discord;
 using SophBot.Twitch;
 using SophBot.Universal;
 

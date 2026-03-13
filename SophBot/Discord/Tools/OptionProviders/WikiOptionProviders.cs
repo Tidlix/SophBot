@@ -27,7 +27,6 @@ namespace SophBot.Discord.Tools.OptionProviders
                         result.Add(new(article, article));
                     }
                 }
-                if (result.Count == 0) result.Add(new ("Invalid Wiki article!", null));
                 return result; 
             }
             public static IEnumerable<DiscordSelectComponentOption> GetSelectOptions() 

@@ -57,6 +57,8 @@ namespace SophBot.Universal
                     return result + "\"logs\"";
                 case DBTable.Monitorings:
                     return result + "\"monitorings\"";
+                case DBTable.Commands:
+                    return result + "\"commands\"";
                 default:
                     throw new NotImplementedException($"Table ({table}) not implemented yet!");
             }

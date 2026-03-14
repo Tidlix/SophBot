@@ -21,6 +21,10 @@ namespace SophBot.Discord.Tools
                 DatabaseEngine.ModifyData(DatabaseEngine.DBTable.Commands, new Dictionary<string, object>() { 
                     { "response", response }, { "sync-vars", syncVariables } }, [new("command", "=", command)]);
         }
+        public static void deleteCommand(string command)
+        {
+            DatabaseEngine.DeleteData(DatabaseEngine.DBTable.Commands, [new("command", "=", command)]);
+        }
     }
     public class CustomCommand
     {
@@ -31,20 +35,27 @@ namespace SophBot.Discord.Tools
         public CustomCommand(string command)
         {
             this.command = command;
-            var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Commands, ["command"], [new("command", "=", command)]);
+            var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Commands, ["response", "sync-vars"], [new("command", "=", command)]);
             DataRow row = data.Rows[0];
             response = (string)row["response"];
             syncVariables = (bool)row["sync-vars"];
         }
 
-        public override string ToString()
+        public string ToString(string[] param)
         {
             /*
             if syncVariables = true
               replace every (random) variable with same value
             else
               replace every (random) variable with new random value
+-# {rand(x)} -> Zufällige Zahl zwischen 0 und x
+-# {rand(x,y)} -> Zufällige Zahl zwischen x und y
+-# {sender} -> Sender der Nachricht
+-# {text} -> Text welcher hinter dem Command geschrieben wurde
+-# {text(x)} -> x. Wort des Textes welcher hinter dem Command geschrieben wurde
             */
+            response = response.Replace("{text}", string.Join(' ', param.Skip(1)));
+            Console.Write(param[0]);
             return response;
         }
     }

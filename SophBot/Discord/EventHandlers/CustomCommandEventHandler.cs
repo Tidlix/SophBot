@@ -14,7 +14,7 @@ namespace SophBot.Discord.EventHandlers
             string[] param = content.Split(' ');
             CustomCommand? command = CustomCommandEngine.getCommand(param[0]);
             if (command is null) return;
-            await eventArgs.Message.RespondAsync(command.ToString(param));
+            await eventArgs.Message.RespondAsync(command.ToString(param, eventArgs.Author.Mention));
         }
     }
 }

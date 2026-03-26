@@ -34,8 +34,8 @@ namespace SophBot.Discord.SlashCommands
 -# {rand(x)} -> Zufällige Zahl zwischen 0 und x
 -# {rand(x,y)} -> Zufällige Zahl zwischen x und y
 -# {sender} -> Sender der Nachricht
--# {text} -> Text welcher hinter dem Command geschrieben wurde
--# {text(x)} -> x. Wort des Textes welcher hinter dem Command geschrieben wurde");
+-# {input} -> Text welcher hinter dem Command geschrieben wurde
+-# {input(x)} -> x. Wort des Textes welcher hinter dem Command geschrieben wurde");
             await ctx.RespondWithModalAsync(modal);
             var response = await DiscordEngine.Interactivity.WaitForModalAsync($"commandModify{command}", TimeSpan.FromMinutes(30));
             

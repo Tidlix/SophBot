@@ -152,6 +152,7 @@ namespace SophBot.Discord.SlashCommands
             await ctx.EditResponseAsync(message);
 
         }
+                
         private static bool checkChannelPoints(Profile profile, int points)
         {
             if (points <= 0) 

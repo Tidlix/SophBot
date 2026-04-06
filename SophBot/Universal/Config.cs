@@ -6,6 +6,8 @@ namespace SophBot.Universal
         public static class Discord
         {
             public static string Token { get; set; }
+            public static ulong LogChannelId { get; set; }
+            public static ulong CCForumId { get; set; }
         }
         public static class Twitch
         {
@@ -30,6 +32,8 @@ namespace SophBot.Universal
         public static void Read()
         {
             Discord.Token = getValue(ConfigPath.Discord, "Token");
+            Discord.LogChannelId = ulong.Parse(getValue(ConfigPath.Discord, "LogChannel"));
+            Discord.CCForumId = ulong.Parse(getValue(ConfigPath.Discord, "CCForum"));
 
             Twitch.ClientId = getValue(ConfigPath.Twitch, "ClientId");
             Twitch.ClientSecret = getValue(ConfigPath.Twitch, "ClientSecret");

@@ -1,11 +1,11 @@
 using System.Reflection;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.InteractionNamingPolicies;
 using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
+using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
@@ -19,6 +19,11 @@ namespace SophBot.Discord
 #pragma warning disable CS8618 
         public static DiscordClient Client { get; private set; }
         public static InteractivityExtension Interactivity { get; private set; }
+        internal static class Channels
+        {
+            public static DiscordChannel LogChannel;
+            public static DiscordChannel CustomChannelForum;
+        }
 #pragma warning restore CS8618 
 
         public static async Task Initialize(string token)
@@ -37,6 +42,7 @@ namespace SophBot.Discord
                 e.AddEventHandlers<SystemMessageEventHandler>();
                 e.AddEventHandlers<WikiEventHandler>();
                 e.AddEventHandlers<CustomCommandEventHandler>();
+                e.AddEventHandlers<LogEventHandler>();
             });
             builder.ConfigureExtraFeatures(f =>
             {
@@ -77,6 +83,9 @@ namespace SophBot.Discord
             Client = builder.Build();
             Interactivity =  (Client.ServiceProvider.GetService(typeof(InteractivityExtension)) as InteractivityExtension)!;
             await Client.ConnectAsync();
+
+            Channels.LogChannel = await Client.GetChannelAsync(Config.Discord.LogChannelId);
+            Channels.CustomChannelForum = await Client.GetChannelAsync(Config.Discord.CCForumId);
         }
     }
 }

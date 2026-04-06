@@ -21,7 +21,7 @@ namespace SophBot.Universal
         #region DB-Tools
         public enum DBTable
         {
-            Profiles,       // id ; discord-id ; twitch-id ; discord-messages ; twitch-messages ; channel-points 
+            Profiles,       // id ; discord-id ; twitch-id ; discord-messages ; twitch-messages ; channel-points ; ai-notes
             Commands,       // command ; response ; sync-vars
             Wiki,           // article ; page ; content
             Monitorings,    // discord-channel ; twitch-channel ; mention-role
@@ -210,7 +210,7 @@ namespace SophBot.Universal
 
             ExecuteQuery(cmd);
         }
-        
+
         public static void DeleteData(DBTable table, IEnumerable<DBCondition> conditions)
         {
             NpgsqlCommand cmd = new();

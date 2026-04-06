@@ -18,6 +18,10 @@ namespace SophBot.Universal
         public long DiscordMessages { get; private set; }
         public long TwitchMessages { get; private set; }
         public long Channelpoints { get; private set; }
+        public string[]? AiNotes { get; private set; }
+
+        private string[] columnList = ["id", "discord-id", "twitch-id", "discord-messages", "twitch-messages", "channel-points", "ai-notes"];
+
 
         #region Constructors
         /*
@@ -25,28 +29,27 @@ namespace SophBot.Universal
         */
         public Profile(ulong discordId)
         {
-            var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Profiles, ["id", "discord-id", "twitch-id", "discord-messages", "twitch-messages", "channel-points"], [new ("discord-id", "=", discordId)]);
+            var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Profiles, columnList, [new ("discord-id", "=", discordId)]);
             
             if (data.Rows.Count == 0)
             {
                 // If no entry is found, a new Entry(profile) will be created!
                 DatabaseEngine.InsertData(DatabaseEngine.DBTable.Profiles, new Dictionary<string, object> { {"discord-id", discordId}});
-                data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Profiles, ["id", "discord-id", "twitch-id", "discord-messages", "twitch-messages", "channel-points"], [new ("discord-id", "=", discordId)]);
+                data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Profiles, columnList, [new ("discord-id", "=", discordId)]);
             } 
             ConvertData(data);
-
         }
         /*
         * GET PROFILE BY TWITCH ACCOUNT
         */
         public Profile(string twitchId)
         {
-            var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Profiles, ["id", "discord-id", "twitch-id", "discord-messages", "twitch-messages", "channel-points"], [new ("twitch-id", "=", twitchId)]);
+            var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Profiles, columnList, [new ("twitch-id", "=", twitchId)]);
             if (data.Rows.Count == 0)
             {
                 // If no entry is found, a new Entry(profile) will be created!
                 DatabaseEngine.InsertData(DatabaseEngine.DBTable.Profiles, new Dictionary<string, object> { {"twitch-id", twitchId}});
-                data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Profiles, ["id", "discord-id", "twitch-id", "discord-messages", "twitch-messages", "channel-points"], [new ("twitch-id", "=", twitchId)]);
+                data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Profiles, columnList, [new ("twitch-id", "=", twitchId)]);
             } 
             ConvertData(data);
         }
@@ -55,7 +58,7 @@ namespace SophBot.Universal
         */
         public Profile(long id)
         {
-            var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Profiles, ["id", "discord-id", "twitch-id", "discord-messages", "twitch-messages", "channel-points"], [new ("id", "=", id)]);            
+            var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Profiles, columnList, [new ("id", "=", id)]);            
             if (data.Rows.Count == 0)
             {
                 throw new Exception($"Profile with id \"{id}\" was not found!");
@@ -80,6 +83,7 @@ namespace SophBot.Universal
             DiscordMessages = (long)row["discord-messages"];
             TwitchMessages = (long)row["twitch-messages"];
             Channelpoints = (long)row["channel-points"];
+            AiNotes = (row["ai-notes"] == DBNull.Value) ? null : (string[]?)row["ai-notes"];
         }
         #endregion
 
@@ -115,7 +119,23 @@ namespace SophBot.Universal
             DatabaseEngine.ModifyData(DatabaseEngine.DBTable.Profiles, new Dictionary<string, object>{{"channel-points", Channelpoints}}, [new ("id", "=", ID)]);
             return this;
         }
-        
+        public Profile AddAiNote(string value)
+        {
+            if (AiNotes is null)
+                AiNotes = [value];
+            else
+                AiNotes = AiNotes.Append(value).ToArray();
+            DatabaseEngine.ModifyData(DatabaseEngine.DBTable.Profiles, new Dictionary<string, object>{{"ai-notes", AiNotes}}, [new ("id", "=", ID)]);
+            return this;
+        }
+        public Profile SetAiNote(int index, string value)
+        {
+            if (AiNotes is null || AiNotes.Length < index)
+                throw new Exception("Index was not found in array");
+            AiNotes[index] = value;
+            DatabaseEngine.ModifyData(DatabaseEngine.DBTable.Profiles, new Dictionary<string, object>{{"ai-notes", AiNotes}}, [new ("id", "=", ID)]);
+            return this;
+        }
         public Profile SyncDiscordAccount(Profile discord)
         {
             if (DiscordUser != null) throw new Exception("Discord Account is allready synced!");
@@ -156,6 +176,21 @@ namespace SophBot.Universal
             result += $"**Gesendete Nachrichten:**\n  **Discord:** {DiscordMessages}\n  **Twitch:** {TwitchMessages}\n  **Gesamt:** {DiscordMessages+TwitchMessages}\n";
             result += $"**Channelpoints:** {Channelpoints}\n";
 
+            return result;
+        }
+        public string AsAiString()
+        {
+            string result = $@"{{
+userId = {ID},
+discordId = {(DiscordUser is null ? "null" : DiscordUser.Id)},
+twitchId = {(TwitchUser is null ? "null" : TwitchUser.ID)},
+discordUsername = {(DiscordUser is null ? "null" : DiscordUser.GlobalName)},
+twitchUsername = {(TwitchUser is null ? "null" : TwitchUser.DisplayName)},
+discordMessages = {DiscordMessages},
+twitchMessages = {TwitchMessages},
+channelpoints = {Channelpoints},
+aiNotes = {(AiNotes is null ? "null" : $"{{{string.Join(';', AiNotes)}}}")}
+}}";
             return result;
         }
         #endregion

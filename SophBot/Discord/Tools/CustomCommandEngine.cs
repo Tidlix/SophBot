@@ -1,7 +1,6 @@
 using System.Data;
 using System.Text.RegularExpressions;
 using SophBot.Universal;
-using TwitchLib.Api.Helix.Models.EventSub.Conduits.Shards.UpdateConduitShards;
 
 namespace SophBot.Discord.Tools
 {

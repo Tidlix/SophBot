@@ -5,9 +5,7 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Trees.Metadata;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using SophBot.Twitch;
 using SophBot.Universal;
-using TwitchSharp.Entities;
 
 namespace SophBot.Discord.SlashCommands
 {
@@ -29,19 +27,19 @@ namespace SophBot.Discord.SlashCommands
                 new DiscordThumbnailComponent(target.AvatarUrl, "Profilbild auf Discord")) 
             );
             components.Add(new DiscordSeparatorComponent(true));
-            if (profile.TwitchUser is null)
+            /*if (profile.TwitchUser is null)
                 components.Add(new DiscordTextDisplayComponent($"## Twitch: \nNicht Synchronisiert! (/profile sync)"));
             else
                 components.Add(new DiscordSectionComponent(
                     new DiscordTextDisplayComponent($"## Twitch: \n**Name:** {profile.TwitchUser.DisplayName}\n**Gesendete Nachrichten:** {profile.TwitchMessages}"),
                     new DiscordThumbnailComponent(profile.TwitchUser.ProfileImageUrl, "Profilbild auf Twitch")) 
-                );
+                );*/
             components.Add(new DiscordSeparatorComponent(true));
             components.Add(new DiscordTextDisplayComponent($"## Allgemeine Statistiken: \n**Insgesamt gesendete Nachrichten:** {profile.DiscordMessages+profile.TwitchMessages}\n**Channelpoints:** {profile.Channelpoints}"));
             await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new (components, false, target.Color.PrimaryColor)));
         }
 
-        [Command("Sync")]
+        /*[Command("Sync")]
         public async Task SyncProfile(SlashCommandContext ctx, [Description("Schreibe hier den Namen des Twitch-Accounts, welchen du mit diesem Profil verbinden willst")] string TwitchName)
         {
             Profile discord = new Profile(ctx.User.Id);
@@ -97,7 +95,7 @@ namespace SophBot.Discord.SlashCommands
             {
                 await mdlResponse.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Synchronisation fehlgeschlagen! - Falscher Code"));
             }
-        }
+        }*/
 
         [Command("Leaderboard")]
         public async Task Leaderboard(CommandContext ctx, [Description("Welches Leaderboard möchtest du anzeigen?")] LeaderboardType leaderboard)
@@ -139,7 +137,7 @@ namespace SophBot.Discord.SlashCommands
                 string name = string.Empty;
                 string url = string.Empty;
                 long value = (long)current[column];
-                if (profile.TwitchUser is null && profile.DiscordUser is null)
+                /*if (profile.TwitchUser is null && profile.DiscordUser is null)
                 {
                     name = $"Unbekannter Nutzer (ID {(long)current["id"]})";
                 } else
@@ -165,6 +163,7 @@ namespace SophBot.Discord.SlashCommands
                     }
                 }
                 url ??= TwitchEngine.TwitchSharpClient.CurrentUser.ProfileImageUrl;
+                */
 
                 if (place <= 3)
                 {

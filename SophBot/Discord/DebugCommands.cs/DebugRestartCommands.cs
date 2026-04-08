@@ -4,9 +4,7 @@ using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Commands.Trees.Metadata;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
-using SophBot.Twitch;
 using SophBot.Universal;
-using TwitchSharp;
 
 namespace SophBot.Discord.DebugCommands
 {
@@ -22,15 +20,6 @@ namespace SophBot.Discord.DebugCommands
             Logs.AddLog("Restarted GeminiEngine", LogLevel.Information, "SophBot.Discord.DebugCommands");
 
             await ctx.RespondAsync("SophBot AI wurde neu gestartet!");
-        }
-        [Command("twitch")]
-        public async Task RestartTwitch(CommandContext ctx, string authUri)
-        {
-            string refreshToken = await TwitchSharpEngine.GenerateRefreshTokenAsync(Config.Twitch.ClientId, Config.Twitch.ClientSecret, "https://localhost:3000", authUri);
-            await TwitchEngine.Initialize(refreshToken);
-            Logs.AddLog("Restarted TwitchEngine", LogLevel.Information, "SophBot.Discord.DebugCommands");
-
-            await ctx.RespondAsync("Die TwitchEngine wurde neu gestartet!");
         }
     }
 }

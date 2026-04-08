@@ -2,10 +2,7 @@ using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using GenerativeAI;
 using GenerativeAI.Tools;
-using SophBot.Twitch;
 using System.Data;
-using TwitchLib.Client;
-using TwitchSharp.Entities;
 
 namespace SophBot.Universal
 {
@@ -38,7 +35,7 @@ namespace SophBot.Universal
             MainModel.AddFunctionTool(new QuickTool((long userId, int arrayIndex, string noteContent) => ModifyUserAiNote(userId, arrayIndex, noteContent), "ModifyUserAiNote", "Notiere dir eine Information zu dem aktuellen Nutzer"));
             MainModel.AddFunctionTool(new QuickTool(() => ReadWiki(), "ReadWiki", "Erhalte die Informationen des Internen Soph-Wikis"));
             //MainModel.AddFunctionTool(new QuickTool((long id) => GetProfile(id), "GetProfile", "Erhalte mehr Informationen über einen Benutzer"));
-            MainModel.AddFunctionTool(new QuickTool(async() => await GetCurrentStream(), "GetCurrentStream", "Erhalte den Informationen über den aktuell Laufenden Stream"));
+            //MainModel.AddFunctionTool(new QuickTool(async() => await GetCurrentStream(), "GetCurrentStream", "Erhalte den Informationen über den aktuell Laufenden Stream"));
             MainModel.AddFunctionTool(new QuickTool((string request) => AskGoogleAi(request), "AskGoogleAi", "Frage ein KI-Modell, mit der möglichkeit google zu durchsuchen, nach Informationen"));
 
 
@@ -104,7 +101,7 @@ namespace SophBot.Universal
             return result;
         }
 
-        private static async Task<string> GetCurrentStream()
+        /*private static async Task<string> GetCurrentStream()
         {
             TwitchUser user = await TwitchEngine.TwitchSharpClient.GetUserByLoginAsync("xsophe");
             TwitchStream? stream = user.GetCurrentStream();
@@ -114,7 +111,8 @@ namespace SophBot.Universal
 Kategorie: {stream.GameName}
 Gestartet um: {stream.StartedAt.ToString("dd.MM.yyyy - HH:mm:ss")}
 Aktuelle Zuschauer: {stream.CurrentViewer}";
-        }     
+        }
+        */ 
         private static string AskGoogleAi(string request)
         {
             try
@@ -172,7 +170,7 @@ userInformation: {Profile.AsAiString()}
 userPromt: {Promt}";
         }
     }
-    public class TwitchAiRequest : BaseAiRequest
+    /*public class TwitchAiRequest : BaseAiRequest
     {
         public readonly string Channel;
         public readonly bool IsPrivate;
@@ -195,7 +193,7 @@ isPrivate: {IsPrivate}
 userInformation: {Profile.AsAiString()}
 userPromt: {Promt}";
         }
-    }
+    }*/
     public class ConsoleAiRequest : BaseAiRequest
     {
         public ConsoleAiRequest(string promt)

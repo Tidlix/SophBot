@@ -2,7 +2,9 @@ using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using GenerativeAI;
 using GenerativeAI.Tools;
+using SophBot.Twitch;
 using System.Data;
+using TwitchSharp.Api.Clients;
 
 namespace SophBot.Universal
 {
@@ -103,16 +105,16 @@ namespace SophBot.Universal
 
         /*private static async Task<string> GetCurrentStream()
         {
-            TwitchUser user = await TwitchEngine.TwitchSharpClient.GetUserByLoginAsync("xsophe");
-            TwitchStream? stream = user.GetCurrentStream();
+            UserData user = (await TwitchEngine.Client.Users.GetUsersAsync(logins: ["xsophe"]))[0];
+            var stream = await TwitchEngine.Client.Streams.GetFollowedStreamsAsync(user.Id);
             if (stream is null)
                 return "Null - No Stream active!";
-            return $@"Titel: {stream.Title}
+            return $@"Titel: {stream}
 Kategorie: {stream.GameName}
 Gestartet um: {stream.StartedAt.ToString("dd.MM.yyyy - HH:mm:ss")}
 Aktuelle Zuschauer: {stream.CurrentViewer}";
-        }
-        */ 
+        }*/
+        
         private static string AskGoogleAi(string request)
         {
             try
@@ -170,17 +172,17 @@ userInformation: {Profile.AsAiString()}
 userPromt: {Promt}";
         }
     }
-    /*public class TwitchAiRequest : BaseAiRequest
+    public class TwitchAiRequest : BaseAiRequest
     {
         public readonly string Channel;
         public readonly bool IsPrivate;
         public readonly Profile Profile;
-        public TwitchAiRequest(string channel, bool isPrivateChat, TwitchUser sender, string promt)
+        public TwitchAiRequest(string channel, bool isPrivateChat, UserData sender, string promt)
             : base(AiRequestType.TWITCH, sender.DisplayName, 0 , promt)
         {
             Channel = channel;
             IsPrivate = isPrivateChat;
-            Profile = new Profile(sender.ID);
+            Profile = new Profile(sender.Id);
             Id = Profile.ID;
         }
 
@@ -193,7 +195,7 @@ isPrivate: {IsPrivate}
 userInformation: {Profile.AsAiString()}
 userPromt: {Promt}";
         }
-    }*/
+    }
     public class ConsoleAiRequest : BaseAiRequest
     {
         public ConsoleAiRequest(string promt)

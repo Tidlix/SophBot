@@ -3,6 +3,8 @@ using System.Threading.Channels;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using SophBot.Discord;
+using SophBot.Twitch;
+using TwitchSharp.Api.Clients;
 
 namespace SophBot.Universal
 {
@@ -10,7 +12,7 @@ namespace SophBot.Universal
     {
         public long ID { get; private set; }
         public DiscordUser? DiscordUser { get; private set; }
-        // public ??? TwitchUser { get; private set; }
+        public UserData? TwitchUser { get; private set; }
         public long DiscordMessages { get; private set; }
         public long TwitchMessages { get; private set; }
         public long Channelpoints { get; private set; }
@@ -75,7 +77,7 @@ namespace SophBot.Universal
 
             ID = (long)row["id"];
             DiscordUser = (row["discord-id"] == DBNull.Value) ? null : DiscordEngine.Client.GetUserAsync((ulong)(long)row["discord-id"]).Result;
-            //TwitchUser = (row["twitch-id"] == DBNull.Value) ? null : TwitchEngine.TwitchSharpClient.GetUserByIDAsync((string)row["twitch-id"]).Result;
+            TwitchUser = (row["twitch-id"] == DBNull.Value) ? null : TwitchEngine.MainClient.Users.GetUsersAsync(ids: [(string)row["twitch-id"]]).Result[0];
             DiscordMessages = (long)row["discord-messages"];
             TwitchMessages = (long)row["twitch-messages"];
             Channelpoints = (long)row["channel-points"];
@@ -144,18 +146,18 @@ namespace SophBot.Universal
             DatabaseEngine.DeleteData(DatabaseEngine.DBTable.Profiles, [new ("id", "=", discord.ID)]);
             return this;
         }
-        /*public Profile SyncTwitchAccount(Profile twitch)
+        public Profile SyncTwitchAccount(Profile twitch)
         {
             if (TwitchUser != null) throw new Exception("Twitch Account is allready synced!");
             TwitchUser = twitch.TwitchUser;
             DatabaseEngine.ModifyData(DatabaseEngine.DBTable.Profiles, new Dictionary<string, object>{
-                {"twitch-id", TwitchUser!.ID},
+                {"twitch-id", TwitchUser!.Id},
                 {"twitch-messages", twitch.TwitchMessages},
                 {"channel-points", this.Channelpoints + twitch.Channelpoints}
                 }, [new ("id", "=", ID)]);
             DatabaseEngine.DeleteData(DatabaseEngine.DBTable.Profiles, [new ("id", "=", twitch.ID)]);
             return this;
-        }*/
+        }
 
         public override string ToString()
         {
@@ -165,10 +167,10 @@ namespace SophBot.Universal
             {
                 result += $"**Discord:**\n  **Name:** {DiscordUser.GlobalName}\n  **Discord ID:** {DiscordUser.Id}\n";
             }
-            /*if (TwitchUser is not null)
+            if (TwitchUser is not null)
             {
-                result += $"**Twitch:**\n  **Name:** {TwitchUser.DisplayName}\n  **Discord ID:** {TwitchUser.ID}\n";
-            }*/
+                result += $"**Twitch:**\n  **Name:** {TwitchUser.DisplayName}\n  **Twitch ID:** {TwitchUser.Id}\n";
+            }
             result += $"**Gesendete Nachrichten:**\n  **Discord:** {DiscordMessages}\n  **Twitch:** {TwitchMessages}\n  **Gesamt:** {DiscordMessages+TwitchMessages}\n";
             result += $"**Channelpoints:** {Channelpoints}\n";
 
@@ -179,9 +181,9 @@ namespace SophBot.Universal
             string result = $@"{{
 userId = {ID},
 discordId = {(DiscordUser is null ? "null" : DiscordUser.Id)},
-twitchId = {/*(TwitchUser is null ? */"null"/* : TwitchUser.ID)*/},
+twitchId = {(TwitchUser is null ? "null" : TwitchUser.Id)},
 discordUsername = {(DiscordUser is null ? "null" : DiscordUser.GlobalName)},
-twitchUsername = {/*(TwitchUser is null ? */"null"/* : TwitchUser.DisplayName)*/},
+twitchUsername = {(TwitchUser is null ? "null" : TwitchUser.DisplayName)},
 discordMessages = {DiscordMessages},
 twitchMessages = {TwitchMessages},
 channelpoints = {Channelpoints},

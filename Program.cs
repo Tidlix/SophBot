@@ -1,4 +1,5 @@
 ﻿using SophBot.Discord;
+using SophBot.Twitch;
 using SophBot.Universal;
 
 namespace SophBot
@@ -20,7 +21,7 @@ namespace SophBot
             await DiscordEngine.Initialize(Config.Discord.Token);
             
             // Start Twitch
-
+            await TwitchEngine.Initialize();
 
 
             while (true)

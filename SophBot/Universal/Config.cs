@@ -13,6 +13,8 @@ namespace SophBot.Universal
         {
             public static string ClientId { get; set; }
             public static string ClientSecret { get; set; }
+            public static string MainRFToken { get; set; }
+            public static string SubRFToken { get; set; }
         }
         public static class Database
         {
@@ -37,6 +39,8 @@ namespace SophBot.Universal
 
             Twitch.ClientId = getValue(ConfigPath.Twitch, "ClientId");
             Twitch.ClientSecret = getValue(ConfigPath.Twitch, "ClientSecret");
+            Twitch.MainRFToken = getValue(ConfigPath.Twitch, "MainRFT");
+            Twitch.SubRFToken = getValue(ConfigPath.Twitch, "SubRFT");
 
             Database.Host = getValue(ConfigPath.Database, "Host");
             Database.Port = getValue(ConfigPath.Database, "Port");

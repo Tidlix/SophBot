@@ -5,7 +5,9 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Trees.Metadata;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using SophBot.Twitch;
 using SophBot.Universal;
+using TwitchSharp.Api.Clients;
 
 namespace SophBot.Discord.SlashCommands
 {
@@ -27,19 +29,19 @@ namespace SophBot.Discord.SlashCommands
                 new DiscordThumbnailComponent(target.AvatarUrl, "Profilbild auf Discord")) 
             );
             components.Add(new DiscordSeparatorComponent(true));
-            /*if (profile.TwitchUser is null)
+            if (profile.TwitchUser is null)
                 components.Add(new DiscordTextDisplayComponent($"## Twitch: \nNicht Synchronisiert! (/profile sync)"));
             else
                 components.Add(new DiscordSectionComponent(
                     new DiscordTextDisplayComponent($"## Twitch: \n**Name:** {profile.TwitchUser.DisplayName}\n**Gesendete Nachrichten:** {profile.TwitchMessages}"),
                     new DiscordThumbnailComponent(profile.TwitchUser.ProfileImageUrl, "Profilbild auf Twitch")) 
-                );*/
+                );
             components.Add(new DiscordSeparatorComponent(true));
             components.Add(new DiscordTextDisplayComponent($"## Allgemeine Statistiken: \n**Insgesamt gesendete Nachrichten:** {profile.DiscordMessages+profile.TwitchMessages}\n**Channelpoints:** {profile.Channelpoints}"));
             await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new (components, false, target.Color.PrimaryColor)));
         }
 
-        /*[Command("Sync")]
+        [Command("Sync")]
         public async Task SyncProfile(SlashCommandContext ctx, [Description("Schreibe hier den Namen des Twitch-Accounts, welchen du mit diesem Profil verbinden willst")] string TwitchName)
         {
             Profile discord = new Profile(ctx.User.Id);
@@ -47,24 +49,25 @@ namespace SophBot.Discord.SlashCommands
             {
                 await ctx.RespondAsync("Du hast bereits einen Twitch Account verbunden! \n-# Ist das ein Fehler? Bitte kontaktiere Tidlix!");
             }
-            TwitchUser twitchUser = await TwitchEngine.TwitchSharpClient.GetUserByLoginAsync(TwitchName.ToLower());
-            Profile twitch = new Profile(twitchUser.ID);
+            UserData twitchUser = (await TwitchEngine.MainClient.Users.GetUsersAsync(logins: [TwitchName.ToLower()]))[0];
+            Profile twitch = new Profile(twitchUser.Id);
             if (twitch.DiscordUser is not null)
             {
                 await ctx.RespondAsync("Dieser Twitch Account wurde bereits mit einem anderen Discord Account verbunden! \n-# Ist das ein Fehler? Bitte kontaktiere Tidlix!");
             }
 
+            int rand = new Random().Next(100000, 999999);
             DiscordModalBuilder modal = new DiscordModalBuilder()
                 .WithCustomId($"SyncTwitchUserMdl.{ctx.User.Id}")
                 .WithTitle("Twitch-Account Verbinden...")
                 .AddTextDisplay($"Der Synchronisationscode wurde via. DM an den Twitch Account `{twitchUser.DisplayName}` gesendet.")
                 .AddTextInput(new DiscordTextInputComponent($"SyncTwitchUserInp.{ctx.User.Id}", placeholder: "000000", min_length: 6, max_length: 6), "Synchronisationscode:", "Gib hier deinen Synchronisationscode ein!")
                 .AddTextDisplay("-# Du hast nur 5 Minuten Zeit den Code einzugeben!")
-                .AddTextDisplay("-# Hast du keine DM erhalten? Überprüfe ob du deinen Twitch Namen richtig geschrieben hast und versuche es erneut!");
+                .AddTextDisplay("-# Hast du keine DM erhalten? Überprüfe ob du deinen Twitch Namen richtig geschrieben hast und versuche es erneut!")
+                .AddTextDisplay($"Code is currently not beeing sent! see ProfileCommands.cs Line 70. > Code: {rand}");
             await ctx.RespondWithModalAsync(modal);
 
-            int rand = new Random().Next(100000, 999999);
-            await twitchUser.SendWhisperAsync($"Dein Synchronisationscode lautet '{rand}'. Gib diesen Code niemanden weiter. Du hast nicht versucht dich anzumelden? In dem Fall ignorier diese Nachricht einfach!");
+            //await twitchUser.SendWhisperAsync($"Dein Synchronisationscode lautet '{rand}'. Gib diesen Code niemanden weiter. Du hast nicht versucht dich anzumelden? In dem Fall ignorier diese Nachricht einfach!");
 
             var mdlResponse = await DiscordEngine.Interactivity.WaitForModalAsync($"SyncTwitchUserMdl.{ctx.User.Id}", TimeSpan.FromMinutes(5));
 
@@ -95,7 +98,7 @@ namespace SophBot.Discord.SlashCommands
             {
                 await mdlResponse.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Synchronisation fehlgeschlagen! - Falscher Code"));
             }
-        }*/
+        }
 
         [Command("Leaderboard")]
         public async Task Leaderboard(CommandContext ctx, [Description("Welches Leaderboard möchtest du anzeigen?")] LeaderboardType leaderboard)
@@ -134,10 +137,11 @@ namespace SophBot.Discord.SlashCommands
             foreach(DataRow current in lb.Rows)
             {
                 Profile profile = new Profile((long)current["id"]);
+                UserData botData = (await TwitchEngine.MainClient.Users.GetUsersAsync(logins: ["sophbotv3"]))[0];
                 string name = string.Empty;
                 string url = string.Empty;
                 long value = (long)current[column];
-                /*if (profile.TwitchUser is null && profile.DiscordUser is null)
+                if (profile.TwitchUser is null && profile.DiscordUser is null)
                 {
                     name = $"Unbekannter Nutzer (ID {(long)current["id"]})";
                 } else
@@ -154,16 +158,16 @@ namespace SophBot.Discord.SlashCommands
                             break;
                         case LeaderboardType.Nachrichten_Twitch:
                             name = profile.TwitchUser is not null ? profile.TwitchUser.DisplayName : "Gelöschter Account!";
-                            url = profile.TwitchUser is not null ? profile.TwitchUser!.ProfileImageUrl : TwitchEngine.TwitchSharpClient.CurrentUser.ProfileImageUrl;
+                            url = profile.TwitchUser is not null ? profile.TwitchUser!.ProfileImageUrl : botData.ProfileImageUrl;
                             break;
                         default:
                             name = "ERROR - UNKNOWN TYPE!";
-                            url = TwitchEngine.TwitchSharpClient.CurrentUser.ProfileImageUrl;
+                            url = botData.ProfileImageUrl;
                             break;
                     }
                 }
-                url ??= TwitchEngine.TwitchSharpClient.CurrentUser.ProfileImageUrl;
-                */
+                url ??= botData.ProfileImageUrl;
+                
 
                 if (place <= 3)
                 {

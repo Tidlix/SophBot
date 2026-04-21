@@ -63,11 +63,10 @@ namespace SophBot.Discord.SlashCommands
                 .AddTextDisplay($"Der Synchronisationscode wurde via. DM an den Twitch Account `{twitchUser.DisplayName}` gesendet.")
                 .AddTextInput(new DiscordTextInputComponent($"SyncTwitchUserInp.{ctx.User.Id}", placeholder: "000000", min_length: 6, max_length: 6), "Synchronisationscode:", "Gib hier deinen Synchronisationscode ein!")
                 .AddTextDisplay("-# Du hast nur 5 Minuten Zeit den Code einzugeben!")
-                .AddTextDisplay("-# Hast du keine DM erhalten? Überprüfe ob du deinen Twitch Namen richtig geschrieben hast und versuche es erneut!")
-                .AddTextDisplay($"Code is currently not beeing sent! see ProfileCommands.cs Line 70. > Code: {rand}");
+                .AddTextDisplay("-# Hast du keine DM erhalten? Überprüfe ob du deinen Twitch Namen richtig geschrieben hast und versuche es erneut!");
             await ctx.RespondWithModalAsync(modal);
 
-            //await twitchUser.SendWhisperAsync($"Dein Synchronisationscode lautet '{rand}'. Gib diesen Code niemanden weiter. Du hast nicht versucht dich anzumelden? In dem Fall ignorier diese Nachricht einfach!");
+            await TwitchEngine.SendWhisperAsync(twitchUser, $"Dein Synchronisationscode lautet '{rand}'. Gib diesen Code niemanden weiter. Du hast nicht versucht deinen Account zu Synchronisieren? In dem Fall ignorier diese Nachricht einfach!");
 
             var mdlResponse = await DiscordEngine.Interactivity.WaitForModalAsync($"SyncTwitchUserMdl.{ctx.User.Id}", TimeSpan.FromMinutes(5));
 

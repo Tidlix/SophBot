@@ -5,7 +5,7 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Trees.Metadata;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using SophBot.Twitch;
+using DSharpPlus.Interactivity;
 using SophBot.Universal;
 using TwitchSharp.Api.Clients;
 
@@ -41,7 +41,7 @@ namespace SophBot.Discord.SlashCommands
             await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new (components, false, target.Color.PrimaryColor)));
         }
 
-        [Command("Sync")]
+        /*[Command("Sync")]
         public async Task SyncProfile(SlashCommandContext ctx, [Description("Schreibe hier den Namen des Twitch-Accounts, welchen du mit diesem Profil verbinden willst")] string TwitchName)
         {
             Profile discord = new Profile(ctx.User.Id);
@@ -68,7 +68,7 @@ namespace SophBot.Discord.SlashCommands
 
             await TwitchEngine.SendWhisperAsync(twitchUser, $"Dein Synchronisationscode lautet '{rand}'. Gib diesen Code niemanden weiter. Du hast nicht versucht deinen Account zu Synchronisieren? In dem Fall ignorier diese Nachricht einfach!");
 
-            var mdlResponse = await DiscordEngine.Interactivity.WaitForModalAsync($"SyncTwitchUserMdl.{ctx.User.Id}", TimeSpan.FromMinutes(5));
+            var mdlResponse = await Program.GetService<InteractivityExtension>().WaitForModalAsync($"SyncTwitchUserMdl.{ctx.User.Id}", TimeSpan.FromMinutes(5));
 
             await mdlResponse.Result.Interaction.DeferAsync();
             if (mdlResponse.TimedOut)
@@ -84,12 +84,12 @@ namespace SophBot.Discord.SlashCommands
                 if (discord.ID > twitch.ID)
                 {
                     twitch.SyncDiscordAccount(discord);
-                    DatabaseEngine.DeleteData(DatabaseEngine.DBTable.Profiles, [new DatabaseEngine.DBCondition("id", "=", discord.ID)]);
+                    Program.GetService<DatabaseService>().DeleteData(DBTable.Profiles, [new Program.GetService<DatabaseService>().DBCondition("id", "=", discord.ID)]);
                 }
                 else
                 {
                     discord.SyncTwitchAccount(twitch);
-                    DatabaseEngine.DeleteData(DatabaseEngine.DBTable.Profiles, [new DatabaseEngine.DBCondition("id", "=", twitch.ID)]);
+                    Program.GetService<DatabaseService>().DeleteData(DBTable.Profiles, [new Program.GetService<DatabaseService>().DBCondition("id", "=", twitch.ID)]);
                 }
                 await mdlResponse.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Synchronisation abgeschlossen!"));
             }
@@ -97,9 +97,9 @@ namespace SophBot.Discord.SlashCommands
             {
                 await mdlResponse.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Synchronisation fehlgeschlagen! - Falscher Code"));
             }
-        }
+        }*/
 
-        [Command("Leaderboard")]
+        /*[Command("Leaderboard")]
         public async Task Leaderboard(CommandContext ctx, [Description("Welches Leaderboard möchtest du anzeigen?")] LeaderboardType leaderboard)
         {
             await ctx.DeferResponseAsync();
@@ -129,7 +129,7 @@ namespace SophBot.Discord.SlashCommands
                     valueType = "unknown";
                     break;
             }
-            var lb = DatabaseEngine.SelectTopEntrys(DatabaseEngine.DBTable.Profiles, 10, column, true);
+            var lb = Program.GetService<DatabaseService>().SelectTopEntrys(DBTable.Profiles, 10, column, true);
 
             components.Add(new DiscordTextDisplayComponent($"# Leaderboard ({valueType})"));
             
@@ -186,7 +186,7 @@ namespace SophBot.Discord.SlashCommands
             components.Add(new DiscordTextDisplayComponent(result));
 
             await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new (components, false, DiscordColor.Gold)));
-        }
+        }*/
         public enum LeaderboardType
         {
             Channelpoints,

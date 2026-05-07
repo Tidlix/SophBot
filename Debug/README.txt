@@ -1,1 +1,0 @@
-Dieser Debug Ordner entält alle Ornder und Dateien, welche in den ./bin/Debug/net9.0 Ordner kopiert und ggf. bearbeitet werden müssen

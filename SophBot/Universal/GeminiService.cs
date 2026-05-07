@@ -2,69 +2,74 @@ using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using GenerativeAI;
 using GenerativeAI.Tools;
-using SophBot.Twitch;
+using Microsoft.Extensions.Hosting;
 using System.Data;
 using TwitchSharp.Api.Clients;
 
 namespace SophBot.Universal
 {
-    public class GeminiEngine
+    public class GeminiService : IHostedService
     {
 #pragma warning disable CS8618
-        public static GoogleAi GoogleAI { get; private set; }
-        public static GenerativeModel MainModel { get; private set; }
-        public static GenerativeModel GoogleModel { get; private set; }
-        public static ChatSession MainChat { get; private set; }
-        public static ChatSession GoogleChat { get; private set; }
+        private GoogleAi googleAI { get; set; }
+        private GenerativeModel mainModel { get; set; }
+        private GenerativeModel googleModel { get; set; }
+        private ChatSession mainChat { get; set; }
+        private ChatSession googleChat { get; set; }
 #pragma warning restore CS8618
 
-        public static void Initialize(string token)
+
+        public Task StopAsync(CancellationToken cancellationToken)
         {
-            GoogleAI = new GoogleAi(token);
-            MainModel = GoogleAI.CreateGenerativeModel("models/gemini-3-flash-preview"); 
-            GoogleModel = GoogleAI.CreateGenerativeModel("models/gemini-2.5-flash");
+            return Task.CompletedTask;
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            googleAI = new GoogleAi(Environment.GetEnvironmentVariable("Gemini.Token") ?? throw new Exception("Gemini Token was not found in appsettings!"));
+            mainModel = googleAI.CreateGenerativeModel("models/gemini-3-flash-preview"); 
+            googleModel = googleAI.CreateGenerativeModel("models/gemini-2.5-flash");
 
 
-            MainModel.UseGoogleSearch = false;
-            MainModel.SystemInstruction = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}/ai/promt.txt");
+            mainModel.UseGoogleSearch = false;
+            mainModel.SystemInstruction = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}/ai/prompt.txt");
 
-            MainModel.EnableFunctions();
+            mainModel.EnableFunctions();
             //MainModel.AddFunctionTool(new QuickTool((string? filter = null) => ReadMemory(filter), "ReadMemory", "Lies die gespeicherten Informationen (mit dem optionalen filter kannst du nur die Einträge anzeigen, die genau diesen string enthalten)"));
             //MainModel.AddFunctionTool(new QuickTool((string content) => WriteMemory(content), "WriteMemory", "Speichere eine neue Information"));
             //MainModel.AddFunctionTool(new QuickTool((long id, string newContent) => ModifyMemory(id, newContent), "ModifyMemory", "Bearbeite eine Information anhand der id (readMemory)"));
             //MainModel.AddFunctionTool(new QuickTool((long id) => DeleteMemory(id), "DeleteMemory", "Lösche eine Information anhand der id (readMemory)"));
-            MainModel.AddFunctionTool(new QuickTool((long userId, string noteContent) => AddUserAiNote(userId, noteContent), "AddUserAiNote", "Notiere dir eine Information zu dem aktuellen Nutzer"));
-            MainModel.AddFunctionTool(new QuickTool((long userId, int arrayIndex, string noteContent) => ModifyUserAiNote(userId, arrayIndex, noteContent), "ModifyUserAiNote", "Notiere dir eine Information zu dem aktuellen Nutzer"));
-            MainModel.AddFunctionTool(new QuickTool(() => ReadWiki(), "ReadWiki", "Erhalte die Informationen des Internen Soph-Wikis"));
+            mainModel.AddFunctionTool(new QuickTool((long userId, string noteContent) => AddUserAiNote(userId, noteContent), "AddUserAiNote", "Notiere dir eine Information zu dem aktuellen Nutzer"));
+            mainModel.AddFunctionTool(new QuickTool((long userId, int arrayIndex, string noteContent) => ModifyUserAiNote(userId, arrayIndex, noteContent), "ModifyUserAiNote", "Notiere dir eine Information zu dem aktuellen Nutzer"));
+            mainModel.AddFunctionTool(new QuickTool((string? filter = null) => ReadWiki(filter), "ReadWiki", "Erhalte die Informationen des Internen Soph-Wikis"));
             //MainModel.AddFunctionTool(new QuickTool((long id) => GetProfile(id), "GetProfile", "Erhalte mehr Informationen über einen Benutzer"));
             //MainModel.AddFunctionTool(new QuickTool(async() => await GetCurrentStream(), "GetCurrentStream", "Erhalte den Informationen über den aktuell Laufenden Stream"));
-            MainModel.AddFunctionTool(new QuickTool((string request) => AskGoogleAi(request), "AskGoogleAi", "Frage ein KI-Modell, mit der möglichkeit google zu durchsuchen, nach Informationen"));
+            mainModel.AddFunctionTool(new QuickTool((string request) => AskGoogleAi(request), "AskGoogleAi", "Frage ein KI-Modell, mit der möglichkeit google zu durchsuchen, nach Informationen"));
 
 
-            GoogleModel.UseGoogleSearch = true;
+            googleModel.UseGoogleSearch = true;
 
-            StartNewMainChat();
-            StartNewGoogleChat();
+            StartNewmainChat();
+            StartNewgoogleChat();
 
-            GoogleChat.DisableFunctions();
-
-            //GenerateResponseAsync(new SystemAiRequest("liese deine gespeicherten Informationen - Gib diese nicht aus und warte auf weitere Anfragen")).Wait();
+            googleChat.DisableFunctions();
+            return Task.CompletedTask;
         }
 
-        public static void StartNewMainChat()
+        public void StartNewmainChat()
         {
-            MainChat = MainModel.StartChat();
+            mainChat = mainModel.StartChat();
         }
-        public static void StartNewGoogleChat()
+        public void StartNewgoogleChat()
         {
-            GoogleChat = GoogleModel.StartChat();
+            googleChat = googleModel.StartChat();
         }
 
-        public static async Task<string> GenerateResponseAsync(BaseAiRequest request)
+        public async Task<string> GenerateResponseAsync(BaseAiRequest request)
         {
             try
             {
-                return (await MainChat.GenerateContentAsync(request.ToString())).Text;
+                return (await mainChat.GenerateContentAsync(request.ToString())).Text;
             } catch (Exception ex)
             {
                 if (ex.Message.Contains("The model is overloaded")) return "System Überladen! - Bitte später erneut versuchen!";
@@ -74,36 +79,33 @@ namespace SophBot.Universal
         }
 
         #region Function Tools
-        private static string AddUserAiNote(long userId, string noteContent)
+        private string AddUserAiNote(long userId, string noteContent)
         {
             Profile profile = new Profile(userId);
             profile.AddAiNote(noteContent);
             return $"Added Note! New Profile: {profile.AsAiString()}";
         }
-        private static string ModifyUserAiNote(long userId, int arrayIndex, string noteContent)
+        private string ModifyUserAiNote(long userId, int arrayIndex, string noteContent)
         {
             Profile profile = new Profile(userId);
             profile.SetAiNote(arrayIndex, noteContent);
             return $"Modified Note! New Profile: {profile.AsAiString()}";
         }
         
-        private static string ReadWiki()
+        private string ReadWiki(string? filter = null)
         {
             string result = string.Empty;
-            DataTable data = DatabaseEngine.SelectTable(DatabaseEngine.DBTable.Wiki, "article");
-
-            result += string.Join(" | ", data.Columns.Cast<DataColumn>().Select(c => c.ColumnName));
-            result += "\n";
-
-            foreach (DataRow row in data.Rows)
+            DataTable data = Program.GetService<DatabaseService>().SelectTable(DBTable.Wiki, "article");
+            
+            result += string.Join(" | ", data.Columns.Cast<DataColumn>().Select(c => c.ColumnName)) + "\n";
+            foreach(DataRow row in data.Rows)
             {
-                result += string.Join(" | ", row.ItemArray);
-                result += "\n";
+                if (filter is null || row.ItemArray.Contains(filter)) result += string.Join(" | ", row.ItemArray) + "\n";
             }
             return result;
         }
 
-        /*private static async Task<string> GetCurrentStream()
+        /*private async Task<string> GetCurrentStream()
         {
             UserData user = (await TwitchEngine.Client.Users.GetUsersAsync(logins: ["xsophe"]))[0];
             var stream = await TwitchEngine.Client.Streams.GetFollowedStreamsAsync(user.Id);
@@ -115,19 +117,17 @@ Gestartet um: {stream.StartedAt.ToString("dd.MM.yyyy - HH:mm:ss")}
 Aktuelle Zuschauer: {stream.CurrentViewer}";
         }*/
         
-        private static string AskGoogleAi(string request)
+        private string AskGoogleAi(string request)
         {
             try
             {
-                return GoogleChat.GenerateContentAsync(request).Result.Text;
+                return googleChat.GenerateContentAsync(request).Result.Text;
             }
             catch
             {
                 return "Google Request failed!";
             }
         }
-        
-
         #endregion
     }
     #region Requests
@@ -135,15 +135,15 @@ Aktuelle Zuschauer: {stream.CurrentViewer}";
     {
         public readonly string Name;
         public long Id { get; init; }
-        public readonly string Promt;
+        public readonly string Prompt;
         public readonly AiRequestType Source;
 
-        public BaseAiRequest(AiRequestType source, string name, long id, string promt)
+        public BaseAiRequest(AiRequestType source, string name, long id, string prompt)
         {
             Source = source;
             Name = name;
             Id = id;
-            Promt = promt;
+            Prompt = prompt;
         }
 
         public abstract override string ToString();
@@ -153,8 +153,8 @@ Aktuelle Zuschauer: {stream.CurrentViewer}";
         public readonly DiscordChannel Channel;
         public readonly bool IsPrivate;
         public readonly Profile Profile;
-        public DiscordAiRequest(DiscordChannel channel, DiscordUser sender, string promt)
-            : base(AiRequestType.DISCORD, sender.GlobalName ?? sender.Username, 0 , promt)
+        public DiscordAiRequest(DiscordChannel channel, DiscordUser sender, string prompt)
+            : base(AiRequestType.DISCORD, sender.GlobalName ?? sender.Username, 0 , prompt)
         {
             Channel = channel;
             IsPrivate = channel.IsPrivate;
@@ -169,7 +169,7 @@ dateTime: {DateTime.Now.ToString("dd.MM.yyyy - HH:mm:ss")}
 channelname (id): {Channel.Name} ({Channel.Id})
 isPrivate: {IsPrivate}
 userInformation: {Profile.AsAiString()}
-userPromt: {Promt}";
+userPromt: {Prompt}";
         }
     }
     public class TwitchAiRequest : BaseAiRequest
@@ -177,8 +177,8 @@ userPromt: {Promt}";
         public readonly string Channel;
         public readonly bool IsPrivate;
         public readonly Profile Profile;
-        public TwitchAiRequest(string channel, bool isPrivateChat, UserData sender, string promt)
-            : base(AiRequestType.TWITCH, sender.DisplayName, 0 , promt)
+        public TwitchAiRequest(string channel, bool isPrivateChat, UserData sender, string prompt)
+            : base(AiRequestType.TWITCH, sender.DisplayName, 0 , prompt)
         {
             Channel = channel;
             IsPrivate = isPrivateChat;
@@ -193,13 +193,13 @@ dateTime: {DateTime.Now.ToString("dd.MM.yyyy - HH:mm:ss")}
 channelname: {Channel}
 isPrivate: {IsPrivate}
 userInformation: {Profile.AsAiString()}
-userPromt: {Promt}";
+userPromt: {Prompt}";
         }
     }
     public class ConsoleAiRequest : BaseAiRequest
     {
-        public ConsoleAiRequest(string promt)
-            : base(AiRequestType.CONSOLE, "CONSOLE", -100 , promt)
+        public ConsoleAiRequest(string prompt)
+            : base(AiRequestType.CONSOLE, "CONSOLE", -100 , prompt)
         {
             
         }
@@ -208,13 +208,13 @@ userPromt: {Promt}";
         {
             return $@"source: {Source}
 dateTime: {DateTime.Now.ToString("dd.MM.yyyy - HH:mm:ss")}
-consolePromt: {Promt}";
+consolePromt: {Prompt}";
         }
     }
     public class SystemAiRequest : BaseAiRequest
     {
-        public SystemAiRequest(string promt)
-            : base(AiRequestType.SYSTEM, "SYSTEM", -101 , promt)
+        public SystemAiRequest(string prompt)
+            : base(AiRequestType.SYSTEM, "SYSTEM", -101 , prompt)
         {
             
         }
@@ -223,7 +223,7 @@ consolePromt: {Promt}";
         {
             return $@"source: {Source}
 dateTime: {DateTime.Now.ToString("dd.MM.yyyy - HH:mm:ss")}
-systemPromt: {Promt}";
+systemPromt: {Prompt}";
         }
     }
 

@@ -4,6 +4,7 @@ using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Interactivity;
 using SophBot.Discord.Tools;
 using SophBot.Discord.Tools.OptionProviders;
 using SophBot.Universal;
@@ -37,7 +38,7 @@ namespace SophBot.Discord.SlashCommands
 -# {input} -> Text welcher hinter dem Command geschrieben wurde
 -# {input(x)} -> x. Wort des Textes welcher hinter dem Command geschrieben wurde");
             await ctx.RespondWithModalAsync(modal);
-            var response = await DiscordEngine.Interactivity.WaitForModalAsync($"commandModify{command}", TimeSpan.FromMinutes(30));
+            var response = await Program.GetService<InteractivityExtension>().WaitForModalAsync($"commandModify{command}", TimeSpan.FromMinutes(30));
             
             await response.Result.Interaction.DeferAsync(true);
             if (response.TimedOut)
@@ -54,14 +55,14 @@ namespace SophBot.Discord.SlashCommands
                 CustomCommandEngine.deleteCommand(command);
                 await response.Result.Interaction.EditOriginalResponseAsync(
                     new DiscordWebhookBuilder().WithContent($"Der Command `!{command}` wurde gelöscht!"));
-                Logs.AddLog($"CC was deleted by {ctx.User}!");
+                //.AddLog($"CC was deleted by {ctx.User}!");
                 return;
             }
             CustomCommandEngine.setCommandResponse(command, cmdResponse!.Value, syncVariables!.Value);
 
             await response.Result.Interaction.EditOriginalResponseAsync(
                 new DiscordWebhookBuilder().WithContent($"Der Command `!{command}` wurde bearbeitet!"));
-            Logs.AddLog($"CC was modified by {ctx.User}! - New content: {cmdResponse.Value}", Microsoft.Extensions.Logging.LogLevel.Information, "SophBot.AdminCommands");
+            //Logs.AddLog($"CC was modified by {ctx.User}! - New content: {cmdResponse.Value}", Microsoft.Extensions.Logging.LogLevel.Information, "SophBot.AdminCommands");
         }
     }
 }

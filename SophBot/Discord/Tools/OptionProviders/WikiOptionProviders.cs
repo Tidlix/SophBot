@@ -16,7 +16,7 @@ namespace SophBot.Discord.Tools.OptionProviders
             {
                 var result = new List<DiscordAutoCompleteChoice>();
                 var articles = new List<string>();
-                var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Wiki, ["article"], [new("article", "LIKE", $"%{context.UserInput ?? ""}%")]);
+                var data = Program.GetService<DatabaseService>().SelectEntrys(DBTable.Wiki, ["article"], [new("article", "LIKE", $"%{context.UserInput ?? ""}%")]);
 
                 foreach(DataRow currentRow in data.Rows)
                 {
@@ -33,7 +33,7 @@ namespace SophBot.Discord.Tools.OptionProviders
             {
                 var result = new List<DiscordSelectComponentOption>();
                 var articles = new List<string>();
-                var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Wiki, ["article"], [new("article", "LIKE", "%")]);
+                var data = Program.GetService<DatabaseService>().SelectEntrys(DBTable.Wiki, ["article"], [new("article", "LIKE", "%")]);
 
                 foreach(DataRow currentRow in data.Rows)
                 {

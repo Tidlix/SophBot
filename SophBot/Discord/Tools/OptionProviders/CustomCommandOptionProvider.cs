@@ -14,7 +14,7 @@ namespace SophBot.Discord.Tools.OptionProviders
         {
             var result = new List<DiscordAutoCompleteChoice>();
             var commands = new List<string>();
-            var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Commands, ["command"], [new("command", "LIKE", $"%{context.UserInput ?? ""}%")]);
+            var data = Program.GetService<DatabaseService>().SelectEntrys(DBTable.Commands, ["command"], [new("command", "LIKE", $"%{context.UserInput ?? ""}%")]);
 
             foreach(DataRow currentRow in data.Rows)
             {

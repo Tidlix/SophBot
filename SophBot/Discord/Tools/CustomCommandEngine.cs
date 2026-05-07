@@ -8,7 +8,7 @@ namespace SophBot.Discord.Tools
     {
         public static CustomCommand? getCommand(string command)
         {
-            var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Commands, ["command"], [new("command", "=", command)]);
+            var data = Program.GetService<DatabaseService>().SelectEntrys(DBTable.Commands, ["command"], [new("command", "=", command)]);
             if (data.Rows.Count == 0) return null;
 
             return new CustomCommand(command);
@@ -16,15 +16,15 @@ namespace SophBot.Discord.Tools
         public static void setCommandResponse(string command, string response, bool syncVariables)
         {
             if (getCommand(command) is null)
-                DatabaseEngine.InsertData(DatabaseEngine.DBTable.Commands, new Dictionary<string, object>() { 
+                Program.GetService<DatabaseService>().InsertData(DBTable.Commands, new Dictionary<string, object>() { 
                     { "command", command }, { "response", response }, { "sync-vars", syncVariables } });
             else
-                DatabaseEngine.ModifyData(DatabaseEngine.DBTable.Commands, new Dictionary<string, object>() { 
+                Program.GetService<DatabaseService>().ModifyData(DBTable.Commands, new Dictionary<string, object>() { 
                     { "response", response }, { "sync-vars", syncVariables } }, [new("command", "=", command)]);
         }
         public static void deleteCommand(string command)
         {
-            DatabaseEngine.DeleteData(DatabaseEngine.DBTable.Commands, [new("command", "=", command)]);
+            Program.GetService<DatabaseService>().DeleteData(DBTable.Commands, [new("command", "=", command)]);
         }
     }
     public class CustomCommand
@@ -36,7 +36,7 @@ namespace SophBot.Discord.Tools
         public CustomCommand(string command)
         {
             this.command = command;
-            var data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Commands, ["response", "sync-vars"], [new("command", "=", command)]);
+            var data = Program.GetService<DatabaseService>().SelectEntrys(DBTable.Commands, ["response", "sync-vars"], [new("command", "=", command)]);
             DataRow row = data.Rows[0];
             response = (string)row["response"];
             syncVariables = (bool)row["sync-vars"];

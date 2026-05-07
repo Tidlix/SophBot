@@ -1,47 +1,51 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 
 namespace SophBot.Universal
 {
-    public static class Logs
+    public class Logger : ILogger
     {
-        public static void AddLog(string content, LogLevel logLevel = LogLevel.Information, string source = "SophBot") 
+        string _source;
+        DatabaseService _dbSercive;
+        public Logger(string source, DatabaseService dbService) 
         {
-            string currentTime = DateTime.Now.ToString("yyyy/MM/dd - HH:mm:ss:fff"); 
-            DatabaseEngine.InsertData(DatabaseEngine.DBTable.Logs, new Dictionary<string, object>
-            {
-                {"source", source},
-                {"datetime", currentTime},
-                {"loglevel", logLevel.ToString()},
-                {"content", content}
-            });
+            _source = source;
+            _dbSercive = dbService;
         }
 
-        public class LogProvider : ILoggerProvider
+#pragma warning disable CS8633 // Nullability in constraints for type parameter doesn't match the constraints for type parameter in implicitly implemented interface method'.
+        public IDisposable? BeginScope<TState>(TState state) => null;
+#pragma warning restore CS8633 // Nullability in constraints for type parameter doesn't match the constraints for type parameter in implicitly implemented interface method'.
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
-            public ILogger CreateLogger(string categoryName)
+            _dbSercive.InsertData(DBTable.Logs, new Dictionary<string, object>
             {
-                return new Logger(categoryName);
-            }
+                {"source", _source},
+                {"datetime", DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss:fff")},
+                {"loglevel", logLevel.ToString()},
+                {"content", formatter(state, exception)}
+            });
+        }
+    }
+    public class LoggingProvider : ILoggerProvider
+    {
+        DatabaseService _dbService;
+        public LoggingProvider(DatabaseService dbService)
+        {
+            _dbService = dbService;
+            _dbService.StartAsync(CancellationToken.None).Wait();
+        }
+        public ILogger CreateLogger(string categoryName)
+        {
+            return new Logger(categoryName, _dbService);
+        }
 
-            public void Dispose() {}
-
-            private class Logger : ILogger
-            {
-                private string _name;
-                public Logger(string name) {
-                    _name = name;
-                }
-#pragma warning disable CS8633 
-                public IDisposable? BeginScope<TState>(TState state) => null;
-#pragma warning restore CS8633 
-                public bool IsEnabled(LogLevel logLevel) => true;
-
-                public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-                {
-                    AddLog(formatter(state, exception), logLevel, _name);
-                }
-            }
+        public void Dispose()
+        {
         }
     }
 }

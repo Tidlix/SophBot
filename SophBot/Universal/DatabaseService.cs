@@ -1,25 +1,12 @@
 using System.Data;
 using System.Data.Common;
+using Microsoft.Extensions.Hosting;
 using Npgsql;
 using Npgsql.Schema;
 
 namespace SophBot.Universal
 {
-    public static class DatabaseEngine
-    {
-        #region Variables / Initialization
-        private static string connStr = "null";
-        private static string schema = "test";
-
-        public static void Initialize()
-        {
-            connStr = $"host={Config.Database.Host}; port={Config.Database.Port}; database={Config.Database.DatabaseName}; username={Config.Database.User}; password={Config.Database.Password};";
-            schema = Config.Database.Schema;
-        }
-        #endregion
-
-        #region DB-Tools
-        public enum DBTable
+    public enum DBTable
         {
             Profiles,       // id ; discord-id ; twitch-id ; discord-messages ; twitch-messages ; channel-points ; ai-notes
             Commands,       // command ; response ; sync-vars
@@ -28,9 +15,33 @@ namespace SophBot.Universal
             AI_Memory,      // id ; content
             Logs            // id ; datetime ; loglevel ; content ; source
         }
+    public class DatabaseService : IHostedService
+    {
+        #region Variables / Initialization
+        private string connStr = "null";
+        private string schema = "test";
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            connStr = $@"host={Environment.GetEnvironmentVariable("Database.Host") ?? throw new Exception("Database Host not found!")}; 
+            port={Environment.GetEnvironmentVariable("Database.Port") ?? throw new Exception("Database Port not found!")}; 
+            database={Environment.GetEnvironmentVariable("Database.Database") ?? throw new Exception("Database Database not found!")}; 
+            username={Environment.GetEnvironmentVariable("Database.Username") ?? throw new Exception("Database Username not found!")}; 
+            password={Environment.GetEnvironmentVariable("Database.Password") ?? throw new Exception("Database Password not found!")};";
+
+            
+            schema = Environment.GetEnvironmentVariable("Database.Schema") ?? throw new Exception("Database Schema not found!");
+        }
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+        #endregion
+
+        #region DB-Tools
         public record DBCondition(string Column, string Operator, object Value);
         
-        private static object ConvertParameterValue(object value)
+        private object ConvertParameterValue(object value)
         {
             if (value == null)
                 return DBNull.Value;
@@ -42,7 +53,7 @@ namespace SophBot.Universal
             return value;
         }
 
-        private static string TableString(DBTable table)
+        private string TableString(DBTable table)
         {
             string result = schema + ".";
             switch (table)
@@ -64,7 +75,7 @@ namespace SophBot.Universal
             }
         }
 
-        private static DataTable ExecuteReader(NpgsqlCommand cmd)
+        private DataTable ExecuteReader(NpgsqlCommand cmd)
         {
             try
             {
@@ -87,7 +98,7 @@ namespace SophBot.Universal
             }
         }
 
-        private static void ExecuteQuery(NpgsqlCommand cmd)
+        private void ExecuteQuery(NpgsqlCommand cmd)
         {
             try
             {
@@ -107,13 +118,13 @@ namespace SophBot.Universal
         #endregion
 
         #region Select
-        public static DataTable SelectTable(DBTable table, string? orderByColumn = null)
+        public DataTable SelectTable(DBTable table, string? orderByColumn = null)
         {
             var cmd = new NpgsqlCommand($"SELECT * FROM {TableString(table)}" + (orderByColumn is null ? "" : $" ORDER BY \"{orderByColumn}\""));
             return ExecuteReader(cmd);
         }
         
-        public static DataTable SelectTopEntrys(DBTable table, int limit, string? orderByColumn = null, bool desc = false)
+        public DataTable SelectTopEntrys(DBTable table, int limit, string? orderByColumn = null, bool desc = false)
         {
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.CommandText = $@"
@@ -124,7 +135,7 @@ namespace SophBot.Universal
             return ExecuteReader(cmd);
         }
         
-        public static DataTable SelectEntrys(DBTable table, IEnumerable<string> columns, IEnumerable<DBCondition> conditions)
+        public DataTable SelectEntrys(DBTable table, IEnumerable<string> columns, IEnumerable<DBCondition> conditions)
         {
             using var cmd = new NpgsqlCommand();
 
@@ -152,7 +163,7 @@ namespace SophBot.Universal
         #endregion
 
         #region Insert / Modify / Delete
-        public static void InsertData(DBTable table, Dictionary<string, object> data)
+        public void InsertData(DBTable table, Dictionary<string, object> data)
         {
             using var cmd = new NpgsqlCommand();
 
@@ -174,7 +185,7 @@ namespace SophBot.Universal
             ExecuteQuery(cmd);
         }
         
-        public static void ModifyData(DBTable table, Dictionary<string, object> data, IEnumerable<DBCondition> conditions)
+        public void ModifyData(DBTable table, Dictionary<string, object> data, IEnumerable<DBCondition> conditions)
         {
             using var cmd = new NpgsqlCommand();
 
@@ -211,7 +222,7 @@ namespace SophBot.Universal
             ExecuteQuery(cmd);
         }
 
-        public static void DeleteData(DBTable table, IEnumerable<DBCondition> conditions)
+        public void DeleteData(DBTable table, IEnumerable<DBCondition> conditions)
         {
             NpgsqlCommand cmd = new();
             List<string> conditionList = new();

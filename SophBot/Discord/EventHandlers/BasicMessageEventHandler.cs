@@ -12,7 +12,7 @@ namespace SophBot.Discord.EventHandlers
 
             if(e.Channel.IsPrivate)
             {
-                string response = await GeminiEngine.GenerateResponseAsync(new DiscordAiRequest(e.Channel, e.Author, e.Message.Content));
+                string response = await Program.GetService<GeminiService>().GenerateResponseAsync(new DiscordAiRequest(e.Channel, e.Author, e.Message.Content));
                 await e.Channel.SendMessageAsync(response);
             }
             else

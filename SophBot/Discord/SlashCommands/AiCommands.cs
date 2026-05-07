@@ -9,13 +9,13 @@ namespace SophBot.Discord.SlashCommands
     public class AiCommands
     {
         [Command("ai")]
-        public async Task AiCmd(CommandContext ctx, [Description("Der Promt für die AI")] string promt)
+        public async Task AiCmd(CommandContext ctx, [Description("Der Prompt für die AI")] string prompt)
         {
             await ctx.DeferResponseAsync();
-            string response = await GeminiEngine.GenerateResponseAsync(new DiscordAiRequest(ctx.Channel, ctx.User, promt));
+            string response = await Program.GetService<GeminiService>().GenerateResponseAsync(new DiscordAiRequest(ctx.Channel, ctx.User, prompt));
             List<DiscordComponent> components =
             [
-                new DiscordTextDisplayComponent("### " + promt),
+                new DiscordTextDisplayComponent("### " + prompt),
                 new DiscordSeparatorComponent(true),
                 new DiscordTextDisplayComponent(response),
             ];

@@ -9,7 +9,7 @@ namespace SophBot.Discord.Tools
     {
         public static WikiArticle? getArticle(string article, int page)
         {
-            DataTable data = DatabaseEngine.SelectEntrys(DatabaseEngine.DBTable.Wiki, ["article", "page", "content"], [new ("article", "=", article)]);
+            DataTable data = Program.GetService<DatabaseService>().SelectEntrys(DBTable.Wiki, ["article", "page", "content"], [new ("article", "=", article)]);
 
             if (data.Rows.Count == 0)
                 return null;
@@ -31,8 +31,8 @@ namespace SophBot.Discord.Tools
         {
             if (getArticle(article, page) == null)
             {
-                DatabaseEngine.InsertData(
-                    DatabaseEngine.DBTable.Wiki, 
+                Program.GetService<DatabaseService>().InsertData(
+                    DBTable.Wiki, 
                     new ()
                     {
                         {"article", article},
@@ -42,8 +42,8 @@ namespace SophBot.Discord.Tools
             }
             else
             {
-                DatabaseEngine.ModifyData(
-                    DatabaseEngine.DBTable.Wiki,
+                Program.GetService<DatabaseService>().ModifyData(
+                    DBTable.Wiki,
                     new () { {"content", content} },
                     [new ("article", "=", article), new ("page", "=", page)]
                     );

@@ -1,10 +1,10 @@
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
-using DSharpPlus.Commands.ContextChecks.ParameterChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Interactivity;
 using SophBot.Discord.Tools;
 using SophBot.Discord.Tools.OptionProviders;
 
@@ -56,7 +56,7 @@ namespace SophBot.Discord.SlashCommands
                 modal.AddTextDisplay("-# Im Wiki kann jegliche Formatierung von Discord verwendet werden!\n-# https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline");
                 await ctx.RespondWithModalAsync(modal);
 
-                var response = (await DiscordEngine.Interactivity.WaitForModalAsync("wikiArtCreate", TimeSpan.FromDays(1))).Result;
+                var response = (await Program.GetService<InteractivityExtension>().WaitForModalAsync("wikiArtCreate", TimeSpan.FromDays(1))).Result;
                 await response.Interaction.DeferAsync();
 
                 WikiEngine.setArticle(title, 1, (response.Values["wikiArtCreateInput"] as TextInputModalSubmission)!.Value);
@@ -85,7 +85,7 @@ namespace SophBot.Discord.SlashCommands
                 modal.AddTextDisplay("-# Im Wiki kann jegliche Formatierung von Discord verwendet werden!\n-# https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline");
                 await ctx.RespondWithModalAsync(modal);
 
-                var response = (await DiscordEngine.Interactivity.WaitForModalAsync("wikiArtAdd", TimeSpan.FromDays(1))).Result;
+                var response = (await Program.GetService<InteractivityExtension>().WaitForModalAsync("wikiArtAdd", TimeSpan.FromDays(1))).Result;
                 await response.Interaction.DeferAsync();
 
                 WikiEngine.setArticle(article, current.PageCount + 1, (response.Values["wikiArtAddInput"] as TextInputModalSubmission)!.Value);
@@ -120,7 +120,7 @@ namespace SophBot.Discord.SlashCommands
                 modal.AddTextDisplay("-# Im Wiki kann jegliche Formatierung von Discord verwendet werden!\n-# https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline");
                 await ctx.RespondWithModalAsync(modal);
 
-                var response = (await DiscordEngine.Interactivity.WaitForModalAsync("wikiArtModify", TimeSpan.FromDays(1))).Result;
+                var response = (await Program.GetService<InteractivityExtension>().WaitForModalAsync("wikiArtModify", TimeSpan.FromDays(1))).Result;
                 await response.Interaction.DeferAsync();
 
                 WikiEngine.setArticle(article, page, (response.Values["wikiArtModifyInput"] as TextInputModalSubmission)!.Value);

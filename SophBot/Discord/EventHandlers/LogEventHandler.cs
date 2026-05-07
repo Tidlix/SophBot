@@ -23,7 +23,7 @@ namespace SophBot.Discord.EventHandlers
                     new DiscordSeparatorComponent(true),
                     new DiscordTextDisplayComponent(delContent)
                 ]));
-            await DiscordEngine.Channels.LogChannel.SendMessageAsync(msg);
+            await Program.GetService<DiscordService>().getLogChannel().SendMessageAsync(msg);
         }
 
         public async Task HandleEventAsync(DiscordClient s, MessageUpdatedEventArgs e)
@@ -48,7 +48,7 @@ namespace SophBot.Discord.EventHandlers
                     new DiscordTextDisplayComponent(newContent),
                     new DiscordActionRowComponent([new DiscordLinkButtonComponent(e.Message.JumpLink.AbsoluteUri, "Zur Nachricht")])
                 ]));
-            await DiscordEngine.Channels.LogChannel.SendMessageAsync(msg);
+            await Program.GetService<DiscordService>().getLogChannel().SendMessageAsync(msg);
         }
 
         public async Task HandleEventAsync(DiscordClient s, GuildBanAddedEventArgs e)
@@ -62,7 +62,7 @@ namespace SophBot.Discord.EventHandlers
                     new DiscordSeparatorComponent(true),
                     new DiscordTextDisplayComponent($"Gebannter Nutzer: {ban.User.GlobalName} ({ban.User.Id}) \nGrund: {ban.Reason}")
                 ]));
-            await DiscordEngine.Channels.LogChannel.SendMessageAsync(msg);
+            await Program.GetService<DiscordService>().getLogChannel().SendMessageAsync(msg);
         }
     }
 }

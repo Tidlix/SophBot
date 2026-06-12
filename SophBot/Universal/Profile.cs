@@ -5,7 +5,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Microsoft.Extensions.Hosting;
 using SophBot.Discord;
-using TwitchSharp.Api.Clients;
 
 namespace SophBot.Universal
 {
@@ -13,13 +12,12 @@ namespace SophBot.Universal
     {
         public long ID { get; private set; }
         public DiscordUser? DiscordUser { get; private set; }
-        public UserData? TwitchUser { get; private set; }
+        //public UserData? TwitchUser { get; private set; }
         public long DiscordMessages { get; private set; }
         public long TwitchMessages { get; private set; }
         public long Channelpoints { get; private set; }
-        public string[]? AiNotes { get; private set; }
 
-        private string[] columnList = ["id", "discord-id", "twitch-id", "discord-messages", "twitch-messages", "channel-points", "ai-notes"];
+        private string[] columnList = ["id", "discord-id", "twitch-id", "discord-messages", "twitch-messages", "channel-points"];
 
 
         #region Constructors
@@ -82,7 +80,6 @@ namespace SophBot.Universal
             DiscordMessages = (long)row["discord-messages"];
             TwitchMessages = (long)row["twitch-messages"];
             Channelpoints = (long)row["channel-points"];
-            AiNotes = (row["ai-notes"] == DBNull.Value) ? null : (string[]?)row["ai-notes"];
         }
         #endregion
 
@@ -118,23 +115,6 @@ namespace SophBot.Universal
             Program.GetService<DatabaseService>().ModifyData(DBTable.Profiles, new Dictionary<string, object>{{"channel-points", Channelpoints}}, [new ("id", "=", ID)]);
             return this;
         }
-        public Profile AddAiNote(string value)
-        {
-            if (AiNotes is null)
-                AiNotes = [value];
-            else
-                AiNotes = AiNotes.Append(value).ToArray();
-            Program.GetService<DatabaseService>().ModifyData(DBTable.Profiles, new Dictionary<string, object>{{"ai-notes", AiNotes}}, [new ("id", "=", ID)]);
-            return this;
-        }
-        public Profile SetAiNote(int index, string value)
-        {
-            if (AiNotes is null || AiNotes.Length < index)
-                throw new Exception("Index was not found in array");
-            AiNotes[index] = value;
-            Program.GetService<DatabaseService>().ModifyData(DBTable.Profiles, new Dictionary<string, object>{{"ai-notes", AiNotes}}, [new ("id", "=", ID)]);
-            return this;
-        }
         public Profile SyncDiscordAccount(Profile discord)
         {
             if (DiscordUser != null) throw new Exception("Discord Account is allready synced!");
@@ -147,7 +127,7 @@ namespace SophBot.Universal
             Program.GetService<DatabaseService>().DeleteData(DBTable.Profiles, [new ("id", "=", discord.ID)]);
             return this;
         }
-        public Profile SyncTwitchAccount(Profile twitch)
+        /*public Profile SyncTwitchAccount(Profile twitch)
         {
             if (TwitchUser != null) throw new Exception("Twitch Account is allready synced!");
             TwitchUser = twitch.TwitchUser;
@@ -158,7 +138,7 @@ namespace SophBot.Universal
                 }, [new ("id", "=", ID)]);
             Program.GetService<DatabaseService>().DeleteData(DBTable.Profiles, [new ("id", "=", twitch.ID)]);
             return this;
-        }
+        }*/
 
         public override string ToString()
         {
@@ -168,10 +148,10 @@ namespace SophBot.Universal
             {
                 result += $"**Discord:**\n  **Name:** {DiscordUser.GlobalName}\n  **Discord ID:** {DiscordUser.Id}\n";
             }
-            if (TwitchUser is not null)
+            /*if (TwitchUser is not null)
             {
                 result += $"**Twitch:**\n  **Name:** {TwitchUser.DisplayName}\n  **Twitch ID:** {TwitchUser.Id}\n";
-            }
+            }*/
             result += $"**Gesendete Nachrichten:**\n  **Discord:** {DiscordMessages}\n  **Twitch:** {TwitchMessages}\n  **Gesamt:** {DiscordMessages+TwitchMessages}\n";
             result += $"**Channelpoints:** {Channelpoints}\n";
 
@@ -182,13 +162,12 @@ namespace SophBot.Universal
             string result = $@"{{
 userId = {ID},
 discordId = {(DiscordUser is null ? "null" : DiscordUser.Id)},
-twitchId = {(TwitchUser is null ? "null" : TwitchUser.Id)},
+twitchId = {/*(TwitchUser is null ? "null" : TwitchUser.Id)*/"null"},
 discordUsername = {(DiscordUser is null ? "null" : DiscordUser.GlobalName)},
-twitchUsername = {(TwitchUser is null ? "null" : TwitchUser.DisplayName)},
+twitchUsername = {/*(TwitchUser is null ? "null" : TwitchUser.DisplayName)*/"null"},
 discordMessages = {DiscordMessages},
 twitchMessages = {TwitchMessages},
 channelpoints = {Channelpoints},
-aiNotes = [{(AiNotes is null ? "null" : $"{{{string.Join(';', AiNotes)}}}")}]
 }}";
             return result;
         }

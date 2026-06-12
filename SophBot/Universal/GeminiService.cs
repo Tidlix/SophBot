@@ -4,7 +4,6 @@ using GenerativeAI;
 using GenerativeAI.Tools;
 using Microsoft.Extensions.Hosting;
 using System.Data;
-using TwitchSharp.Api.Clients;
 
 namespace SophBot.Universal
 {
@@ -16,6 +15,7 @@ namespace SophBot.Universal
         private GenerativeModel googleModel { get; set; }
         private ChatSession mainChat { get; set; }
         private ChatSession googleChat { get; set; }
+        private TextFileEditor SIEditor { get; set; }
 #pragma warning restore CS8618
 
 
@@ -32,19 +32,16 @@ namespace SophBot.Universal
 
 
             mainModel.UseGoogleSearch = false;
-            mainModel.SystemInstruction = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}/ai/prompt.txt");
+            SIEditor = new TextFileEditor($"{AppDomain.CurrentDomain.BaseDirectory}/ai/dynamicSystemInstructions.txt");
+            mainModel.SystemInstruction = ReadFullSystemInstruction();
 
             mainModel.EnableFunctions();
-            //MainModel.AddFunctionTool(new QuickTool((string? filter = null) => ReadMemory(filter), "ReadMemory", "Lies die gespeicherten Informationen (mit dem optionalen filter kannst du nur die Einträge anzeigen, die genau diesen string enthalten)"));
-            //MainModel.AddFunctionTool(new QuickTool((string content) => WriteMemory(content), "WriteMemory", "Speichere eine neue Information"));
-            //MainModel.AddFunctionTool(new QuickTool((long id, string newContent) => ModifyMemory(id, newContent), "ModifyMemory", "Bearbeite eine Information anhand der id (readMemory)"));
-            //MainModel.AddFunctionTool(new QuickTool((long id) => DeleteMemory(id), "DeleteMemory", "Lösche eine Information anhand der id (readMemory)"));
-            mainModel.AddFunctionTool(new QuickTool((long userId, string noteContent) => AddUserAiNote(userId, noteContent), "AddUserAiNote", "Notiere dir eine Information zu dem aktuellen Nutzer"));
-            mainModel.AddFunctionTool(new QuickTool((long userId, int arrayIndex, string noteContent) => ModifyUserAiNote(userId, arrayIndex, noteContent), "ModifyUserAiNote", "Notiere dir eine Information zu dem aktuellen Nutzer"));
-            mainModel.AddFunctionTool(new QuickTool((string? filter = null) => ReadWiki(filter), "ReadWiki", "Erhalte die Informationen des Internen Soph-Wikis"));
-            //MainModel.AddFunctionTool(new QuickTool((long id) => GetProfile(id), "GetProfile", "Erhalte mehr Informationen über einen Benutzer"));
-            //MainModel.AddFunctionTool(new QuickTool(async() => await GetCurrentStream(), "GetCurrentStream", "Erhalte den Informationen über den aktuell Laufenden Stream"));
-            mainModel.AddFunctionTool(new QuickTool((string request) => AskGoogleAi(request), "AskGoogleAi", "Frage ein KI-Modell, mit der möglichkeit google zu durchsuchen, nach Informationen"));
+            mainModel.AddFunctionTool(new QuickTool(AddLineToSystemInstructions, "AddLineToSystemInstructions", "Füge eine neue Zeile zu den Systemanweisungen hinzu"));
+            mainModel.AddFunctionTool(new QuickTool(AddLinesToSystemInstructions, "AddLinesToSystemInstructions", "Füge mehrere Zeilen zu den Systemanweisungen hinzu"));
+            mainModel.AddFunctionTool(new QuickTool(SetLineFromSystemInstructions, "SetLineFromSystemInstructions", "Setzt den Text einer vorhandenen Zeile der Systemanweisungen"));
+            mainModel.AddFunctionTool(new QuickTool(RemoveLineFromSystemInstructions, "RemoveLineFromSystemInstructions", "Entfernt eine Zeile aus den Systemanweisungen"));
+            mainModel.AddFunctionTool(new QuickTool(ReadWiki, "ReadWiki", "Erhalte die Informationen des Internen Soph-Wikis"));
+            mainModel.AddFunctionTool(new QuickTool(AskGoogleAi, "AskGoogleAi", "Frage ein KI-Modell, mit der möglichkeit google zu durchsuchen, nach Informationen"));
 
 
             googleModel.UseGoogleSearch = true;
@@ -56,6 +53,31 @@ namespace SophBot.Universal
             return Task.CompletedTask;
         }
 
+        private string ReadFullSystemInstruction()
+        {
+            return ReadStaticSystemInstruction() + "\n\n" + ReadDynamicSystemInstruction();
+        }
+        private string ReadStaticSystemInstruction()
+        {
+            return $@"---Start Statische Systemanweisungen---
+{File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}/ai/staticSystemInstructions.txt")} 
+---Ende Statische Systemanweisung---";
+        }
+        private string ReadDynamicSystemInstruction()
+        {
+            string[] lines = SIEditor.ReadAllLines();
+            string text = string.Empty;
+            int index = 0;
+            foreach(string line in lines)
+            {
+                text += $"[{index}] {line}\n";
+                index++;
+            }
+            return $@"---Start Dynamische Systemanweisungen---
+{text} 
+---Ende Dynamische Systemanweisung---";
+        }
+        
         public void StartNewmainChat()
         {
             mainChat = mainModel.StartChat();
@@ -79,17 +101,25 @@ namespace SophBot.Universal
         }
 
         #region Function Tools
-        private string AddUserAiNote(long userId, string noteContent)
+        private string AddLineToSystemInstructions(string text)
         {
-            Profile profile = new Profile(userId);
-            profile.AddAiNote(noteContent);
-            return $"Added Note! New Profile: {profile.AsAiString()}";
+            SIEditor.AppendNewLine(text);
+            return ReadFullSystemInstruction();
         }
-        private string ModifyUserAiNote(long userId, int arrayIndex, string noteContent)
+        private string AddLinesToSystemInstructions(string[] texts)
         {
-            Profile profile = new Profile(userId);
-            profile.SetAiNote(arrayIndex, noteContent);
-            return $"Modified Note! New Profile: {profile.AsAiString()}";
+            SIEditor.AppendNewLines(texts);
+            return ReadFullSystemInstruction();
+        }
+        private string SetLineFromSystemInstructions(int lineIndex, string text)
+        {
+            SIEditor.SetLineText(lineIndex, text);
+            return ReadFullSystemInstruction();
+        }
+        private string RemoveLineFromSystemInstructions(int lineIndex)
+        {
+            SIEditor.DeleteLine(lineIndex);
+            return ReadFullSystemInstruction();
         }
         
         private string ReadWiki(string? filter = null)
@@ -104,18 +134,6 @@ namespace SophBot.Universal
             }
             return result;
         }
-
-        /*private async Task<string> GetCurrentStream()
-        {
-            UserData user = (await TwitchEngine.Client.Users.GetUsersAsync(logins: ["xsophe"]))[0];
-            var stream = await TwitchEngine.Client.Streams.GetFollowedStreamsAsync(user.Id);
-            if (stream is null)
-                return "Null - No Stream active!";
-            return $@"Titel: {stream}
-Kategorie: {stream.GameName}
-Gestartet um: {stream.StartedAt.ToString("dd.MM.yyyy - HH:mm:ss")}
-Aktuelle Zuschauer: {stream.CurrentViewer}";
-        }*/
         
         private string AskGoogleAi(string request)
         {
@@ -172,7 +190,7 @@ userInformation: {Profile.AsAiString()}
 userPromt: {Prompt}";
         }
     }
-    public class TwitchAiRequest : BaseAiRequest
+    /*public class TwitchAiRequest : BaseAiRequest
     {
         public readonly string Channel;
         public readonly bool IsPrivate;
@@ -195,7 +213,7 @@ isPrivate: {IsPrivate}
 userInformation: {Profile.AsAiString()}
 userPromt: {Prompt}";
         }
-    }
+    }*/
     public class ConsoleAiRequest : BaseAiRequest
     {
         public ConsoleAiRequest(string prompt)

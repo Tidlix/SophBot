@@ -7,7 +7,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using SophBot.Universal;
-using TwitchSharp.Api.Clients;
 
 namespace SophBot.Discord.SlashCommands
 {
@@ -29,13 +28,13 @@ namespace SophBot.Discord.SlashCommands
                 new DiscordThumbnailComponent(target.AvatarUrl, "Profilbild auf Discord")) 
             );
             components.Add(new DiscordSeparatorComponent(true));
-            if (profile.TwitchUser is null)
+            /*if (profile.TwitchUser is null)
                 components.Add(new DiscordTextDisplayComponent($"## Twitch: \nNicht Synchronisiert! (/profile sync)"));
             else
                 components.Add(new DiscordSectionComponent(
                     new DiscordTextDisplayComponent($"## Twitch: \n**Name:** {profile.TwitchUser.DisplayName}\n**Gesendete Nachrichten:** {profile.TwitchMessages}"),
                     new DiscordThumbnailComponent(profile.TwitchUser.ProfileImageUrl, "Profilbild auf Twitch")) 
-                );
+                );*/
             components.Add(new DiscordSeparatorComponent(true));
             components.Add(new DiscordTextDisplayComponent($"## Allgemeine Statistiken: \n**Insgesamt gesendete Nachrichten:** {profile.DiscordMessages+profile.TwitchMessages}\n**Channelpoints:** {profile.Channelpoints}"));
             await ctx.EditResponseAsync(new DiscordMessageBuilder().EnableV2Components().AddContainerComponent(new (components, false, target.Color.PrimaryColor)));
